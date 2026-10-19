@@ -5,6 +5,7 @@ sha256 and byte count. A file is fetched only when missing. After one network fa
 the client stops reading SEC for the rest of the run.
 """
 import datetime as dt
+import http.client
 import json
 import os
 import re
@@ -74,7 +75,7 @@ class Client:
         try:
             with urllib.request.urlopen(req, timeout=30) as r:
                 return r.read()
-        except (urllib.error.URLError, OSError, ValueError) as e:
+        except (urllib.error.URLError, http.client.HTTPException, OSError, ValueError) as e:
             self.failed = True
             print(f"SEC read failed for {url}: {e}. Not reading SEC again this run.", file=sys.stderr)
             raise SECUnavailable(str(e)) from e
