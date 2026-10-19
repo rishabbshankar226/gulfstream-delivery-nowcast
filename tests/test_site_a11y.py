@@ -141,3 +141,49 @@ def test_missing_path_hides_the_path_chart(browser, base_url):
     page.wait_for_selector("html.ready")
     assert page.is_hidden("#c-path")
     ctx.close()
+
+
+def _live_page(browser, base_url, data):
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.route("**/data.json", lambda route: route.fulfill(status=200, content_type="application/json",
+                                                          body=json.dumps(data)))
+    page.goto(base_url)
+    page.wait_for_selector("html.ready")
+    return page
+
+
+def _next_quarter(L):
+    q4 = json.loads(json.dumps(L))
+    q4.update({"quarter": "2026Q4", "build": None, "locked": None, "lock": None, "score": None,
+               "guidance_pace": None, "release_date": None})
+    q4["latest"]["quarter"] = "2026Q4"
+    return q4
+
+
+def test_a_scored_quarter_stays_featured_after_the_next_one_starts(browser, base_url):
+    # On the score day the same run writes 2026Q4's first files; the page must still show 2026Q3's result.
+    data = json.loads((SITE / "data.json").read_text())
+    q3 = data["live"][-1]
+    pred = q3["latest"] or q3["build"]
+    q3["locked"] = pred
+    q3["lock"] = {"tag": "lock-2026Q3", "published_at": "2026-10-29T23:20:00Z", "sha256": "0" * 64, "commit": "0" * 40}
+    q3["score"] = {"quarter": "2026Q3", "reported": {"large": 30, "mid": 5, "total": 35}, "accn": "0000040533-26-000040",
+                   "locked": True, "nowcast": pred["nowcast"], "ae_total": abs(pred["nowcast"]["total"] - 35),
+                   "ape_pct": abs(pred["nowcast"]["total"] - 35) / 35 * 100, "inside_band": True,
+                   "guidance_pace": None, "guidance_ae": None}
+    data["live"].append(_next_quarter(q3))
+    data.setdefault("path", {})["2026Q4"] = data.get("path", {}).get("2026Q3", [])
+    page = _live_page(browser, base_url, data)
+    assert page.inner_text("#live-status").startswith("2026Q3")
+    assert "Scored" in page.text_content("#live-status")
+    assert "GD reported" in page.inner_text("#live-facts")
+    page.context.close()
+
+
+def test_without_a_lock_or_score_the_newest_quarter_is_featured(browser, base_url):
+    data = json.loads((SITE / "data.json").read_text())
+    data["live"].append(_next_quarter(data["live"][-1]))
+    page = _live_page(browser, base_url, data)
+    assert page.inner_text("#live-status").startswith("2026Q4")
+    page.context.close()

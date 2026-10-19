@@ -158,6 +158,16 @@ def signed_errors(root, snap):
     _save(fig, root, "signed_errors.png")
 
 
+def featured_path(paths):
+    """The newest quarter's path with a lock or a score, so a scored quarter stays up until the next one locks;
+    else the newest. `paths` is in quarter order. site/app.js `current()` picks the same quarter."""
+    for p in reversed(paths):
+        q = p.name.split("_")[0]
+        if (p.parent / f"{q}_lock.json").exists() or (p.parent / f"{q}_score.json").exists():
+            return p
+    return paths[-1]
+
+
 def nowcast_path(root, snap):
     import matplotlib.dates as mdates
     from . import live, model
@@ -170,7 +180,7 @@ def nowcast_path(root, snap):
         _finish(fig, ax, "The live estimate by snapshot date", "Estimated deliveries (aircraft)", snap, "Snapshot date")
         _save(fig, root, "nowcast_path.png")
         return
-    p = paths[-1]
+    p = featured_path(paths)
     q = p.name.split("_")[0]
     rows = read_csv(p)
     latest = read_json(lv / f"{q}_latest.json")
