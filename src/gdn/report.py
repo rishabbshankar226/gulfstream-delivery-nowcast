@@ -174,9 +174,14 @@ def live_record(root):
         else:
             lp = lv / f"{q}_latest.json"
             p = read_json(lp) if lp.exists() else read_json(lv / f"{q}_build.json")
-            line = (f"- **{q}**: not locked yet. The latest estimate is {f1(p['nowcast']['total'])} (band "
-                    f"{f1(p['band'][0])} to {f1(p['band'][1])}) from the {p['snapshot']} snapshot{pace_s}."
-                    + (f" It locks on {eve_of(rel)}, the day before GD reports on {rel}." if rel else ""))
+            if p["snapshot"] < p["window_end"]:
+                # The quarter is still open: its count so far is not an estimate of the quarter.
+                line = (f"- **{q}**: not locked yet. Its window runs to {p['window_end']}, so the {p['snapshot']} "
+                        "snapshot counts only part of it and no estimate is shown yet.")
+            else:
+                line = (f"- **{q}**: not locked yet. The latest estimate is {f1(p['nowcast']['total'])} (band "
+                        f"{f1(p['band'][0])} to {f1(p['band'][1])}) from the {p['snapshot']} snapshot{pace_s}.")
+            line += f" It locks on {eve_of(rel)}, the day before GD reports on {rel}." if rel else ""
         out.append(line)
     return "\n".join(out) if out else "No live quarter yet."
 
@@ -217,6 +222,11 @@ def post(root):
                      f"{f1(s['ae_total'])}. I locked an estimate of {f1(s['nowcast']['total'])} Gulfstream deliveries "
                      f"for {q} on GitHub before GD reported, and GD reported {s['reported']['total']}. One quarter "
                      "shows how it works live, not whether it works.")
+    elif scores:
+        q = sorted(scores, key=qidx)[0]
+        lines.append("How closely do FAA aircraft registrations track the Gulfstream deliveries General Dynamics "
+                     f"reports? I built a tracker to find out. Its first live test, {q}, missed its lock window, so "
+                     "there is no locked estimate to score yet; the next quarter's lock will be the first.")
     else:
         rel = cfg.get("releases", {}).get("2026Q3")
         lines.append("How closely do FAA aircraft registrations track the Gulfstream deliveries General Dynamics "

@@ -270,6 +270,8 @@ def build(root="."):
     if lock:
         d, t = et_time(lock["published_at"])
         live_point += f" I locked it as a {lockword} at {t} ET on {d}."
+    elif score:
+        live_point += " The quarter missed its lock window, so this estimate was never locked."
     if score:
         live_point += f" GD reported {score['reported']['total']}"
         if score.get("guidance_pace") is not None:
@@ -401,6 +403,8 @@ def build(root="."):
     if lock:
         d, t = et_time(lock["published_at"])
         body += f" I locked this estimate as a {lockword} at {t} ET on {d}."
+    elif score:
+        body += " This is the build estimate: the quarter missed its lock window, so it was never locked."
     else:
         eve = (live.parse_now(rel + "T12:00:00Z") - live.dt.timedelta(days=1)).date().isoformat() if rel else None
         body += (" This is the build estimate; the locked estimate replaces it"
