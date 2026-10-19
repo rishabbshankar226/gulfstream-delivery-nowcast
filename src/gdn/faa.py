@@ -88,7 +88,7 @@ def download(root, now_utc=None, log=print):
         log(f"FAA snapshot {date} is already stored; keeping it")
         return date
     out.parent.mkdir(parents=True, exist_ok=True)
-    part = out.with_suffix(".part")
+    part = out.with_suffix(f".{os.getpid()}.part")
     ci = bool(os.environ.get("CI"))
     rc = _curl(part, 120 if ci else 600)
     if rc == 0 and is_zip(part):
