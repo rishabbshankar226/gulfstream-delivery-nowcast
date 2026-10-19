@@ -116,3 +116,28 @@ def test_static_html_holds_no_figures():
 def test_site_under_900_kb():
     total = sum(p.stat().st_size for p in SITE.rglob("*") if p.is_file() and p.suffix != ".pdf")
     assert total < 900 * 1024, total
+
+
+def test_failed_data_shows_a_linked_error(browser, base_url):
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.route("**/data.json", lambda route: route.fulfill(status=404, body="missing"))
+    page.goto(base_url)
+    page.wait_for_selector("#error:not([hidden])")
+    assert "could not load" in page.inner_text("#error")
+    assert page.get_attribute("#error a", "href").endswith("#results")
+    assert axe(page) == []
+    ctx.close()
+
+
+def test_missing_path_hides_the_path_chart(browser, base_url):
+    data = json.loads((SITE / "data.json").read_text())
+    data.pop("path", None)
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.route("**/data.json", lambda route: route.fulfill(status=200, content_type="application/json",
+                                                          body=json.dumps(data)))
+    page.goto(base_url)
+    page.wait_for_selector("html.ready")
+    assert page.is_hidden("#c-path")
+    ctx.close()
