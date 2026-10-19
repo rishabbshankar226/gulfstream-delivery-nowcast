@@ -68,3 +68,41 @@ def test_offline_data_reads_the_tracked_backtest_subset(tmp_path):
         date, sub = data.build_faa(tmp_path, network=network, log=lambda *a: None)
         assert date == "2030-01-02" and sub == faa.read_subset(tmp_path, date)
     assert {p.name: p.read_bytes() for p in (tmp_path / "data/snapshots/2030-01-02").iterdir()} == stored
+
+
+def test_the_path_chart_keeps_a_scored_quarter_until_the_next_lock(tmp_path):
+    from gdn.charts import featured_path
+    lv = tmp_path / "results/live"
+    lv.mkdir(parents=True)
+    paths = [lv / "2026Q3_path.csv", lv / "2026Q4_path.csv"]
+    for p in paths:
+        p.write_text("date\n")
+    assert featured_path(paths) == paths[1]
+    (lv / "2026Q3_score.json").write_text("{}\n")
+    assert featured_path(paths) == paths[0]
+    (lv / "2026Q4_lock.json").write_text("{}\n")
+    assert featured_path(paths) == paths[1]
+
+
+def test_workbook_digest_covers_every_input_but_new_snapshot_entries(tmp_path):
+    root = tree(tmp_path)
+    base = workbook.input_digest(root)
+    man = json.loads((root / "data/snapshots/MANIFEST.json").read_text())
+    man["snapshots"]["2026-10-29"] = {"zip_sha256": "0" * 64}
+    write_json(root / "data/snapshots/MANIFEST.json", man)
+    assert workbook.input_digest(root) == base  # a lock-window snapshot changes nothing the workbook shows
+    for rel in ("data/processed/backlog_2026Q2.csv", "data/processed/gd_deliveries.csv",
+                "data/processed/registry_quarterly.csv"):
+        p = root / rel
+        old = p.read_bytes()
+        p.write_bytes(old + b"\n")
+        assert workbook.input_digest(root) != base, rel
+        p.write_bytes(old)
+    man["backtest"] = "2026-10-20"
+    write_json(root / "data/snapshots/MANIFEST.json", man)
+    assert workbook.input_digest(root) != base
+    man["backtest"] = json.loads((ROOT / "data/snapshots/MANIFEST.json").read_text())["backtest"]
+    write_json(root / "data/snapshots/MANIFEST.json", man)
+    assert workbook.input_digest(root) == base
+    write_json(root / "results/live/2026Q3_score.json", {"quarter": "2026Q3"})
+    assert workbook.input_digest(root) != base
