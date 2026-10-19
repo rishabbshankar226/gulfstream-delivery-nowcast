@@ -12,7 +12,7 @@ import zipfile
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-from .files import read_json, sha256, write_json
+from .files import read_json, sha256, write_gz, write_json
 
 URL = "https://registry.faa.gov/database/ReleasableAircraft.zip"
 REFERER = "https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download"
@@ -234,10 +234,7 @@ def store_subset(root, date, sub, zpath, backtest=False):
     d.mkdir(parents=True, exist_ok=True)
     files = {}
     for k in FILES:
-        gz = gzip.compress(sub[k].encode("utf-8"), mtime=0)
-        p = d / f"{k}.txt.gz"
-        if not p.exists() or p.read_bytes() != gz:
-            p.write_bytes(gz)
+        gz = write_gz(d / f"{k}.txt.gz", sub[k].encode("utf-8"))
         files[f"{k}.txt.gz"] = sha256(gz)
     zb = Path(zpath).read_bytes()
     when = dt.datetime.fromtimestamp(Path(zpath).stat().st_mtime, dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

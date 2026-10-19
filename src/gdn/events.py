@@ -4,7 +4,7 @@ import gzip
 import re
 
 from .faa import parse_date, read_table, scope
-from .files import csv_text
+from .files import csv_text, gz_bytes
 
 SERIAL_COLS = ["mfr_code", "serial", "model", "cabin", "held_by_gulfstream", "first_airworthiness", "year_mfr",
                "bound", "customer_cert", "gulfstream_cancel", "export_cancel", "export_country", "e1", "e2"]
@@ -69,7 +69,7 @@ def serials_text(rows):
 
 
 def serials_gz(rows):
-    return gzip.compress(serials_text(rows).encode("utf-8"), mtime=0)
+    return gz_bytes(serials_text(rows).encode("utf-8"))
 
 
 def read_serials_rows(dict_rows):
