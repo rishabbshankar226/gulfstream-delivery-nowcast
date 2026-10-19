@@ -1,6 +1,6 @@
 # Lock rehearsal
 
-Run by `tools/rehearsal.py` on 2026-10-19 from commit 1d7df03. Origin is a bare copy at `/tmp/gdn-rehearsal/github.com/rishabbshankar226/gulfstream-delivery-nowcast.git` and `gh` is a shim first on PATH that answers from `/tmp/gdn-rehearsal/gh_state.json`. Times are ET; the release date is 2026-10-30. Nothing here reached GitHub.
+Run by `tools/rehearsal.py` on 2026-10-19 from commit bfa9913. Origin is a bare copy at `/tmp/gdn-rehearsal/github.com/rishabbshankar226/gulfstream-delivery-nowcast.git` and `gh` is a shim first on PATH that answers from `/tmp/gdn-rehearsal/gh_state.json`. Times are ET; the release date is 2026-10-30. Nothing here reached GitHub.
 
 | Case | Command | Exit | Expected | Observed | Result |
 |---|---|---|---|---|---|
