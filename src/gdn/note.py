@@ -27,7 +27,7 @@ BASE_NAMES = {"guidance": "GD's guidance pace", "seasonal": "the same quarter la
 STUDY_URL = "https://rishabbshankar226.github.io/Defense-Backlog-forecast/"
 PRODUCT_IDS = ["pc-g500-g600-entry-into-service", "pc-g700-first-deliveries", "pc-g800-certification",
                "pc-g800-first-deliveries", "pc-g650-end-of-production", "pc-g280-mid-cabin", "pc-g280-iai",
-               "pc-g300-announced", "pc-g300-entry-timing", "pc-g400-timing-update"]
+               "pc-g400-timing-update"]
 REPO_URL = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast"
 
 
