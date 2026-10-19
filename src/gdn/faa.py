@@ -82,10 +82,11 @@ def download(root, now_utc=None, log=print):
     now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
     date = snapshot_date(now_utc)
     out = root / "data/raw/faa" / f"ReleasableAircraft-{date}.zip"
-    if date in manifest(root)["snapshots"] and is_zip(out):
-        # A stored subset (the backtest's, or one a lock may read) is never replaced by a second
-        # download on the same Chicago date.
-        log(f"FAA snapshot {date} is already stored; keeping it")
+    man = manifest(root)
+    if date in ({man.get("backtest")} | locked_dates(root)) and date in man["snapshots"] and is_zip(out):
+        # The backtest's subset and a subset a lock read are never replaced by a second download on the
+        # same Chicago date. Any other date's second run downloads again and replaces its files (§3.11).
+        log(f"FAA snapshot {date} backs the backtest or a lock; keeping it")
         return date
     out.parent.mkdir(parents=True, exist_ok=True)
     part = out.with_suffix(f".{os.getpid()}.part")
@@ -247,6 +248,11 @@ def store_subset(root, date, sub, zpath, backtest=False):
         man["backtest"] = date
     save_manifest(root, man)
     return entry
+
+
+def locked_dates(root):
+    """Snapshot dates that a committed or pending prediction file names."""
+    return {read_json(p).get("snapshot") for p in (Path(root) / "predictions").glob("*.json")}
 
 
 def zip_path(root, date):

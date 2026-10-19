@@ -5,7 +5,7 @@ from pathlib import Path
 
 from . import events, faa, sec
 from .fiscal import START, LAST_PINNED, Calendar, qrange, shift
-from .files import read_csv, write_csv, write_text
+from .files import read_csv, sha256, write_csv, write_text
 
 DELIVERY_COLS = ["quarter", "fiscal_end", "large", "mid", "total", "accn", "filed"]
 SEGMENT_COLS = ["quarter", "segment", "revenue_usd", "operating_earnings_usd", "accn"]
@@ -24,18 +24,23 @@ def backtest_date(root):
     return dates[-1]
 
 
-def build_faa(root, log=print):
-    """Store the backtest subset from its raw zip when present; return the subset texts."""
+def build_faa(root, network=True, log=print):
+    """The backtest subset texts. They come from the tracked files, except on the first build and on a
+    networked `make data` whose raw zip is the very file the manifest recorded, so an offline rebuild never
+    reads an untracked file and a replaced zip never replaces the subset."""
     date = backtest_date(root)
     z = faa.zip_path(root, date)
-    if z.exists():
+    entry = faa.manifest(root)["snapshots"].get(date)
+    if z.exists() and (entry is None or (network and entry.get("zip_sha256") == sha256(z.read_bytes()))):
+        if not faa.lossless(z):
+            log(f"WARNING: the {date} zip is not valid UTF-8 throughout")
         texts = faa.zip_texts(z)
         sub = faa.subset(texts)
         faa.store_subset(root, date, sub, z, backtest=True)
         log(f"backtest subset {date} from its zip")
     else:
         sub = faa.read_subset(root, date)
-        log(f"backtest subset {date} from the tracked files (raw zip absent)")
+        log(f"backtest subset {date} from the tracked files")
     return date, sub
 
 
@@ -118,7 +123,7 @@ def build_sec(root, network=True, log=print):
 
 def run(root=".", network=True, log=print):
     root = Path(root)
-    date, sub = build_faa(root, log)
+    date, sub = build_faa(root, network, log)
     rows = events.airframes(sub)
     write_text(root / "data/processed/serials.csv", events.serials_text(rows))
     build_sec(root, network=network, log=log)
