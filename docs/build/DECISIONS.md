@@ -126,3 +126,21 @@ Asked the owner how to proceed; the guidance checkers kept running meanwhile.
 
 - Gate `--only faa,truth,model,prereg`: no failing code. Holdout MAE in aircraft: seasonal 4.6, last 8.8, guidance 6.9, raw 6.2, ratio 5.5. Sign tests of ratio against guidance 14 wins and 12 losses, against seasonal 11 and 15, against last 16 and 10; Holm rejects none. The headline therefore takes the null wording, with guidance named first, since 22 holdout quarters have a numeric outlook.
 - `results/error_analysis.md` comes from `src/gdn/errors.py`. No filing or call states why the registry count differed from GD's count in any of the five largest misses, so none names a cause. Two carry GD's own statement about the quarter's deliveries as context, each tested against its cached source.
+
+## Phase 4: live estimate
+
+- `results/live/2026Q3_build.json` from the 2026-10-19 snapshot: 35 large and 6 mid events in the 2026Q3 window (2026-07-05 to 2026-10-04); trailing reported 140 and 23 against trailing registry 187 and 28; estimate 31.1 (26.2 large, 4.9 mid), past-miss band 20.4 to 36.4. It is written once and never edited. The first path row, the latest file and the daily airframe table for 2026-10-19 (identical to `serials.csv`) come from the same snapshot.
+- `results/estimates.json` from the build file: Aerospace $2.6B from 31.1 deliveries at trailing revenue per delivery.
+- Gate `--only live,segments`: no failing code. L3 warns "not locked yet". S3 warns that the gate could not parse the segment exhibit from SEC's text for some releases from 2024Q3 on. My own parser read all eight, S1 matches the gate's pins, and Phase 5 allows both warnings.
+
+## Limitations for the README (each with R3's keyword)
+
+1. **Export.** A jet exported to a foreign registry without a Gulfstream test registration leaves no US record, so the registry never sees that delivery. The G280, built by IAI in Israel, often leaves no Gulfstream-held record at all: none of the 26 G280s built in 2016 and 2017 that lack an E1 has one.
+2. **Processing.** Registry processing can lag by months. The backtest reads events by their stamped date in a file that had years to fill in, while a live estimate sees only what has posted. The truncation table shows how fast the error grows when a quarter's own events are cut 30, 60 or 90 days before its end.
+3. **Military.** Military and special-mission airframes may never reach the civil registry, though GD may count some of them as deliveries.
+4. **Handover.** GD counts a delivery at its own handover. A registration or cancellation date only approximates that day, so an event can land in the quarter before or after.
+5. **Coverage.** The ratio assumes the registry's coverage of GD's count holds steady from one year to the next. It does not: in the design years, registry events over reported deliveries rose from 0.52 (2016) to 0.80 (2019), and mid cabin sat at 0.37 and 0.47 in 2016 and 2017. MASTER keeps only an airframe's current certificate, so a resold or renewed jet loses its first owner's date.
+6. **Used jet.** A used jet with no airworthiness date or year of manufacture, or one whose maker code changed between registrations, can read as a new delivery. Imported used jets that received a new US airworthiness date also pass the bound.
+7. **Band.** The past-miss band comes from errors measured on a finished registry file, so it is likely too narrow at a live lock, when recent registrations have not posted.
+
+Also for `## Data`: the G280 is filed under the maker `IAI LTD` (model `GULFSTREAM G280`); GD's counts use the delivered basis that came with ASC 606, adopted 2017-01-01 and applied back to 2016.
