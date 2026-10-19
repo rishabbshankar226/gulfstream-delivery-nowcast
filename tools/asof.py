@@ -17,7 +17,8 @@ from gdn.fiscal import Calendar, qrange, shift  # noqa: E402
 
 UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36"
 COLS = ["quarter", "fiscal_end", "capture", "days_after_end", "events_large", "events_mid", "trailing_registry_large",
-        "trailing_registry_mid", "estimate", "reported", "ae", "backtest_estimate", "backtest_ae", "note"]
+        "trailing_registry_mid", "estimate", "reported", "ae", "backtest_estimate", "backtest_ae", "band_low",
+        "band_high", "inside_band", "note"]
 
 
 def captures():
@@ -38,6 +39,7 @@ def main():
             if r["model"] == "ratio"}
     hold.update({r["quarter"]: float(r["total"]) for r in read_csv(ROOT / "results/design.csv")
                  if r["model"] == "ratio" and r["definition"] == chosen})
+    bands = {b["quarter"]: b for b in read_json(ROOT / "results/metrics.json")["holdout"]["band"]["by_quarter"]}
     caps = captures()
     best = {}
     for q in qrange("2016Q1", "2026Q2"):
@@ -70,7 +72,12 @@ def main():
         nl = {c: [events.count(air, chosen, c, *cal.window(x)) for x in lags] for c in ("large", "mid")}
         est = sum(model.ratio(ev[c], nl[c], [Y[x][c] for x in lags]) for c in ("large", "mid"))
         rep = Y[q]["total"]
-        rows.append(dict(base, events_large=ev["large"], events_mid=ev["mid"], trailing_registry_large=sum(nl["large"]),
+        band = {}
+        if q in bands and q in hold:
+            # The same past-miss band widths as the backtest, centred on the as-of estimate.
+            lo, hi = est - (hold[q] - bands[q]["low"]), est + (bands[q]["high"] - hold[q])
+            band = {"band_low": lo, "band_high": hi, "inside_band": lo <= rep <= hi}
+        rows.append(dict(base, **band, events_large=ev["large"], events_mid=ev["mid"], trailing_registry_large=sum(nl["large"]),
                          trailing_registry_mid=sum(nl["mid"]), estimate=est, reported=rep, ae=abs(est - rep),
                          backtest_estimate=hold.get(q), backtest_ae=abs(hold[q] - rep) if q in hold else None,
                          note=""))
@@ -81,11 +88,17 @@ def main():
             f"one taken 20 to 30 days after the fiscal end, and {len(scored)} of them can be scored.")
     text = ["# As-of study (preregistered secondary analysis)", "", line, ""]
     if scored:
-        text += ["| Quarter | Capture | Days after end | As-of estimate | Reported | As-of miss | Miss on the 2026-10-19 copy |",
-                 "|---|---|---|---|---|---|---|"]
+        text += ["| Quarter | Capture | Days after end | As-of estimate | Reported | As-of miss | Miss on the 2026-10-19 copy | As-of band | Inside |",
+                 "|---|---|---|---|---|---|---|---|---|"]
         for r in scored:
+            band = (f"{r['band_low']:.1f} to {r['band_high']:.1f}", "yes" if r["inside_band"] else "no") \
+                if r.get("band_low") is not None else ("n/a (design quarter)", "")
             text.append(f"| {r['quarter']} | {r['capture'][:8]} | {r['days_after_end']} | {r['estimate']:.1f} | "
-                        f"{r['reported']} | {r['ae']:.1f} | {r['backtest_ae']:.1f} |")
+                        f"{r['reported']} | {r['ae']:.1f} | {r['backtest_ae']:.1f} | {band[0]} | {band[1]} |")
+        text += ["", "Each as-of estimate reads both the quarter's own registry events and its four lag quarters from "
+                     "the same archived copy, as a live estimate does. The truncation table in the README cuts only the "
+                     "quarter's own events and keeps the lags whole, so it is the harsher test. Four quarters are too "
+                     "few to conclude anything; the locked quarters remain the real test."]
     write_text(ROOT / "results/exploratory/asof.md", "\n".join(text) + "\n")
     print(line)
 

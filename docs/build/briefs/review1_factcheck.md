@@ -1,0 +1,5 @@
+# Brief: review round 1, fact-checker
+
+Repository: `~/Desktop/projects/gulfstream-delivery-nowcast`. Output: `docs/build/FACT_CHECK.md`. Write only your output file; never edit the repository. A finding has an id, a file and line, a severity (blocking, major or minor), evidence (a quote or command output), and a concrete fix. No evidence, no finding. Default to wrong under doubt: when you cannot confirm something reads right, report it.
+
+Read every entry of `report/claims.json` against its cached source. The cached source is the file under `data/raw/sources/` whose sha256 equals the entry's `sha256` (find it with `shasum -a 256`). Convert HTML to text the way `src/gdn/claims.py` `page_text` does. For each entry, decide whether the source supports the entry's `text` (not just the quote): every fact, number, date and attribution in the text must be in the source, and the text must not overstate it. List each entry the source does not support, with the reason and the source's own words. Also confirm the quote is verbatim and at most 40 words. Time box: 40 minutes.
