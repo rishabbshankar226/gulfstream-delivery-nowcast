@@ -200,15 +200,15 @@ def test_existing_release_blocks_a_new_lock(repo):
 
 
 class ConflictOnce(FakeOps):
-    """The first pull comes back conflicted, as when the other machine pushed live files mid-run."""
+    """The first pulls come back conflicted, as when the other machine pushed live files mid-run."""
 
-    def __init__(self, *a, **kw):
+    def __init__(self, *a, conflicts=2, **kw):
         super().__init__(*a, **kw)
-        self.pulls, self.aborts = 0, 0
+        self.pulls, self.aborts, self.conflicts = 0, 0, conflicts
 
     def pull(self):
         self.pulls += 1
-        return ["results/live/2026Q3_latest.json"] if self.pulls == 1 else []
+        return ["results/live/2026Q3_latest.json"] if self.pulls <= self.conflicts else []
 
     def abort_merge(self):
         self.aborts += 1
@@ -217,7 +217,8 @@ class ConflictOnce(FakeOps):
 def test_conflicted_pull_aborts_and_retries(repo):
     ops = ConflictOnce(repo, at("2026-10-29T19:30"))
     rc = live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None)
-    assert rc == 0 and ops.aborts == 1 and len(ops.creates) == 1
+    # The opening pull and the first attempt's pull both conflict; both merges are aborted and attempt 2 locks.
+    assert rc == 0 and ops.aborts == 2 and len(ops.creates) == 1
 
 
 def test_wall_clock_stops_a_late_lock(repo, monkeypatch):
@@ -257,3 +258,163 @@ def test_manifest_merge_keeps_both_sides():
     theirs = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"z": 1}, "2026-10-29": {"z": 3}}})
     merged = json.loads(daily.merge_manifests(ours, theirs))
     assert sorted(merged["snapshots"]) == ["2026-10-19", "2026-10-28", "2026-10-29"]
+
+
+class SlowPush(FakeOps):
+    """The prediction's push takes the real clock to within minutes of midnight ET."""
+
+    def __init__(self, *a, box, late, **kw):
+        super().__init__(*a, **kw)
+        self.box, self.late = box, late
+
+    def push(self):
+        self.box[0] = self.late
+        return super().push()
+
+
+def test_clock_crossing_the_margin_during_the_push_stops_the_release(repo, monkeypatch):
+    box = [at("2026-10-29T19:20")]
+    monkeypatch.setattr(live, "utcnow", lambda: box[0])
+    ops = SlowPush(repo, at("2026-10-29T19:00"), box=box, late=at("2026-10-29T23:55"))
+    rc = live.run_lock(at("2026-10-29T19:00"), root=repo, ops=ops, log=lambda *a: None, wall=True)
+    assert rc == 1 and not ops.creates
+    # The committed prediction carries the time it was computed, not the time the run started.
+    assert json.loads((repo / "predictions/2026Q3.json").read_text())["made_utc"] == "2026-10-29T23:20:00Z"
+
+
+class CreatedElsewhere(FakeOps):
+    """gh release create fails because the other machine created the release a moment earlier."""
+
+    def release_create(self, tag, target, title, notes):
+        from gdn.gitops import GitError
+        self.released = {"tagName": tag, "publishedAt": "2026-10-29T23:01:00Z"}
+        raise GitError("gh release create failed: a release with the same tag name already exists")
+
+
+def test_a_release_created_by_another_run_is_recorded(repo):
+    ops = CreatedElsewhere(repo, at("2026-10-29T19:00"))
+    rc = live.run_lock(at("2026-10-29T19:00"), root=repo, ops=ops, log=lambda *a: None)
+    lock_obj = json.loads((repo / "results/live/2026Q3_lock.json").read_text())
+    assert rc == 0 and lock_obj["published_at"] == "2026-10-29T23:01:00Z"
+
+
+def fixture_zip(path, drop_master_row=False):
+    import zipfile
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with zipfile.ZipFile(path, "w") as z:
+        for k in faa.FILES:
+            text = (FIXTURES / "faa" / f"{k}.txt").read_bytes().decode("utf-8")
+            if drop_master_row and k == "MASTER":
+                lines = text.splitlines(keepends=True)
+                text = "".join(lines[:1] + lines[2:])
+            z.writestr(f"{k}.txt", text)
+
+
+def test_ingest_stores_the_subset_only_in_the_lock_window(repo):
+    for date in ("2026-10-22", "2026-10-23", "2026-10-30"):
+        fixture_zip(faa.zip_path(repo, date))
+        live.ingest(repo, date, log=lambda *a: None)
+        assert live.table_path(repo, date).exists()
+    stored = set(faa.manifest(repo)["snapshots"])
+    # Seven days before 2026-10-30 is 2026-10-23; the release date itself is outside the window.
+    assert "2026-10-23" in stored and "2026-10-22" not in stored and "2026-10-30" not in stored
+
+
+def test_ingest_keeps_a_subset_that_a_prediction_names(repo):
+    date = "2026-10-24"
+    fixture_zip(faa.zip_path(repo, date))
+    live.ingest(repo, date, log=lambda *a: None)
+    before = {p.name: p.read_bytes() for p in (repo / "data/snapshots" / date).iterdir()}
+    entry = faa.manifest(repo)["snapshots"][date]
+    write_json(repo / "predictions/2026Q3.json", {"quarter": "2026Q3", "snapshot": date})
+    fixture_zip(faa.zip_path(repo, date), drop_master_row=True)
+    live.ingest(repo, date, log=lambda *a: None)
+    assert {p.name: p.read_bytes() for p in (repo / "data/snapshots" / date).iterdir()} == before
+    assert faa.manifest(repo)["snapshots"][date] == entry
+
+
+def test_path_rows_one_per_date(repo):
+    now = at("2026-10-28T09:00")
+    live.update_latest(repo, now, log=lambda *a: None)
+    live.update_latest(repo, now, log=lambda *a: None)
+    path = repo / "results/live/2026Q3_path.csv"
+    assert [r.split(",")[0] for r in path.read_text().splitlines()[1:]] == ["2026-10-28"]
+    live.write_table(repo, "2026-10-29", live.read_table(repo, "2026-10-28"))
+    live.update_latest(repo, at("2026-10-29T09:00"), log=lambda *a: None)
+    assert [r.split(",")[0] for r in path.read_text().splitlines()[1:]] == ["2026-10-28", "2026-10-29"]
+
+
+def test_build_file_is_written_once(repo):
+    live.write_build(repo, now=at("2026-10-27T09:00"))
+    p = repo / "results/live/2026Q3_build.json"
+    first = p.read_bytes()
+    live.write_build(repo, now=at("2026-10-28T09:00"))
+    assert p.read_bytes() == first
+
+
+def score_file(repo, q, total, nowcast=None):
+    write_json(repo / f"results/live/{q}_score.json",
+               {"quarter": q, "reported": {"large": total - 6, "mid": 6, "total": total}, "accn": "x",
+                "locked": nowcast is not None, "nowcast": {"total": nowcast} if nowcast is not None else None})
+
+
+def test_a_score_moves_the_live_quarter_and_joins_the_history(repo):
+    assert live.live_quarter(repo) == "2026Q3"
+    score_file(repo, "2026Q3", 40, nowcast=37.5)
+    assert live.live_quarter(repo) == "2026Q4"
+    assert live.reported_history(repo)["2026Q3"] == {"large": 34, "mid": 6, "total": 40}
+    # The locked error (37.5 - 40) joins the band's errors after the design and holdout ones.
+    assert live.band_errors(repo)[-1] == -2.5 and len(live.band_errors(repo)) == 21
+
+
+def test_a_live_quarter_without_a_fiscal_end_is_logged_not_raised(repo):
+    score_file(repo, "2026Q3", 40)
+    score_file(repo, "2026Q4", 45)
+    msgs = []
+    assert live.live_quarter(repo) == "2027Q1"
+    assert live.update_latest(repo, at("2027-02-01T09:00"), log=msgs.append) is None
+    assert any("fiscal end" in m for m in msgs)
+
+
+class FakeSEC:
+    body = ""
+
+    def __init__(self, root, network=True):
+        pass
+
+    def filings(self, refresh=True):
+        return []
+
+    def exhibit_991(self, accn):
+        return "ex99.htm", self.body
+
+    def save_manifest(self):
+        pass
+
+
+@pytest.mark.parametrize("fixture,scored", [("with_sentence.htm", True), (None, False)])
+def test_the_score_waits_for_the_8k_not_the_calendar(repo, monkeypatch, fixture, scored):
+    from gdn import sec
+    (repo / "data/guidance.csv").write_text(
+        "call_date,year,outlook,quote,speaker,url\n2026-07-29,2026,160,about 160,CFO,u\n")
+    # An 8-K whose exhibit has no delivery table is logged and left unscored, not raised.
+    FakeSEC.body = (FIXTURES / "releases" / fixture).read_bytes() if fixture else b"<p>Other news</p>"
+    monkeypatch.setattr(sec, "Client", FakeSEC)
+    monkeypatch.setattr(sec, "results_8k", lambda filings, end: {"accn": "0000040533-26-000099"})
+    # 2026-10-20: after the quarter's end (2026-10-04), ten days before the calendar's release date.
+    assert live.run_score(at("2026-10-20T09:00"), root=repo, log=lambda *a: None) == 0
+    assert (repo / "results/live/2026Q3_score.json").exists() is scored
+
+
+class PullBringsAScore(FakeOps):
+    """The pull brings the other machine's score for 2026Q3, so there is nothing left to lock."""
+
+    def pull(self):
+        score_file(self.root, "2026Q3", 40)
+        return []
+
+
+def test_the_lock_pulls_before_it_reads_local_state(repo):
+    ops = PullBringsAScore(repo, at("2026-10-29T19:30"))
+    assert live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None) == 0
+    assert ops.creates == [] and not (repo / "predictions/2026Q3.json").exists()

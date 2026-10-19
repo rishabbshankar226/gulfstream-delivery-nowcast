@@ -77,6 +77,10 @@ def _run(now, offline, core, root):
     wall = now is None
     now = live.parse_now(now)
     ops = Ops(root)
+    if ops.merging():
+        # An earlier run died mid-merge: never carry its conflicted files over.
+        ops.abort_merge()
+        print("aborted a merge an earlier run left unfinished")
     dirty = [p for p in ops.dirty_tracked() if not _under(p, ALLOWED)]
     if dirty:
         print(f"Refusing to run: uncommitted changes outside the daily job's paths: {dirty[:8]}")
@@ -112,10 +116,15 @@ def _run(now, offline, core, root):
         print(f"git pull failed: {e}")
     if not offline:
         print(sec.probe())
-    date = None if offline else faa.download(root, now)
-    if date:
-        live.ingest(root, date)
-    live.update_latest(root, now)
+    date = None
+    try:
+        # A bad zip or a changed FAA header must not cost the lock, which reads the newest stored subset.
+        date = None if offline else faa.download(root, now)
+        if date:
+            live.ingest(root, date)
+        live.update_latest(root, now)
+    except Exception as e:  # noqa: BLE001
+        print(f"snapshot step failed: {type(e).__name__}: {e}; carrying on to the lock")
     ops.commit(LIVE_PATHS, f"Daily snapshot {date}" if date else "Daily nowcast without a new snapshot")
 
     def push_outputs():
@@ -125,11 +134,14 @@ def _run(now, offline, core, root):
     try:
         rc = live.run_lock(now, offline, root=root, ops=ops, before_prediction=push_outputs,
                            on_conflict=on_conflict, wall=wall)
-    except GitError as e:
-        print(f"lock step failed: {e}")
+    except Exception as e:  # noqa: BLE001
+        print(f"lock step failed: {type(e).__name__}: {e}")
         rc = 1
     before = set(live.scores(root))
-    live.run_score(now, offline, root=root)
+    try:
+        live.run_score(now, offline, root=root)
+    except Exception as e:  # noqa: BLE001
+        print(f"score step failed: {type(e).__name__}: {e}")
     if set(live.scores(root)) != before:
         live.update_latest(root, now)
         ops.commit(LIVE_PATHS, "Score the released quarter")

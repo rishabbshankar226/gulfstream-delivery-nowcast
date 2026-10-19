@@ -45,6 +45,10 @@ class Ops:
     def tracked(self, path):
         return bool(self.git("ls-files", "--", str(path)).stdout.strip())
 
+    def merging(self):
+        """True while a merge is in progress (MERGE_HEAD exists)."""
+        return self.git("rev-parse", "-q", "--verify", "MERGE_HEAD", check=False).returncode == 0
+
     def ahead(self):
         r = self.git("rev-list", "--count", "@{u}..HEAD", check=False)
         return int(r.stdout.strip() or 0) if r.returncode == 0 else 0

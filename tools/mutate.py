@@ -35,8 +35,8 @@ MUTANTS = [
      "return s[max(0, int(p * len(s)) - 1)] if s else None"),
     ("Eve boundary", "src/gdn/live.py", "return newest_snapshot == eve.isoformat() or t.hour >= LOCK_HOUR_ET",
      "return newest_snapshot == eve.isoformat() or t.hour > LOCK_HOUR_ET"),
-    ("Second lock", "src/gdn/live.py", "        ops.pull()\n        if ops.release_view(tag):",
-     "        ops.pull()\n        if False:"),
+    ("Second lock", "src/gdn/live.py", "        if ops.release_view(tag):\n            if not lock_p.exists() and pred_p.exists():",
+     "        if False:\n            if not lock_p.exists() and pred_p.exists():"),
 ]
 
 
@@ -50,7 +50,8 @@ def copy_tree(dst):
 def run_tests(tree):
     r = subprocess.run([str(PY), "-m", "pytest", "-q", "-rf", "-p", "no:cacheprovider", "--tb=no",
                         "--ignore=tests/test_site_a11y.py", "tests"], cwd=tree, capture_output=True, text=True,
-                       env={"PYTHONPATH": str(Path(tree) / "src"), "PATH": "/usr/bin:/bin"})
+                       env={"PYTHONPATH": str(Path(tree) / "src"), "PATH": "/usr/bin:/bin",
+                            "PYTHONDONTWRITEBYTECODE": "1"})
     failed = re.findall(r"^FAILED (\S+)", r.stdout, re.M)
     return r.returncode, failed, r.stdout.strip().splitlines()[-1] if r.stdout.strip() else r.stderr[-300:]
 
@@ -72,9 +73,16 @@ def main():
             p.write_text(src.replace(old, new))
             rc, failed, last = run_tests(tree)
             p.write_text(src)
+            for cache in tree.rglob("__pycache__"):
+                shutil.rmtree(cache)
+            clean_rc, _, clean_last = run_tests(tree)
+            if clean_rc != 0:
+                sys.exit(f"after restoring {rule} the copy no longer passes: {clean_last}")
             ok = rc != 0 and failed
             caught += bool(ok)
-            rows.append((rule, f, old.splitlines()[-1].strip(), new.splitlines()[-1].strip(), failed))
+            a, b = old.splitlines(), new.splitlines()
+            i = next(i for i in range(len(a)) if a[i] != b[i])  # the line the mutant changes
+            rows.append((rule, f, a[i].strip(), b[i].strip(), failed))
             print(f"{'caught' if ok else 'SURVIVED'}: {rule} ({len(failed)} failing)")
     lines = ["# Tests of the tests", "",
              f"`tools/mutate.py` copies the tree, confirms the clean copy passes, then breaks one rule at a time with a "

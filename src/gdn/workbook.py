@@ -190,7 +190,7 @@ def segments_sheet(wb, root):
         put(ws, f"O{r}", f"=N{r}/J{r}", F_RATIO)
     last = 2 + QUARTERS.index("2026Q2")
     rows = [("TTM deliveries", f"=SUM(Quarters!E{last - 3}:E{last})", F_AIR),
-            ("Revenue per delivery", "=J2/B12", "#,##0.0"),
+            ("Revenue per delivery", "=J2/B12", F_USD),
             ("Nowcast deliveries", "=Live!B11", F_AIR),
             ("Aerospace from nowcast", "=B14*B13", F_USD),
             ("Aerospace operating earnings from nowcast", "=B15*M2", F_USD),
@@ -235,7 +235,9 @@ def pin(path, date):
 def input_digest(root):
     root = Path(root)
     lines = []
-    for p in (basis_path(root), root / "results/metrics.json", root / "data/processed/segments.csv"):
+    # The builder's own source counts as an input, so a change to a formula or a format rebuilds the file.
+    for p in (basis_path(root), root / "results/metrics.json", root / "data/processed/segments.csv",
+              root / "src/gdn/workbook.py"):
         lines.append(f"{sha256(p.read_bytes())}  {p.relative_to(root)}")
     return "\n".join(lines) + "\n"
 
