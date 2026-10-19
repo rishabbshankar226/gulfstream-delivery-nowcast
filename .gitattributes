@@ -1,2 +1,11 @@
 # Auto detect text files and perform LF normalization
 * text=auto
+*.gz binary
+*.zip binary
+*.xlsx binary
+*.pdf binary
+*.png binary
+*.woff2 binary
+*.woff binary
+*.ttf binary
+tests/fixtures/** -text
