@@ -183,6 +183,15 @@ def replace_section(md, head, body):
     return pat.sub(lambda m: f"{head}\n\n{body.strip()}\n\n", md, count=1)
 
 
+def low_line(m):
+    """A sentence naming a simple baseline that missed by less than the registry estimate, if one did."""
+    h = m["holdout"]
+    low = min(("seasonal", "last"), key=lambda b: h["mae"][b])
+    if h["mae"][low] < h["mae"]["ratio"]:
+        return f" Simply repeating {BASE[low]} did a little better, at {f1(h['mae'][low])}."
+    return ""
+
+
 def post(root):
     root = Path(root)
     m = read_json(root / "results/metrics.json")
@@ -208,8 +217,8 @@ def post(root):
               "How I tested it: I counted each Gulfstream jet's first customer registration or export in a registry "
               "copy, scaled the count by the last four quarters, and checked it on 26 past quarters it never saw, "
               "against GD's own guidance pace and two simple baselines.", "",
-              headline(m) + " That test reads a registry that had years to fill in, so only the locked quarters "
-              "show whether it counts jets in time.", "",
+              headline(m) + low_line(m) + " That test reads a registry that had years to fill in, so only the "
+              "locked quarters show whether it counts jets in time.", "",
               f"Dashboard: {DASH}", f"Code, data and the research note: {REPO}", "",
               "What public data would you add to sharpen a delivery estimate like this?", "",
               "#GeneralDynamics #EquityResearch #Python"]
