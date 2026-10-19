@@ -39,7 +39,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 9 | As-of study | done | - | 9b84384 |
 | 10 | Fresh clone build and gate | done (early run; repeat at the end) | all but repo | 6bef306 |
 | R | Review round 1 | done; findings and open items in REVIEW.md | docs | 1a02088, 47af692, a2f8e76, f3f1471 |
-| R | Review rounds 2 and 3 | todo | - | |
+| R | Review round 2 | done; no blocking or major, so no round 3 (§7 stop rule) | docs | 26b0427, 1a726cd |
 | R | Final gate, push, report | todo | all | |
 
 ## Tool routing
@@ -55,6 +55,5 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- Review round 2 (two subagents, launched 13:40 ET 2026-10-19): docs/build/review2_code.md, review2_docs.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
