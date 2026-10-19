@@ -190,3 +190,10 @@ def test_score_with_and_without_lock(repo):
     assert s["locked"] is True and s["nowcast"] == pred["nowcast"]
     assert s["ae_total"] == abs(pred["nowcast"]["total"] - 40)
     assert s["inside_band"] == (pred["band"][0] <= 40 <= pred["band"][1])
+
+
+def test_existing_release_blocks_a_new_lock(repo):
+    # Another machine already created the release; this clone has neither the prediction nor the lock record.
+    ops = FakeOps(repo, at("2026-10-29T19:30"), release={"tagName": "lock-2026Q3", "publishedAt": "2026-10-29T23:05:00Z"})
+    live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None)
+    assert ops.creates == [] and not (repo / "predictions/2026Q3.json").exists()
