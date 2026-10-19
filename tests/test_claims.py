@@ -37,3 +37,14 @@ def test_a_wrong_quote_is_caught(tmp_path):
     idx = claims.source_index(tmp_path)
     assert claims.problems([good], idx) == []
     assert claims.problems([dict(good, quote="Gulfstream delivered 42 aircraft.")], idx)
+
+
+REMOVED = {"pc-g300-entry-timing", "pc-g300-announced"}   # unsupported as written (docs/build/FACT_CHECK.md)
+
+
+def test_claims_the_fact_check_removed_stay_out():
+    for f in [ROOT / "report/claims.json"] + sorted((ROOT / "docs/build").glob("claims_*.json")):
+        ids = {c["id"] for c in json.loads(f.read_text())}
+        assert not ids & REMOVED, f
+    note = (ROOT / "report/note.html").read_text()
+    assert not any(f'data-claim="{i}"' in note for i in REMOVED)

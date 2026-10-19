@@ -144,24 +144,6 @@
     "sha256": "9f2f9ec2a20024db6a20a2ceee6945c753b8ce99f9bae267d0537040dd86545d"
   },
   {
-    "id": "pc-g300-announced",
-    "text": "Gulfstream announced the all-new super-midsize G300 in September 2025 to replace the G280.",
-    "source_type": "filing",
-    "url_or_accn": "0000040533-25-000045",
-    "quote": "In September 2025, we announced our all-new super-midsize G300 aircraft, which will replace the G280 aircraft.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "6cd927b05b9d0b8c3e2696b319b1558dc2bcdc785726ed9ba08349f980f5796b"
-  },
-  {
-    "id": "pc-g300-entry-timing",
-    "text": "GD said the final G280 ought to deliver in the second quarter of next year and the G300 should start in late '27 or early '28, leaving a planned production break.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "the final 280 ought to deliver in the second quarter of next year, and the onset of the 300, which late '27, early '28, somewhere in that. And so we'll have a planned production break",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
     "id": "pc-g400-timing-update",
     "text": "GD said it has whipped up its efforts on the G400 and will say more over the next couple of quarters about where the G400 will be.",
     "source_type": "call",
@@ -271,7 +253,7 @@
   },
   {
     "id": "risk-tariffs",
-    "text": "GD says tariffs have not had a material impact on its results to date but reduced Aerospace operating margins by 30 basis points in 2025, and their duration and extent continue to evolve.",
+    "text": "In its 2025 annual report, GD said tariffs had not had a material impact on its results but reduced Aerospace operating margins by 30 basis points in 2025.",
     "source_type": "filing",
     "url_or_accn": "0000040533-26-000006",
     "quote": "To date, the tariffs have not had a material impact on our results but did reduce the Aerospace operating margins by 30 basis points in 2025. The duration and extent of the tariffs continue to evolve.",
