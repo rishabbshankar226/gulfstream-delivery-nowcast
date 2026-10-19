@@ -47,8 +47,10 @@ def test_workbook_is_kept_until_an_input_changes(tmp_path, capsys):
     assert "wrote" in capsys.readouterr().out
 
 
-def test_revenue_per_delivery_is_formatted_as_dollars():
-    ws = load_workbook(ROOT / workbook.OUT)["Segments"]
+def test_revenue_per_delivery_is_formatted_as_dollars(tmp_path):
+    root = tree(tmp_path)
+    workbook.build(root)
+    ws = load_workbook(root / workbook.OUT)["Segments"]
     row = next(r for r in ws.iter_rows() if r[0].value == "Revenue per delivery")
     assert row[1].number_format == "#,##0"
 

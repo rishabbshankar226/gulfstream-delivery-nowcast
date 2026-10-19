@@ -48,6 +48,8 @@ def main(argv=None):
         kw["offline"] = a.offline
     if a.stage == "daily":
         kw["core"] = a.core
+    if a.stage == "lock":
+        kw["wall"] = a.now is None  # a real run checks the wall clock; a rehearsal's fixed --now does not
     r = f(**kw)
     return r if isinstance(r, int) else 0
 
