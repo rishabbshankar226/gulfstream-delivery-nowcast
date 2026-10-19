@@ -61,14 +61,19 @@ def build(paths, root="."):
     """Merge topic files into report/claims.json, keeping only claims that pass."""
     root = Path(root)
     index = source_index(root)
-    out = []
+    out, seen = [], set()
     for f in paths:
         for c in json.loads(Path(f).read_text()):
+            if sorted(c) != sorted(KEYS):
+                print(f"dropped {c.get('id')}: keys {list(c)}")
+                continue
             c = {k: (norm(c[k]) if k in ("text", "quote") else c[k]) for k in KEYS}
-            b = problems([c], index)
+            # problems() sees one claim at a time here, so the repeated id is caught across files instead.
+            b = [(c["id"], "duplicate id")] if c["id"] in seen else problems([c], index)
             if b:
                 print(f"dropped {c['id']}: {b[0][1]}")
                 continue
+            seen.add(c["id"])
             out.append(c)
     out.sort(key=lambda c: c["id"])
     write_text(root / "report/claims.json", json.dumps(out, indent=2, ensure_ascii=False) + "\n")

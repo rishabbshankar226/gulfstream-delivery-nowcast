@@ -155,7 +155,6 @@ def live_record(root):
         lock = read_json(lv / f"{q}_lock.json") if (lv / f"{q}_lock.json").exists() else None
         score = read_json(lv / f"{q}_score.json") if (lv / f"{q}_score.json").exists() else None
         pred_p = root / "predictions" / f"{q}.json"
-        pace = model.guidance_pace(q, Y, calls, cal)
         pace_s = (f"; GD's guidance pace for the quarter was {f1(score['guidance_pace'])}"
                   if score and score.get("guidance_pace") is not None else "")
         if lock and pred_p.exists():
