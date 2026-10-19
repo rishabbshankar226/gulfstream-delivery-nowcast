@@ -104,7 +104,11 @@
   }
 
   /* ---------- the live quarter ---------- */
-  function current() { return data.live.length ? data.live[data.live.length - 1] : null; }
+  // The newest quarter with a lock or a score, so a scored quarter stays up until the next one locks; else the newest.
+  function current() {
+    for (var i = data.live.length - 1; i >= 0; i--) if (data.live[i].lock || data.live[i].score) return data.live[i];
+    return data.live.length ? data.live[data.live.length - 1] : null;
+  }
 
   function liveCard() {
     var L = current();
