@@ -315,7 +315,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
     for attempt in range(1, 4):
         ops.pull()
         if ops.release_view(tag):
-            if not lock_p.exists():
+            if not lock_p.exists() and pred_p.exists():
                 write_lock_json(root, q, ops)
                 ops.commit([lock_p], f"Record the {q} lock")
                 push_with_merge(ops, log)

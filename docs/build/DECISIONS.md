@@ -162,3 +162,9 @@ Also for `## Data`: the G280 is filed under the maker `IAI LTD` (model `GULFSTRE
 - **The claims registry** holds only the claims the note cites (32 of 41 sourced; N4 fails on unused entries). The three topic files in `docs/build/claims_*.json` keep all 41; the note's code picks which ten product claims to cite and prunes `report/claims.json` to match.
 - **The defense study's MAPEs** are printed as the owner's own study with a link, not as claims, since `claims.json` admits only filing, call, faa and press sources.
 - Full gate after Phase 8: 42 assertions, 0 failing, warnings S3 and L3 ("not locked yet").
+
+## Phase 9: self-checks
+
+- **Tests of the tests** (`tools/mutate.py`, `docs/build/MUTATION.md`): 12 of 12 rules caught. On the first pass the IAI cabin rule survived, because the fixture's IAI G280 also reads mid by its model name. The fixture gained an Israel Aircraft Industries "GULFSTREAM 200" type that only the maker rule makes mid-cabin (`tools/make_fixtures.py` regenerates the fixtures). Writing a test for the second-lock rule exposed a real bug: when a release existed but the clone had no prediction file, the lock crashed while recording it. It now records only when the prediction is present and otherwise stops without creating anything.
+- Source files held literal U+FEFF characters where the escape `"﻿"` was meant (`faa.py`, `test_faa.py`); they now use the escape.
+- **Determinism** (`make check-determinism`, `tools/determinism.py`): `make all` twice gives identical bytes for all 28 files it writes (the workbook rebuilt both times), and it reproduces the committed outputs exactly.

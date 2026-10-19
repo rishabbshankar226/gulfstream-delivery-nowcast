@@ -18,7 +18,7 @@ def test_network_is_blocked():
 
 
 def test_header_normalization():
-    assert faa.norm_header("﻿MFR MDL CODE") == "MFRMDLCODE"
+    assert faa.norm_header("\ufeffMFR MDL CODE") == "MFRMDLCODE"
     assert faa.norm_header("MFR-MDL-CODE") == "MFRMDLCODE"
     assert faa.norm_header("air worth date") == "AIRWORTHDATE"
     assert faa.norm_header(" KIT MODEL") == "KITMODEL"
@@ -50,8 +50,9 @@ def test_blank_lines_are_skipped(faa_texts):
 
 def test_scope_keeps_iai_g280_and_drops_turboprop_piston_and_cessna(faa_texts):
     s = faa.scope(faa.read_table(faa_texts["ACFTREF"], "ACFTREF"))
-    assert set(s) == {"3980221", "4500314", "3980209"}
+    assert set(s) == {"3980221", "4500314", "3980209", "4500308"}
     assert s["4500314"]["cabin"] == "mid"      # IAI LTD, model GULFSTREAM G280
+    assert s["4500308"]["cabin"] == "mid"      # maker rule alone: model GULFSTREAM 200 holds no G200 token
     assert s["3980209"]["cabin"] == "mid"      # G150 by model name
     assert s["3980221"]["cabin"] == "large"
 
@@ -70,10 +71,10 @@ def test_subset_is_header_plus_in_scope_rows_byte_for_byte(faa_texts):
     sub = faa.subset(faa_texts)
     m = sub["MASTER"].splitlines(keepends=True)
     src = faa_texts["MASTER"].splitlines(keepends=True)
-    assert m[0] == src[0] and m[0].startswith("﻿") and m[0].endswith("\r\n")
+    assert m[0] == src[0] and m[0].startswith("\ufeff") and m[0].endswith("\r\n")
     assert all(ln in src for ln in m)
     assert [ln.split(",")[0].strip() for ln in m[1:]] == ["N700AA", "N280ZZ", "N703GD", "N280RN", "N704GA", "N999ZZ"]
-    assert len(sub["ACFTREF"].splitlines()) == 4
+    assert len(sub["ACFTREF"].splitlines()) == 5
     assert len(sub["DEREG"].splitlines()) == 7
 
 
