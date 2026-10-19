@@ -41,3 +41,20 @@ Owner's first person. Title "Gulfstream delivery tracker"; one sentence on what 
 ## LinkedIn post (Phase 8, `report.py`)
 
 At most 1,500 characters. Before the first score: what I built; the held-out result under the headline rule; that the 2026Q3 lock is scored on 2026-10-30. After a score: "One locked quarter so far: off by N" first, never claiming skill from one quarter. Two or three lines on testing, the dashboard link and the note, one question, at most three hashtags.
+
+## Interview notes (Phase 8), at most 900 words, first person
+
+1. The 60-second account: the question; the registry count and its scaling; the held-out test against GD's guidance (5.5 against 6.9, not distinguishable; 4.6 for the same quarter last year); the lock as a timestamped GitHub release; first scoring on 2026-10-30; the note and dashboard.
+2. How the registry count works, in plain words: Gulfstream jets in the FAA file, the first customer registration or export, within a year of first airworthiness; counted in GD's quarters; scaled by deliveries per registration over the last four quarters.
+3. Six questions:
+   - Why GD's guidance is the benchmark (it is what the street anchors on; 22 of 26 quarters had a numeric outlook).
+   - What the held-out result shows and does not (§2's framing; the band held 18 of 26).
+   - Why no price target (a delivery tracker, not a valuation; student project).
+   - What the locked quarter showed, or when it is scored (2026-10-30; results/live).
+   - What failed or surprised (from DECISIONS.md, without counts): early-year coverage fell below my sanity bound because the registry keeps only current certificates; the G280 sits under IAI, not Gulfstream; GitHub's runner reached the FAA when it was expected to be refused; two machines wrote different gzip bytes for the same data; the same quarter last year did better than the registry estimate.
+   - What I would do next (score more locked quarters; an as-of registry archive; ADS-B to date handovers; per-model revenue).
+Figures only from §4's quotable list; dates as YYYY-MM-DD.
+
+## Resume bullets (Phase 8)
+
+Two or three lines starting "- ", each at most 220 characters, the first in the prompt's form with the null result.
