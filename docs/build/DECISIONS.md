@@ -189,3 +189,9 @@ The findings, fixes, commits and regression tests are in `docs/build/REVIEW.md`.
 - **Gzip header (S6), accepted deviation.** Stored subsets follow §3.3's `gzip.compress(data, mtime=0)` except that the header's OS byte is 255, so the Mac and the runner write the same bytes for the lock-window subsets they may both store. The manifest hashes the bytes written, and the gate reads decompressed content (`jetgate.py:328`). The backtest subset keeps its original bytes (OS byte 0x13).
 - **Offline rebuilds (S4).** `make data --offline`, and so `make all`, reads the tracked backtest subset. A networked `make data` re-stores it only when the raw zip's sha256 equals the manifest's.
 - **The score (S7).** The job looks for the quarter's results 8-K once its fiscal end has passed, by §3.2's rule, and no longer waits for a calendar release date; an 8-K with no delivery table is logged and left unscored.
+
+## Review round 2
+
+- Two fresh reviewers, neither with a blocking or major finding, so the review ends after round 2 as §7's stop rule says, and no round 3 runs. The final `make all`, `make check-determinism` and full gate stand in for the refuter's questions; see `docs/build/REVIEW.md`.
+- Round 2's minor findings were fixed where they were real defects (the broken mutation pass, a wrong as-of sentence, untested `daily.run` paths, exit codes). R2D-8 stays open because the gate's N1 rejects the Marine figures it needs.
+

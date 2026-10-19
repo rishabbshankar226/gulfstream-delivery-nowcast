@@ -427,3 +427,11 @@ def test_a_real_gdn_lock_checks_the_wall_clock(monkeypatch):
     cli.main(["lock"])
     cli.main(["lock", "--now", "2026-10-29T23:05:00Z"])
     assert seen == [True, False]
+
+
+def test_a_prediction_left_without_a_release_is_logged_as_missed(repo):
+    write_json(repo / "predictions/2026Q3.json", {"quarter": "2026Q3", "snapshot": "2026-10-29"})
+    msgs = []
+    ops = FakeOps(repo, at("2026-10-30T07:00"))
+    assert live.run_lock(at("2026-10-30T07:00"), root=repo, ops=ops, log=msgs.append) == 0
+    assert ops.creates == [] and any("committed but no release was made" in m for m in msgs)
