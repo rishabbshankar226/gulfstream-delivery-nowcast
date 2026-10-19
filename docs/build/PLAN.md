@@ -29,8 +29,8 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 6 | Charts, VISUAL_QA rows | done | - | phase 6 commit |
 | 6 | claims.json, test_claims.py | done | N4 | phase 6 commit |
 | 6 | note.html and PDF | done | N1 to N3 | phase 6 commit |
-| 7 | site_data.py, page, a11y test | todo | Y1 to Y3 | |
-| 7 | Impeccable critique, audit, polish; shots | todo | site | |
+| 7 | site_data.py, page, a11y test | done | Y1 to Y3 | phase 7 commit |
+| 7 | Impeccable critique, audit, polish; shots | done | site | phase 7 commit |
 | 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | todo | R1 to R4 K1 K2 V1 | |
 | 8 | Full gate | todo | all | |
 | 9 | Airframe audit | todo | - | |
@@ -54,7 +54,5 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- Impeccable critique, Assessment A (subagent): writes docs/build/critique_a.md
-- Impeccable critique, Assessment B (subagent): writes docs/build/critique_b.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
