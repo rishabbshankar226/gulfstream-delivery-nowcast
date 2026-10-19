@@ -338,8 +338,10 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
     if lock_p.exists():
         return 0
     if not lock_due(now, rel, newest_snapshot(root)):
-        if not before_release(now, rel) and not pred_p.exists():
-            log(f"{q} missed its lock window (release {rel}); no late lock")
+        if not before_release(now, rel):
+            log(f"{q} missed its lock window (release {rel})"
+                + ("; its prediction file was committed but no release was made" if pred_p.exists() else "")
+                + "; no late lock")
         return 0
     for attempt in range(1, 4):
         if not pull_clean(ops, on_conflict, log):
@@ -447,7 +449,7 @@ def run_score(now=None, offline=False, root=".", log=print):
         d = sec.parse_deliveries(sec.plain(body))
     except ValueError as e:
         log(f"{q}: the 8-K {f['accn']} gives no delivery counts ({e}); not scored")
-        return 0
+        return 1
     s = score_quarter(root, q, d, f["accn"])
     write_json(live_dir(root) / f"{q}_score.json", s)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))
