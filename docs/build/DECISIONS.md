@@ -121,3 +121,8 @@ Asked the owner how to proceed; the guidance checkers kept running meanwhile.
   - 2022-04-27, 2022-10-26, 2024-04-24, 2025-04-23, 2025-10-24 and 2026-04-29 give only a quarter's plan or a confirmation without a number, so they state none, and the latest numeric call of the year carries forward.
 - Process note: the checkers shared `data/raw/sources/calls/` and each converted every `.html` there to `.txt`, so some `.txt` files were rewritten by more than one checker. I checked every quote against the HTML itself, so this does not affect any row.
 - Design window (12 quarters, 2017Q1 to 2019Q4), MAE in aircraft: seasonal 5.0, last 3.83, raw E1 9.42, ratio E1 5.47, raw E2 9.33, ratio E2 5.58. The chosen definition is **E1** (ratio 5.472548294344893 against 5.5807858422376135). In the design window ratio did worse than last; that is recorded before any holdout figure exists.
+
+## Phase 3: holdout
+
+- Gate `--only faa,truth,model,prereg`: no failing code. Holdout MAE in aircraft: seasonal 4.6, last 8.8, guidance 6.9, raw 6.2, ratio 5.5. Sign tests of ratio against guidance 14 wins and 12 losses, against seasonal 11 and 15, against last 16 and 10; Holm rejects none. The headline therefore takes the null wording, with guidance named first, since 22 holdout quarters have a numeric outlook.
+- `results/error_analysis.md` comes from `src/gdn/errors.py`. No filing or call states why the registry count differed from GD's count in any of the five largest misses, so none names a cause. Two carry GD's own statement about the quarter's deliveries as context, each tested against its cached source.
