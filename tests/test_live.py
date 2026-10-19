@@ -402,8 +402,8 @@ def test_the_score_waits_for_the_8k_not_the_calendar(repo, monkeypatch, fixture,
     monkeypatch.setattr(sec, "Client", FakeSEC)
     monkeypatch.setattr(sec, "results_8k", lambda filings, end: {"accn": "0000040533-26-000099"})
     # 2026-10-20: after the quarter's end (2026-10-04), ten days before the calendar's release date.
-    assert live.run_score(at("2026-10-20T09:00"), root=repo, log=lambda *a: None) == 0
-    assert (repo / "results/live/2026Q3_score.json").exists() is scored
+    rc = live.run_score(at("2026-10-20T09:00"), root=repo, log=lambda *a: None)
+    assert (repo / "results/live/2026Q3_score.json").exists() is scored and rc == (0 if scored else 1)
 
 
 class PullBringsAScore(FakeOps):
@@ -418,3 +418,12 @@ def test_the_lock_pulls_before_it_reads_local_state(repo):
     ops = PullBringsAScore(repo, at("2026-10-29T19:30"))
     assert live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None) == 0
     assert ops.creates == [] and not (repo / "predictions/2026Q3.json").exists()
+
+
+def test_a_real_gdn_lock_checks_the_wall_clock(monkeypatch):
+    from gdn import __main__ as cli
+    seen = []
+    monkeypatch.setattr(live, "run_lock", lambda **kw: seen.append(kw["wall"]) or 0)
+    cli.main(["lock"])
+    cli.main(["lock", "--now", "2026-10-29T23:05:00Z"])
+    assert seen == [True, False]

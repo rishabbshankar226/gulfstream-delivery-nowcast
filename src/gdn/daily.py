@@ -75,6 +75,7 @@ def run(now=None, offline=False, core=False, root="."):
 
 def _run(now, offline, core, root):
     wall = now is None
+    failed = 0  # a step that failed but let the run go on; the run still exits 1 so the failure shows
     now = live.parse_now(now)
     ops = Ops(root)
     if ops.merging():
@@ -125,6 +126,7 @@ def _run(now, offline, core, root):
         live.update_latest(root, now)
     except Exception as e:  # noqa: BLE001
         print(f"snapshot step failed: {type(e).__name__}: {e}; carrying on to the lock")
+        failed = 1
     ops.commit(LIVE_PATHS, f"Daily snapshot {date}" if date else "Daily nowcast without a new snapshot")
 
     def push_outputs():
@@ -139,9 +141,10 @@ def _run(now, offline, core, root):
         rc = 1
     before = set(live.scores(root))
     try:
-        live.run_score(now, offline, root=root)
+        failed = live.run_score(now, offline, root=root) or failed
     except Exception as e:  # noqa: BLE001
         print(f"score step failed: {type(e).__name__}: {e}")
+        failed = 1
     if set(live.scores(root)) != before:
         live.update_latest(root, now)
         ops.commit(LIVE_PATHS, "Score the released quarter")
@@ -163,4 +166,4 @@ def _run(now, offline, core, root):
     except GitError as e:
         print(f"push failed: {e}")
         return 1
-    return rc
+    return rc or failed
