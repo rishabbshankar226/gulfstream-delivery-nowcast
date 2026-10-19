@@ -187,3 +187,18 @@ def test_without_a_lock_or_score_the_newest_quarter_is_featured(browser, base_ur
     page = _live_page(browser, base_url, data)
     assert page.inner_text("#live-status").startswith("2026Q4")
     page.context.close()
+
+
+def test_a_scored_quarter_without_a_lock_says_it_missed_the_window(browser, base_url):
+    data = json.loads((SITE / "data.json").read_text())
+    q3 = data["live"][-1]
+    q3["score"] = {"quarter": "2026Q3", "reported": {"large": 30, "mid": 5, "total": 35}, "accn": "0000040533-26-000040",
+                   "locked": False, "nowcast": None, "ae_total": None, "ape_pct": None, "inside_band": None,
+                   "guidance_pace": None, "guidance_ae": None}
+    data["live"].append(_next_quarter(q3))
+    page = _live_page(browser, base_url, data)
+    assert "Scored" in page.text_content("#live-status")
+    facts, note = page.inner_text("#live-facts"), page.inner_text("#live-note")
+    assert "missed its lock window" in facts and "the day before GD reports" not in facts
+    assert note.startswith("Not locked") and "Provisional" not in note
+    page.context.close()
