@@ -31,7 +31,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 6 | note.html and PDF | done | N1 to N3 | phase 6 commit |
 | 7 | site_data.py, page, a11y test | done | Y1 to Y3 | phase 7 commit |
 | 7 | Impeccable critique, audit, polish; shots | done | site | phase 7 commit |
-| 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | todo | R1 to R4 K1 K2 V1 | |
+| 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | done | R1 to R4 K1 K2 V1 | phase 8 commit |
 | 8 | Full gate | todo | all | |
 | 9 | Airframe audit | todo | - | |
 | 9 | Mutation pass | todo | - | |
