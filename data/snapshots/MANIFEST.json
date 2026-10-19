@@ -1,0 +1,15 @@
+{
+  "backtest": "2026-10-19",
+  "snapshots": {
+    "2026-10-19": {
+      "downloaded_utc": "2026-10-19T15:34:31Z",
+      "zip_sha256": "2fc5b3ea56c487c2ec8ae3a76e8ef17c9029e402557c472ad0431769f6740514",
+      "zip_bytes": 72927535,
+      "files": {
+        "ACFTREF.txt.gz": "f8ec1e0f614f3f0fcc426acd7452ed1c8a92dc5862b49c551c75e76862f926f5",
+        "MASTER.txt.gz": "286aec07a1885e8e2afba39531ef75079351948491cbe7ad4de0f748745496a9",
+        "DEREG.txt.gz": "82a464c205ea288214ccb7685a9350983ddbd4bc6f955bdcfe197a5fdbbaaf34"
+      }
+    }
+  }
+}
