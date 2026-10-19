@@ -41,6 +41,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | R | Review round 1 | done; findings and open items in REVIEW.md | docs | 1a02088, 47af692, a2f8e76, f3f1471 |
 | R | Review round 2 | done; no blocking or major, so no round 3 (§7 stop rule) | docs | 26b0427, 1a726cd |
 | R | Final gate, push, report | done: make all clean, check-determinism identical (28 files), full gate 42 assertions 0 failing | all | b0927cc |
+| R | Bug hunt | done: 5 fixes with tests (REVIEW.md BH-1 to BH-5), 115 passed, make all and check-determinism identical (28 files), rehearsal 11 of 11, gate 0 failing | all | 17cd427 to 733559a |
 
 ## Tool routing
 
