@@ -40,7 +40,9 @@ def test_as_of_mechanism_is_stated_as_measured():
     absent(README, "unfinished file", "has not posted, which")
     absent(NOTE, "because they read the lag quarters")
     absent("results/exploratory/asof.md", "harsher test")
-    present(README, "held more events for the same lag quarters")
+    present(README, "held more events for the same lag quarters", "In three of the four",
+            "came out slightly higher")
+    present("results/exploratory/asof.md", "it came out higher")
     present(NOTE, "They held more events for the same past quarters")
 
 
@@ -49,7 +51,8 @@ def test_audit_breakdown_matches_the_audit_file():
     absent(README, "Every source", "four could not be confirmed")
     absent(NOTE, "every source was")
     present(README, "one with no airworthiness date or year at all", "All but one source")
-    present(NOTE, "All but one source", "delivered by 2019")
+    present(NOTE, "All but one source", "every event the audit could date fell between 2000 and 2019")
+    present(README, "Every event the audit could date fell between 2000 and 2019")
 
 
 def test_coverage_drift_reads_both_sides():
@@ -63,7 +66,7 @@ def test_coverage_drift_reads_both_sides():
 
 def test_baseline_wording():
     # A3, N9, N12, N14, C8: name the baseline that missed by less, without claiming a test supports it.
-    absent(POST, "never saw", "did a little better")
+    absent(POST, "never saw", "did a little better", "own guidance pace")
     absent(NOTES, "did better")
     absent(README, "hardest to beat")
     absent(NOTE, "hardest to beat")

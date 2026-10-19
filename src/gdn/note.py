@@ -277,7 +277,7 @@ def build(root="."):
         live_point += "."
     add('<div class="keypoints"><ol>')
     add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(FRAMING.format(snap=snap))}</li>")
-    add(f"<li>{esc(live_point)}" + (f" GD reports on {rel}.{rel_cite}" if rel and not score else "") + "</li>")
+    add(f"<li>{esc(live_point)}" + (f" GD expects to report on {rel}.{rel_cite}" if rel and not score else "") + "</li>")
     add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, that estimate "
         f"implies {bn(est['aerospace_from_nowcast_usd'])} of Aerospace revenue for {q}, against "
         f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier; scaling last year's quarter by trailing growth gives "
@@ -577,7 +577,7 @@ def limitations(root):
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
         "reading or could not confirm it: five were used jets read as new deliveries, two had an earlier stated "
         "delivery, and three could not be confirmed. All but one source was a registry mirror or aircraft-history "
-        "site, and the jets checked were delivered by 2019, so the audit says little about recent quarters.",
+        "site, and every event the audit could date fell between 2000 and 2019, so it says little about recent quarters.",
     ]
 
 

@@ -388,9 +388,12 @@
     table("t-est", e.target + " revenue by segment against the year-ago quarter", ["Segment", "Year-ago quarter", "Estimate", "Change", "Change, %"], rows);
     var yq = String(Number(e.target.slice(0, 4)) - 1) + e.target.slice(4);
     var yi = data.quarters.indexOf(yq);
-    text($("est-why"), "The delivery estimate of " + f1(e.nowcast_total) + " sits below the " +
+    var below = yi < 0 || e.nowcast_total < data.reported.total[yi];
+    text($("est-why"), "The delivery estimate of " + f1(e.nowcast_total) + (below ? " sits below the " : " sits above the ") +
       (yi >= 0 ? data.reported.total[yi] + " " : "") + "deliveries of " + yq + ", and each delivery carries about " +
-      usdM(e.revenue_per_delivery_usd) + " of Aerospace revenue, so the delivery-based figure falls. The growth row instead scales " +
+      usdM(e.revenue_per_delivery_usd) + " of Aerospace revenue, so the delivery-based figure " + (below ? "falls" : "rises") +
+      ". That " + usdM(e.revenue_per_delivery_usd) + " includes services and Jet Aviation, which do not move with deliveries, " +
+      "so the delivery-based figure overstates the swing. The growth row instead scales " +
       yq + "'s Aerospace revenue by the last four quarters' growth.");
     var ya = q3("Aerospace");
     table("t-sens", "Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
