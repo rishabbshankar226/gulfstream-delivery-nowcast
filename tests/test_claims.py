@@ -48,3 +48,20 @@ def test_claims_the_fact_check_removed_stay_out():
         assert not ids & REMOVED, f
     note = (ROOT / "report/note.html").read_text()
     assert not any(f'data-claim="{i}"' in note for i in REMOVED)
+
+
+def test_build_drops_a_repeated_id_and_a_claim_missing_a_key(tmp_path, capsys):
+    src = tmp_path / "data/raw/sources/x/page.html"
+    src.parent.mkdir(parents=True)
+    src.write_text("<p>Gulfstream delivered 41 aircraft.</p>")
+    good = {"id": "t", "text": "t", "source_type": "press", "url_or_accn": "u",
+            "quote": "Gulfstream delivered 41 aircraft.", "retrieved_on": "2026-10-19",
+            "sha256": claims.sha256(src.read_bytes())}
+    short = {k: v for k, v in dict(good, id="s").items() if k != "retrieved_on"}
+    a, b = tmp_path / "claims_a.json", tmp_path / "claims_b.json"
+    a.write_text(json.dumps([good, short]))
+    b.write_text(json.dumps([dict(good, text="a second claim under the same id")]))
+    out = claims.build([a, b], tmp_path)
+    assert [c["id"] for c in out] == ["t"] and out[0]["text"] == "t"
+    printed = capsys.readouterr().out
+    assert "dropped t: duplicate id" in printed and "dropped s: keys" in printed
