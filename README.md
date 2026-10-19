@@ -141,6 +141,7 @@ Nothing tried after seeing the results has changed the headline. Any variant goe
 - **Coverage.** The ratio assumes the registry's coverage of GD's count holds steady from one year to the next. It drifted: registry events per reported delivery rose from 0.52 in 2016 to 0.80 in 2019, and sat below 0.5 for mid cabin in 2016 and 2017, because the registry keeps only an airframe's current certificate and a resold or renewed jet loses its first owner's date.
 - **Used jet.** A used jet with no airworthiness date or year of manufacture, or one whose maker code changed between registrations, can read as a new delivery, as can an imported used jet with a new US airworthiness date.
 - **Band.** The past-miss band comes from misses measured on a finished registry file, so it is likely too narrow at a live lock, when recent registrations have not posted.
+- **Audit.** I checked 30 airframes against outside sources ([docs/build/AIRFRAME_AUDIT.csv](docs/build/AIRFRAME_AUDIT.csv)). In 10 of 30 (33.3%) the source disagreed with the registry reading or could not confirm it: five were used jets that a fresh US airworthiness date let through as new deliveries, one military jet was delivered a quarter earlier than its registry date, and four could not be confirmed. Every source was a registry mirror or aircraft-history site, because Gulfstream rarely names individual airframes, so the audit checks the reading more than it checks delivery dates.
 
 ## Reproduce
 
