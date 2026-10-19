@@ -512,6 +512,9 @@ def limitations(root):
         "can read as a new delivery.",
         "Band: the past-miss band comes from errors measured on a finished registry file, so it is likely too "
         "narrow at a live lock.",
+        "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
+        "reading or could not confirm it. Five were used jets read as new deliveries; every source was a registry "
+        "mirror or aircraft-history site, since Gulfstream rarely names individual airframes.",
     ]
 
 
