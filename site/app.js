@@ -134,7 +134,8 @@
     if (yago >= 0) fact("Same quarter last year", data.reported.total[yago] + " deliveries");
     if (L.release_date) {
       fact("GD reports", L.release_date);
-      if (!L.lock) {
+      if (!L.lock && L.score) fact("Lock", "none: the quarter missed its lock window");
+      else if (!L.lock) {
         var eve = new Date(L.release_date + "T12:00:00Z");
         eve = new Date(eve.getTime() - 86400000).toISOString().slice(0, 10);
         fact("Locks", eve + ", the day before GD reports");
@@ -145,6 +146,7 @@
       if (L.score.locked) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries");
     }
     var note = L.lock ? "Locked as a timestamped GitHub release; the file's sha256 is in the release notes." :
+      L.score ? "Not locked: the quarter missed its lock window, so this is the build estimate, shown beside GD's count." :
       "Provisional: the estimate locks on GitHub the day before GD reports, from the newest stored registry snapshot, and stays on this page whether it hits or misses.";
     note += " The band comes from misses measured on a finished registry file, so it is likely too narrow for a live quarter.";
     text($("live-note"), note);
@@ -260,7 +262,8 @@
     text($("path-sub"), (rows.length === 1 ? "One snapshot so far (" + rows[0].date + ")." :
       rows.length + " snapshots so far, " + rows[0].date + " to " + rows[rows.length - 1].date + ".") +
       " A point posts with each day's registry snapshot, with the band of past misses around it" +
-      (L.lock ? "; the diamond marks the locked estimate." : "; the estimate locks the day before GD reports."));
+      (L.lock ? "; the diamond marks the locked estimate." : L.score ? "; the quarter missed its lock window." :
+        "; the estimate locks the day before GD reports."));
     var pred = L.locked || L.latest || L.build;
     var below = pred.nowcast.total - pred.band[0], above = pred.band[1] - pred.nowcast.total;
     var last = rows[rows.length - 1].date;
