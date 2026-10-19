@@ -1,3 +1,3 @@
 - Built a Python pipeline estimating Gulfstream deliveries from FAA registrations; tested on 26 held-out quarters against GD's guidance and naive baselines; off by 5.5 jets a quarter vs 6.9 for guidance, not significant
-- Locked each live quarter's estimate on GitHub as a timestamped release carrying its sha256 the evening before GD reports, then scored it from GD's SEC filing; the first lock is scored on 2026-10-30
-- Wrote a cited research note and an Excel model with live formulas on GD, and applied my defense backlog study's best baseline to GD's defense segments
+- Built a daily job that locks each quarter's estimate on GitHub as a timestamped release carrying its sha256 the day before GD reports, and scores it from GD's SEC filing; the first, for 2026Q3, is scored on 2026-10-30
+- Wrote a cited research note and an Excel model with live formulas on GD, and applied my defense backlog study's best next-quarter baseline to GD's defense segments

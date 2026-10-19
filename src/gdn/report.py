@@ -87,7 +87,7 @@ def results(root):
               f"stated a full-year number. On the {g['sourced']} sourced quarters the guidance pace missed by "
               f"{f1(g['mae_sourced'])} aircraft on average.", "",
               f"The past-miss band, built from each quarter's earlier misses only, held GD's count in {band['hits']} "
-              f"of {band['n']} held-out quarters ({f1(band['coverage_pct'])}%, exact 95% interval "
+              f"of {band['n']} held-out quarters ({f1(band['coverage_pct'])}%, against a nominal 80%; exact 95% interval "
               f"{f1(band['cp95_pct'][0])}% to {f1(band['cp95_pct'][1])}%).", "",
               f"The design window, 2017Q1 to 2019Q4 (12 quarters), chose **{m['definition']}**: the ratio model's "
               f"average miss was {f2(d['mae']['E1']['ratio'])} under E1 and {f2(d['mae']['E2']['ratio'])} under E2. "
@@ -104,11 +104,18 @@ def error_analysis(root):
     for r in read_csv(root / "results/holdout.csv"):
         if r["definition"] in ("none", chosen):
             by.setdefault(r["quarter"][:4], {}).setdefault(r["model"], []).append(float(r["ae"]))
-    yrows = [[y] + [f1(sum(v[x]) / len(v[x])) for x in ("ratio", "raw", "guidance", "seasonal", "last")]
+    # Two decimals: each year's mean of four integer misses often ends in 5, which one decimal would round to even.
+    yrows = [[y + (", first half" if len(v["ratio"]) == 2 else "")]
+             + [f2(sum(v[x]) / len(v[x])) for x in ("ratio", "raw", "guidance", "seasonal", "last")]
              for y, v in sorted(by.items())]
     crows = [[NAMES[x], f1(h["mae_large"][x]), f1(h["mae_mid"][x])] for x in ("ratio", "raw", "guidance", "seasonal",
                                                                              "last")]
     cr = h["coverage_ratio"]
+    recent = [cr["by_quarter"][q] for q in ("2025Q4", "2026Q1", "2026Q2") if q in cr["by_quarter"]]
+    drift = (f" The drift runs the other way: the last three quarters sit at {', '.join(f2(x) for x in recent)} "
+             f"against the {f2(cr['mean'])} mean, so the registry is counting more events per delivery than usual, "
+             "which the ratio's trailing scale absorbs only with a lag."
+             if len(recent) == 3 and all(x < cr["mean"] for x in recent) else "")
     tr = h["truncation_mae"]
     ea = (root / "results/error_analysis.md").read_text()
     table = re.search(r"(\| Quarter \|.*?)\n\n", ea, re.S).group(1)
@@ -119,10 +126,9 @@ def error_analysis(root):
         "Average miss by cabin, aircraft:", "",
         md_table(["Model", "Large cabin", "Mid cabin"], crows), "",
         f"GD deliveries per registry event averaged {f2(cr['mean'])} from 2017Q1 to 2025Q2. "
-        + (f"Flagged above the mean plus two standard deviations: {', '.join(cr['flags'])}."
-           if cr["flags"] else "No quarter from 2025Q3 to 2026Q2 sits above the mean plus two standard deviations, "
-                               "so the latest quarters show no sign that the registry is counting fewer jets per "
-                               "delivery than usual."), "",
+        + "The preregistered flag looks for quarters from 2025Q3 to 2026Q2 above the mean plus two standard "
+        "deviations, where the registry would be counting fewer events per delivery than usual"
+        + (f"; it flags {', '.join(cr['flags'])}." if cr["flags"] else "; none is.") + drift, "",
         "The truncation test cuts each held-out quarter's own registry events a set number of days before the "
         "quarter ends, with its four lags left whole. It stands in, crudely, for a registry that has not finished "
         "posting:", "",
@@ -171,9 +177,13 @@ def live_record(root):
             p = read_json(lp) if lp.exists() else read_json(lv / f"{q}_build.json")
             line = (f"- **{q}**: not locked yet. The latest estimate is {f1(p['nowcast']['total'])} (band "
                     f"{f1(p['band'][0])} to {f1(p['band'][1])}) from the {p['snapshot']} snapshot{pace_s}."
-                    + (f" It locks on the evening of the day before GD reports on {rel}." if rel else ""))
+                    + (f" It locks on {eve_of(rel)}, the day before GD reports on {rel}." if rel else ""))
         out.append(line)
     return "\n".join(out) if out else "No live quarter yet."
+
+
+def eve_of(rel):
+    return (live.dt.date.fromisoformat(rel) - live.dt.timedelta(days=1)).isoformat()
 
 
 def replace_section(md, head, body):
@@ -188,7 +198,7 @@ def low_line(m):
     h = m["holdout"]
     low = min(("seasonal", "last"), key=lambda b: h["mae"][b])
     if h["mae"][low] < h["mae"]["ratio"]:
-        return f" Simply repeating {BASE[low]} did a little better, at {f1(h['mae'][low])}."
+        return f" Simply repeating {BASE[low]} missed by less on average, {f1(h['mae'][low])}."
     return ""
 
 
@@ -215,7 +225,8 @@ def post(root):
                      + ", when GD reports 2026Q3 and I score the estimate I lock on GitHub the day before.")
     lines += ["",
               "How I tested it: I counted each Gulfstream jet's first customer registration or export in a registry "
-              "copy, scaled the count by the last four quarters, and checked it on 26 past quarters it never saw, "
+              "copy, scaled the count by the last four quarters, and checked it on 26 past quarters held out from setting "
+              "the rules, "
               "against GD's own guidance pace and two simple baselines.", "",
               headline(m) + low_line(m) + " That test reads a registry that had years to fill in, so only the "
               "locked quarters show whether it counts jets in time.", "",

@@ -11,7 +11,7 @@
     seasonal: "Same quarter last year",
     last: "Last quarter"
   };
-  var BASE = { guidance: "GD's own guidance pace", seasonal: "the same quarter last year", last: "last quarter" };
+  var BASE = { guidance: "GD's guidance pace", seasonal: "the same quarter last year", last: "last quarter" };
   var DASH = { reported: [], ratio: [], raw: [7, 4], guidance: [10, 4, 2, 4], seasonal: [5, 4], last: [2, 3] };
   var WIDTH = { reported: 3, ratio: 2.4, raw: 1.6, guidance: 1.6, seasonal: 1.6, last: 1.8 };
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -133,7 +133,7 @@
       if (!L.lock) {
         var eve = new Date(L.release_date + "T12:00:00Z");
         eve = new Date(eve.getTime() - 86400000).toISOString().slice(0, 10);
-        fact("Locks", "the evening of " + eve);
+        fact("Locks", eve + ", the day before GD reports");
       }
     }
     if (L.score) {
@@ -141,7 +141,7 @@
       if (L.score.locked) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries");
     }
     var note = L.lock ? "Locked as a timestamped GitHub release; the file's sha256 is in the release notes." :
-      "Provisional: the estimate locks on GitHub the evening before GD reports, from the newest registry snapshot, and stays on this page whether it hits or misses.";
+      "Provisional: the estimate locks on GitHub the day before GD reports, from the newest stored registry snapshot, and stays on this page whether it hits or misses.";
     note += " The band comes from misses measured on a finished registry file, so it is likely too narrow for a live quarter.";
     text($("live-note"), note);
   }
@@ -256,7 +256,7 @@
     text($("path-sub"), (rows.length === 1 ? "One snapshot so far (" + rows[0].date + ")." :
       rows.length + " snapshots so far, " + rows[0].date + " to " + rows[rows.length - 1].date + ".") +
       " A point posts with each day's registry snapshot, with the band of past misses around it" +
-      (L.lock ? "; the diamond marks the locked estimate." : "; the estimate locks the evening before GD reports."));
+      (L.lock ? "; the diamond marks the locked estimate." : "; the estimate locks the day before GD reports."));
     var pred = L.locked || L.latest || L.build;
     var below = pred.nowcast.total - pred.band[0], above = pred.band[1] - pred.nowcast.total;
     var last = rows[rows.length - 1].date;
@@ -306,14 +306,14 @@
   function pipeChart() {
     var raw = data.pipeline, p = {};
     Object.keys(raw).forEach(function (n) {
-      var m = n.match(/G\d{3}/), k = m ? m[0] : (n === "550" ? "G550" : n === "GVI" ? "G650" : n);
+      var m = n.match(/G\d{3}/), k = m ? m[0] : (n === "550" ? "Other" : n === "GVI" ? "G650" : n);
       p[k] = (p[k] || 0) + raw[n];
     });
     var names = Object.keys(p).sort(function (a, b) { return p[b] - p[a] || (a < b ? -1 : 1); });
     var all = names.reduce(function (s, n) { return s + p[n]; }, 0);
     text($("pipe-sub"), "Jets registered to Gulfstream itself with no delivery event yet, at the " + data.pipeline_snapshot +
-      " snapshot: " + all + " in all, about " + whole(all / typicalCount()) + " quarters of deliveries at GD's typical " +
-      whole(typicalCount()) + " a quarter. They include aircraft in flight test, in completion and taken back for resale.");
+      " snapshot: " + all + " in all. They include aircraft in flight test, in completion and taken back for resale, " +
+      "and registrations Gulfstream holds for jets with no airworthiness date yet, so this is not a count of jets awaiting delivery.");
     $("pipe-box").style.height = Math.max(220, names.length * 30 + 90) + "px";
     var opts = baseOptions("Aircraft", "Aircraft on Gulfstream's own registration");
     opts.indexAxis = "y";
@@ -356,11 +356,16 @@
       ") fall back to the same quarter last year."));
     var band = h.band;
     ul.appendChild(el("li", null, "The band of past misses held GD's count in " + band.hits + " of " + band.n +
-      " test quarters (" + pct(band.coverage_pct) + "; 95% interval " + pct(band.cp95_pct[0]) + " to " + pct(band.cp95_pct[1]) + ")."));
+      " test quarters (" + pct(band.coverage_pct) + ", against a nominal 80%; 95% interval " + pct(band.cp95_pct[0]) + " to " + pct(band.cp95_pct[1]) + ")."));
     var cr = h.coverage_ratio;
-    ul.appendChild(el("li", null, cr.flags.length ?
+    var recent = ["2025Q4", "2026Q1", "2026Q2"].map(function (q) { return cr.by_quarter[q]; });
+    var below = recent.every(function (x) { return typeof x === "number" && x < cr.mean; });
+    ul.appendChild(el("li", null, (cr.flags.length ?
       "Recent quarters where the registry counted unusually few jets per GD delivery: " + cr.flags.join(", ") + "." :
-      "No quarter from 2025Q3 to 2026Q2 shows the registry counting unusually few jets per GD delivery."));
+      "The preregistered check looks for quarters from 2025Q3 to 2026Q2 where the registry counted unusually few jets per GD delivery; none is flagged.") +
+      (below ? " The drift runs the other way: GD delivered " + recent.map(function (x) { return x.toFixed(2); }).join(", ") +
+        " jets per registry event in the last three quarters, against an average of " + cr.mean.toFixed(2) +
+        ", so the registry is counting more registrations per delivery than usual." : "")));
     var tr = h.truncation_mae;
     table("t-trunc", "Average miss when each test quarter's registrations are cut early, against " + f1(h.mae.guidance) +
       " for GD's guidance pace on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
