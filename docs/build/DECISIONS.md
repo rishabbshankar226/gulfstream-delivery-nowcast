@@ -86,3 +86,38 @@ Real FAA header lines of the 2026-10-19 zip (each starts with a UTF-8 byte-order
 - SEC: all 38 results releases, 2017Q1 to 2026Q2, parsed. Fiscal ends come from the 10-Q report dates and match the gate's pins. The sentence check ran where a release has the sentence: 2020Q2 (total only), 2024Q2, 2024Q3 and 2024Q4, all agreeing. Every prior-year column matches the year-earlier release.
 - Gate `--only faa,truth`: F1 to F4, T1 and T2 pass with no warning, so T2 read every release from SEC's text. T3 fails until Phase 2 writes `data/guidance.csv`.
 - I added `data/processed/book_to_bill.csv` (the 2026Q2 orders paragraph: defense 1.4, Aerospace 1.5, company 1.4) so the note can quote it on an offline rebuild.
+
+## Phase 2: §8 stop on design-year coverage (2026-10-19 11:58 EDT)
+
+`results/diagnostics/coverage_design.csv`, registry events over reported deliveries by year (E1 and E2 agree to the airframe except 2019 large, 96 against 97):
+
+| Year | Large | Mid | Total |
+|---|---|---|---|
+| 2016 | 53 / 94 = 0.564 | 10 / 27 = 0.370 | 63 / 121 = 0.521 |
+| 2017 | 64 / 90 = 0.711 | 14 / 30 = 0.467 | 78 / 120 = 0.650 |
+| 2018 | 63 / 92 = 0.685 | 17 / 29 = 0.586 | 80 / 121 = 0.661 |
+| 2019 | 96 / 114 = 0.842 (E2 97) | 21 / 33 = 0.636 | 117 / 147 = 0.796 (E2 118) |
+
+Mid cabin falls below 0.5 in 2016 and 2017 under both definitions, which is §8's Phase 2 stop. F3 and F4 pass, so the gate's own implementation of §3.3 gets the same airframes and counts: this is the rule meeting the real registry, not a code bug.
+
+What the airframe table shows: of the G280s built in 2016 and 2017 that have no E1, all 26 carry no Gulfstream-held record and no export record. Their only date is a current customer certificate a median 2,537 days (about seven years) after first airworthiness, so the bound drops them. That fits MASTER keeping only the current certificate once a jet is resold or its registration renewed. Large cabin shows the same pattern (70 airframes built 2016 to 2017 without E1, median 2,743 days). Coverage rises toward the snapshot year, as fewer of the newer jets have changed hands. G280s exported without any US registration leave no record at all and cannot be counted here.
+
+Asked the owner how to proceed; the guidance checkers kept running meanwhile.
+- Owner's answer (11:59 EDT): "Keep §3, continue". The definitions stay as preregistered. The low and rising design-year coverage goes into Limitations (the `coverage` limitation) and the error analysis, and §3.4's coverage-drift flag watches the holdout's end. `python -m gdn diagnostics` still prints the flagged cabin-years but exits 0, so `make all` runs.
+
+## Phase 2 to 3: numerics
+
+- Nearest rank is `sorted(xs)[math.ceil(p * n) - 1]` with p the float 0.1 or 0.9. The float 0.1 is slightly above one tenth, so at n = 30 the P10 position is 4, not 3; exact arithmetic on that float gives 4 too. The gate computes it the same way. Among the holdout bands, only 2024Q3's uses 30 past errors.
+- Clopper–Pearson by bisection on the binomial CDF: 21 of 26 gives 0.6065 to 0.9345, and 5 of 10 gives 0.1871 to 0.8129, matching published tables.
+
+## Phase 2: guidance and the design window
+
+- `data/guidance.csv`: three checker subagents, nine calls each, from briefs in `docs/build/briefs/`. I re-derived each cached page's text from its HTML and found every one of the 27 quotes verbatim (`.build/verify_quotes.py`, then `tools/build_guidance.py`, which refuses a quote it cannot find). 17 calls state a number; T3 passes against the gate's 27 pinned calls.
+- Sources: Motley Fool transcripts for 23 calls. MarketBeat for 2023-04-26, 2025-04-23 and 2025-10-24, where no Fool page loaded; 2023-04-26 has an AllMind copy and the 2025 calls a Bullfincher copy as backups. All of them are cached under `data/raw/sources/calls/`, out of git.
+- Readings worth recording:
+  - 2021-01-27: "So all up, 10 fewer aircraft." names no base figure in the sentence, so by §3.4 the call states none. No 2021 call states a full-year number, so 2021's four quarters fall back to seasonal.
+  - 2023-07-26: "five to six fewer aircraft than the 145" reads 139.5. 2023-10-25: "10 to 12 fewer aircraft this year than the 145" reads 134.
+  - 2024-10-23: "150 versus 160" reads 150. 2025-07-23: the cached Fool text reads "150 to 155", not the "$150 million to $155 million" the prompt cites; either way it reads 152.5. 2026-01-28: "160 with a little upside" reads 160.
+  - 2022-04-27, 2022-10-26, 2024-04-24, 2025-04-23, 2025-10-24 and 2026-04-29 give only a quarter's plan or a confirmation without a number, so they state none, and the latest numeric call of the year carries forward.
+- Process note: the checkers shared `data/raw/sources/calls/` and each converted every `.html` there to `.txt`, so some `.txt` files were rewritten by more than one checker. I checked every quote against the HTML itself, so this does not affect any row.
+- Design window (12 quarters, 2017Q1 to 2019Q4), MAE in aircraft: seasonal 5.0, last 3.83, raw E1 9.42, ratio E1 5.47, raw E2 9.33, ratio E2 5.58. The chosen definition is **E1** (ratio 5.472548294344893 against 5.5807858422376135). In the design window ratio did worse than last; that is recorded before any holdout figure exists.

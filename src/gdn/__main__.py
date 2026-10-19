@@ -7,6 +7,7 @@ import sys
 # stage: (module, function)
 STAGES = {
     "data": ("data", "run"),
+    "diagnostics": ("diagnostics", "run"),
     "design": ("model", "run_design"),
     "holdout": ("model", "run_holdout"),
     "snapshot": ("live", "run_snapshot"),
