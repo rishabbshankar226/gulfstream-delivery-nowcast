@@ -32,15 +32,15 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 7 | site_data.py, page, a11y test | done | Y1 to Y3 | phase 7 commit |
 | 7 | Impeccable critique, audit, polish; shots | done | site | phase 7 commit |
 | 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | done | R1 to R4 K1 K2 V1 | phase 8 commit |
-| 8 | Full gate | todo | all | |
+| 8 | Full gate | done | all | phase 8 commit |
 | 9 | Airframe audit | done; 25-non-mirror requirement open | - | phase 9 audit commit |
 | 9 | Mutation pass | done | - | phase 9 commit |
 | 9 | check-determinism | done | - | phase 9 commit |
 | 9 | As-of study | done | - | 9b84384 |
-| 10 | Fresh clone build and gate | done (early run; repeat at the end) | all but repo | 6bef306 |
+| 10 | Fresh clone build and gate | done at b0927cc: make all clean, 104 passed and 2 skipped, gate 0 failing | all but repo | b0927cc |
 | R | Review round 1 | done; findings and open items in REVIEW.md | docs | 1a02088, 47af692, a2f8e76, f3f1471 |
 | R | Review round 2 | done; no blocking or major, so no round 3 (§7 stop rule) | docs | 26b0427, 1a726cd |
-| R | Final gate, push, report | todo | all | |
+| R | Final gate, push, report | done: make all clean, check-determinism identical (28 files), full gate 42 assertions 0 failing | all | b0927cc |
 
 ## Tool routing
 
@@ -55,5 +55,4 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only

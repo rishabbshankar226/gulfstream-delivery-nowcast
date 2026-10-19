@@ -194,4 +194,4 @@ The findings, fixes, commits and regression tests are in `docs/build/REVIEW.md`.
 
 - Two fresh reviewers, neither with a blocking or major finding, so the review ends after round 2 as §7's stop rule says, and no round 3 runs. The final `make all`, `make check-determinism` and full gate stand in for the refuter's questions; see `docs/build/REVIEW.md`.
 - Round 2's minor findings were fixed where they were real defects (the broken mutation pass, a wrong as-of sentence, untested `daily.run` paths, exit codes). R2D-8 stays open because the gate's N1 rejects the Marine figures it needs.
-
+- Final checks at b0927cc: `make all` exit 0 with no tracked file changed; `make check-determinism` identical (28 files); full gate 42 assertions, 0 failing, warnings S3 and L3. Fresh clone of origin in `/tmp/gdn-fresh`: `make all` clean, `make test` 104 passed and 2 skipped, gate on every family but `repo` 40 assertions, 0 failing, warnings F2, S3 and L3.
