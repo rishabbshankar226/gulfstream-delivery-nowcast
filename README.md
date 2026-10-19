@@ -1,0 +1,143 @@
+# Gulfstream delivery tracker
+
+I estimate how many Gulfstream jets General Dynamics (GD) will report delivering each quarter from FAA aircraft registrations, test the method on 26 past quarters against GD's own guidance, and lock each live estimate on GitHub the day before GD reports.
+
+[![The dashboard](output/charts/dashboard.png)](https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/)
+
+The dashboard lives at https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/ once the repository is public. The research note is [output/GD_research_note.pdf](output/GD_research_note.pdf), and the Excel model is [output/gd_gulfstream_model.xlsx](output/gd_gulfstream_model.xlsx).
+
+## Results
+
+The backtest reads a registry copy from 2026-10-19, which had months or years to fill in. It shows how well the registry tracks Gulfstream deliveries after the fact. Only the locked quarters test whether it counts them in time.
+
+**Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable.**
+
+Average miss in aircraft over the 26 held-out quarters, 2020Q1 to 2026Q2:
+
+| Model | Average miss | Average % miss | Bias | Large cabin | Mid cabin | Without 2020 |
+|---|---|---|---|---|---|---|
+| Registry estimate (ratio) | 5.5 | 17.9% | 2.2 | 5.0 | 2.2 | 5.4 |
+| Raw registry count | 6.2 | 18.5% | 2.4 | 5.8 | 1.8 | 5.8 |
+| GD guidance pace | 6.9 | 23.2% | 3.4 | 5.5 | 2.0 | 7.4 |
+| Same quarter last year | 4.6 | 15.2% | -0.6 | 4.2 | 1.5 | 4.5 |
+| Last quarter | 8.8 | 29.5% | 0.1 | 7.9 | 1.9 | 8.7 |
+
+Bias is the average of the estimate minus GD's count.
+
+One-sided exact sign tests that the registry estimate's miss is smaller than each baseline's, with Holm's correction across the three:
+
+| Baseline | Registry closer | Registry further | Ties | p | Holm | Relative miss | Lag-1 autocorrelation |
+|---|---|---|---|---|---|---|---|
+| GD's guidance pace | 14 | 12 | 0 | 0.423 | does not reject | 0.80 | 0.35 |
+| The same quarter last year | 11 | 15 | 0 | 0.837 | does not reject | 1.20 | -0.19 |
+| Last quarter | 16 | 10 | 0 | 0.163 | does not reject | 0.63 | 0.10 |
+
+Relative miss is the registry estimate's average miss divided by the baseline's.
+
+The quarter-to-quarter differences against GD's guidance pace and last quarter are positively autocorrelated, so the sign test, which treats quarters as independent, overstates how much evidence those quarters carry.
+
+GD stated a numeric delivery outlook covering 22 of the 26 held-out quarters, so GD's guidance pace is the baseline named first. The other 4 quarters (2021Q1, 2021Q2, 2021Q3, 2021Q4) fall back to the same quarter last year, because no 2021 call stated a full-year number. On the 22 sourced quarters the guidance pace missed by 7.4 aircraft on average.
+
+The past-miss band, built from each quarter's earlier misses only, held GD's count in 18 of 26 held-out quarters (69.2%, exact 95% interval 48.2% to 85.7%).
+
+The design window, 2017Q1 to 2019Q4 (12 quarters), chose **E1**: the ratio model's average miss was 5.47 under E1 and 5.58 under E2. In that window the same quarter last year missed by 5.00 and last quarter by 3.83.
+
+## Error analysis
+
+Average miss by year, aircraft:
+
+| Year | Ratio | Raw | Guidance | Same quarter last year | Last quarter |
+|---|---|---|---|---|---|
+| 2020 | 6.5 | 8.2 | 4.2 | 5.5 | 9.5 |
+| 2021 | 7.0 | 3.2 | 4.5 | 4.5 | 9.2 |
+| 2022 | 6.1 | 6.0 | 2.5 | 2.2 | 8.2 |
+| 2023 | 3.9 | 2.5 | 14.1 | 3.8 | 8.8 |
+| 2024 | 3.0 | 3.0 | 11.0 | 6.2 | 14.0 |
+| 2025 | 6.6 | 9.0 | 6.3 | 6.5 | 5.0 |
+| 2026 | 5.6 | 16.5 | 4.9 | 2.5 | 5.0 |
+
+Average miss by cabin, aircraft:
+
+| Model | Large cabin | Mid cabin |
+|---|---|---|
+| Registry estimate (ratio) | 5.0 | 2.2 |
+| Raw registry count | 5.8 | 1.8 |
+| GD guidance pace | 5.5 | 2.0 |
+| Same quarter last year | 4.2 | 1.5 |
+| Last quarter | 7.9 | 1.9 |
+
+GD deliveries per registry event averaged 1.18 from 2017Q1 to 2025Q2. No quarter from 2025Q3 to 2026Q2 sits above the mean plus two standard deviations, so the latest quarters show no sign that the registry is counting fewer jets per delivery than usual.
+
+The truncation test cuts each held-out quarter's own registry events a set number of days before the quarter ends, with its four lags left whole. It stands in, crudely, for a registry that has not finished posting:
+
+| Days cut | Average miss, aircraft |
+|---|---|
+| 0 | 5.5 |
+| 30 | 13.5 |
+| 60 | 22.9 |
+| 90 | 31.7 |
+
+Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021Q1. No filing or call states why the registry count differed from GD's count in any of them. The full write-up is in [results/error_analysis.md](results/error_analysis.md).
+
+| Quarter | Estimate | GD reported | Signed error | Registry large | Registry mid | GD large | GD mid |
+|---|---|---|---|---|---|---|---|
+| 2022Q1 | 40.7 | 25 | 15.7 | 32 | 6 | 21 | 4 |
+| 2020Q2 | 18.5 | 32 | -13.5 | 13 | 2 | 26 | 6 |
+| 2025Q4 | 58.4 | 45 | 13.4 | 57 | 8 | 41 | 4 |
+| 2021Q2 | 31.7 | 21 | 10.7 | 24 | 1 | 18 | 3 |
+| 2021Q1 | 38.1 | 28 | 10.1 | 27 | 1 | 25 | 3 |
+
+## Live record
+
+- **2026Q3**: not locked yet. The latest estimate is 31.1 (band 20.4 to 36.4) from the 2026-10-19 snapshot. It locks on the evening of the day before GD reports on 2026-10-30.
+
+## Method
+
+**The count.** I read the FAA's `ReleasableAircraft.zip` and keep every aircraft type whose maker or model name contains GULFSTREAM and whose engines are turbojet or turbofan. That keeps the G280, which the registry files under the maker `IAI LTD`, and drops Gulfstream's old turboprops. An airframe is the first three characters of its maker-model code plus its serial number, gathered across the current registrations (MASTER) and the cancelled ones (DEREG). For each airframe I take:
+- **E1**: the earlier of the first customer's registration certificate and the cancellation of Gulfstream's own registration for export;
+- **E2**: the earlier of the first customer's certificate and any cancellation of Gulfstream's own registration.
+
+Either date must fall within a year of the airframe's first airworthiness date (or by the end of the year after its year of manufacture), which keeps out renewed certificates and most used jets. I count the dates in each of GD's fiscal quarters, by cabin size.
+
+**The models.** For each quarter and cabin, the ratio model scales the registry count by how many deliveries GD reported per registry event over the four quarters before. The baselines are the same quarter last year, the last quarter, and GD's guidance pace: the full-year outlook from GD's latest call, less the deliveries already reported that year, spread over the remaining quarters by their usual share of the year. I also report the raw registry count.
+
+**The test.** The design window, 2017Q1 to 2019Q4, chose between E1 and E2 before I computed anything for a later quarter, and the rules were committed in [docs/PREREGISTRATION.md](docs/PREREGISTRATION.md) before the held-out quarters were scored. Over the 26 held-out quarters, 2020Q1 to 2026Q2, I run one-sided exact sign tests against each baseline with Holm's correction, report the relative miss and the autocorrelation of the differences, and build a past-miss band for each quarter from the earlier quarters' misses only. A truncation test cuts each quarter's own events 30, 60 and 90 days early, and a coverage-drift check watches the latest quarters.
+
+**Live.** Each day my Mac downloads the registry, writes the latest estimate and its airframe table, and, on the evening before GD reports, locks the estimate as a GitHub release whose notes carry the file's sha256. When GD reports, the run scores the lock against GD's count. A GitHub workflow runs the same job as a fallback.
+
+**The dollars.** The Aerospace estimate is the delivery estimate × trailing Aerospace revenue per delivery, services included: a mechanical estimate. The defense segments use the seasonal naive with drift, the baseline my [defense backlog study](https://rishabbshankar226.github.io/Defense-Backlog-forecast/) found hardest to beat for five other primes; applying it to GD is an assumption.
+
+### Exploratory
+
+Nothing tried after seeing the results has changed the headline. Any variant goes in `results/exploratory/`, labelled as tried after the fact.
+
+## Data
+
+- **FAA aircraft registry**: `ReleasableAircraft.zip` from https://registry.faa.gov/database/ReleasableAircraft.zip, the `ACFTREF`, `MASTER` and `DEREG` files. The backtest reads the snapshot downloaded on 2026-10-19; [data/snapshots/](data/snapshots/) keeps the in-scope rows of every stored snapshot with their hashes, so the raw zip stays out of git. The G280 appears under the maker `IAI LTD` with the model `GULFSTREAM G280`, so a scope rule on the maker name alone would drop every mid-cabin delivery.
+- **GD's reported deliveries**: the "Gulfstream Aircraft Deliveries (units)" table of each earnings release (Exhibit 99.1 to the results 8-K), 2016Q1 to 2026Q2. GD counts on the delivered basis it adopted with ASC 606 on 2017-01-01, so 2016 comes from the restated prior-year columns of the 2017 releases. Every count carries its accession number in [data/processed/gd_deliveries.csv](data/processed/gd_deliveries.csv).
+- **GD's guidance**: the full-year delivery outlook stated on each earnings call from 2020-01-29 to 2026-07-29, read from call transcripts (Motley Fool, with MarketBeat where no Fool page loaded), with the quote, speaker and link in [data/guidance.csv](data/guidance.csv).
+- **Segments and backlog**: revenue and operating earnings by segment, 2024Q3 to 2026Q2, and the 2026Q2 backlog, from the same releases.
+- **Claims in the note**: [report/claims.json](report/claims.json), each with a verbatim quote and the sha256 of the cached source. The cached sources stay out of git.
+
+## Limitations
+
+- **Export.** A jet exported to a foreign registry without a Gulfstream test registration leaves no US record, so the registry never sees that delivery. Many G280s, built by IAI in Israel, carry no Gulfstream registration at all.
+- **Processing.** Registry processing can lag by months. The backtest reads events by their stamped date in a file that had years to fill in, while a live estimate sees only what has posted; the truncation table shows how fast the miss grows when a quarter's own events are cut early.
+- **Military.** Military and special-mission airframes may never reach the civil registry, though GD may count them as deliveries.
+- **Handover.** GD counts a delivery at its own handover. A registration or cancellation date only approximates that day, so an event can land in the quarter before or after.
+- **Coverage.** The ratio assumes the registry's coverage of GD's count holds steady from one year to the next. It drifted: registry events per reported delivery rose from 0.52 in 2016 to 0.80 in 2019, and sat below 0.5 for mid cabin in 2016 and 2017, because the registry keeps only an airframe's current certificate and a resold or renewed jet loses its first owner's date.
+- **Used jet.** A used jet with no airworthiness date or year of manufacture, or one whose maker code changed between registrations, can read as a new delivery, as can an imported used jet with a new US airworthiness date.
+- **Band.** The past-miss band comes from misses measured on a finished registry file, so it is likely too narrow at a live lock, when recent registrations have not posted.
+
+## Reproduce
+
+```bash
+make all
+make test
+```
+
+`make all` rebuilds every result, the workbook, the charts, the note and the dashboard data from the tracked files, offline: it never downloads a snapshot, reads SEC, locks or scores. `make data` refetches GD's releases from SEC when the raw files are missing (set `SEC_UA` or write your name and email to `~/.sec_ua`).
+
+The live job is `make daily`. I run it on my Mac once a day until each quarter is scored, because the FAA's site sits behind bot blocking that has refused GitHub's runners; on the Mac it downloads through curl or, failing that, through my own Chrome. The [nowcast workflow](.github/workflows/nowcast.yml) runs the same job twice a day as a fallback and can lock from the evening run on the release date's eve. An independent gate outside this repository rebuilds every figure from the stored registry subsets and checks it.
+
+Rishabb Shankar, [rshankar.dev](https://rshankar.dev)
