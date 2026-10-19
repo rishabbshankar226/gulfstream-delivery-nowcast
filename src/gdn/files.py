@@ -3,11 +3,23 @@ import csv
 import hashlib
 import io
 import json
+import os
+import zlib
 from pathlib import Path
 
 
 def sha256(b):
     return hashlib.sha256(b).hexdigest()
+
+
+def _replace(path, data):
+    """Write through a sibling temp file (ignored by .gitignore) so a reader never sees half a file."""
+    tmp = path.with_name(f".{path.name}.{os.getpid()}.tmp")
+    try:
+        tmp.write_bytes(data)
+        os.replace(tmp, path)
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 def write_text(path, text):
@@ -16,7 +28,7 @@ def write_text(path, text):
     data = text.encode("utf-8")
     if path.exists() and path.read_bytes() == data:
         return False
-    path.write_bytes(data)
+    _replace(path, data)
     return True
 
 
@@ -73,9 +85,9 @@ def write_gz(path, data):
         try:
             if _gzip.decompress(old) == data:
                 return old
-        except OSError:
+        except (OSError, EOFError, zlib.error):  # a write that died halfway: replace it
             pass
     path.parent.mkdir(parents=True, exist_ok=True)
     new = gz_bytes(data)
-    path.write_bytes(new)
+    _replace(path, new)
     return new
