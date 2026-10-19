@@ -235,8 +235,13 @@ def pin(path, date):
 def input_digest(root):
     root = Path(root)
     lines = []
-    for p in (basis_path(root), root / "results/metrics.json", root / "data/processed/segments.csv"):
+    proc = root / "data/processed"
+    for p in (basis_path(root), root / "results/metrics.json", proc / "segments.csv", proc / "gd_deliveries.csv",
+              proc / "registry_quarterly.csv", proc / "backlog_2026Q2.csv",
+              *sorted(root.glob("results/live/*_score.json"))):
         lines.append(f"{sha256(p.read_bytes())}  {p.relative_to(root)}")
+    # Only the manifest's backtest date reaches the workbook; its daily snapshot entries do not.
+    lines.append(f"{read_json(root / 'data/snapshots/MANIFEST.json')['backtest']}  backtest snapshot")
     # The builder's own source counts as an input, so a change to a formula or a format rebuilds the file.
     lines.append(f"{sha256(Path(__file__).read_bytes())}  src/gdn/workbook.py")
     return "\n".join(lines) + "\n"
