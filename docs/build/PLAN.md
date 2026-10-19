@@ -55,4 +55,9 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
+Scheduled tasks in the Claude app (they run while the app is open; a task missed while it is closed runs at the next launch):
+- `gulfstream-daily-job`: `make daily` every day at 06:43 ET until 2026Q3 is scored
+- `gulfstream-eve-morning-check`: 2026-10-29 08:47 ET, checks the lock after GitHub's 08:17 ET run
+- `gulfstream-eve-lock-1907`, `-2037`, `-2207`, `-2317`: 2026-10-29 evening, `make daily-core` unless the lock is on origin
+- `gulfstream-release-day-score`: 2026-10-30 10:47 ET, `make daily` to score 2026Q3
+- `gulfstream-next-release-date`: 2026-11-04, adds GD's 2026Q4 release date to `config/calendar.json` if GD stated it

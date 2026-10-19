@@ -195,3 +195,11 @@ The findings, fixes, commits and regression tests are in `docs/build/REVIEW.md`.
 - Two fresh reviewers, neither with a blocking or major finding, so the review ends after round 2 as §7's stop rule says, and no round 3 runs. The final `make all`, `make check-determinism` and full gate stand in for the refuter's questions; see `docs/build/REVIEW.md`.
 - Round 2's minor findings were fixed where they were real defects (the broken mutation pass, a wrong as-of sentence, untested `daily.run` paths, exit codes). R2D-8 stays open because the gate's N1 rejects the Marine figures it needs.
 - Final checks at b0927cc: `make all` exit 0 with no tracked file changed; `make check-determinism` identical (28 files); full gate 42 assertions, 0 failing, warnings S3 and L3. Fresh clone of origin in `/tmp/gdn-fresh`: `make all` clean, `make test` 104 passed and 2 skipped, gate on every family but `repo` 40 assertions, 0 failing, warnings F2, S3 and L3.
+
+## Owner steps handed to me (2026-10-19)
+
+The owner asked me to carry out §7's owner steps without making anything public.
+- **Scheduled tasks replace the eve waiter.** A daily task runs `make daily` at 06:43 ET until 2026Q3 is scored. Its eve run takes a snapshot dated the eve and so may itself lock before 07:15 ET, ahead of the runner's 08:17 ET run; one lock per quarter holds either way. A task at 08:47 ET checks the lock; four tasks from 19:07 to 23:17 ET run `make daily-core` unless the lock is on origin; a task at 10:47 ET on 2026-10-30 scores; a task on 2026-11-04 adds GD's 2026Q4 release date if GD stated it. `tools/eve_waiter.sh` stays as a manual fallback. The session-only morning cron job was cancelled.
+- **Not done, by the owner's instruction:** posting the sha256 publicly, making the repository public, enabling Pages and posting the LinkedIn text. `config/calendar.json` keeps `"public": false`, so the lock stays a timestamped release on a private repository: GitHub records its `published_at`, but no outsider can check it until the owner publishes.
+- **The workbook in Excel:** opened in Microsoft Excel and closed without saving. Excel calculates Live!B11 = 31.13, the band 20.41 to 36.42, and Summary design and held-out MAE 5.47 and 5.52, matching the build; the file's bytes did not change.
+
