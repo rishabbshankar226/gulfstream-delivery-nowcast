@@ -169,7 +169,11 @@ def update_latest(root, now, log=print):
         log("no live quarter or no daily airframe table")
         return None
     snap = dates[-1]
-    pred = predict(root, q, read_table(root, snap), snap, now)
+    try:
+        pred = predict(root, q, read_table(root, snap), snap, now)
+    except ValueError as e:
+        log(f"no estimate for {q}: {e}")
+        return None
     p = live_dir(root) / f"{q}_latest.json"
     if not (p.exists() and same_but_time(read_json(p), pred)):
         write_json(p, pred)
@@ -196,8 +200,10 @@ def ingest(root, date, log=print):
     texts = faa.zip_texts(z)
     sub = faa.subset(texts)
     write_table(root, date, events.airframes(sub))
-    locked_on = {read_json(p).get("snapshot") for p in (Path(root) / "predictions").glob("*.json")}
-    if date in locked_on:
+    if not faa.lossless(z):
+        log(f"WARNING: the {date} zip is not valid UTF-8 throughout; its stored subset carries replacement "
+            "characters where the zip had invalid bytes")
+    if date in faa.locked_dates(root):
         log(f"the stored subset for {date} backs a lock; kept as it is")
     elif in_lock_window(root, date):
         faa.store_subset(root, date, sub, z)
@@ -283,6 +289,17 @@ def write_lock_json(root, q, ops):
     return obj
 
 
+def pull_clean(ops, on_conflict=None, log=print):
+    """git pull; conflicted paths go to on_conflict(paths), and when it declines the merge is aborted.
+    True when the pull merged cleanly."""
+    conflicted = ops.pull()
+    if conflicted and not (on_conflict and on_conflict(conflicted)):
+        ops.abort_merge()
+        log(f"pull conflicted in {conflicted}; merge aborted")
+        return False
+    return True
+
+
 def push_with_merge(ops, log=print, on_conflict=None):
     """Pull, then push; on a rejected push pull again. Conflicts go to on_conflict(paths)."""
     for _ in range(3):
@@ -304,6 +321,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
     more than LAST_LOCK_MINUTES before midnight ET when the prediction is written and when the release is made."""
     now = parse_now(now)
     ops = ops or Ops(root, log)
+    pull_clean(ops, on_conflict, log)
     q = live_quarter(root)
     rel = config(root).get("releases", {}).get(q) if q else None
     if not q or not rel:
@@ -324,12 +342,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             log(f"{q} missed its lock window (release {rel}); no late lock")
         return 0
     for attempt in range(1, 4):
-        conflicted = ops.pull()
-        if conflicted:
-            if not (on_conflict and on_conflict(conflicted)):
-                ops.abort_merge()
-                log(f"pull conflicted in {conflicted} (attempt {attempt}); merge aborted, retrying")
-                continue
+        if not pull_clean(ops, on_conflict, log):
+            log(f"attempt {attempt} retries after the aborted merge")
+            continue
         if ops.release_view(tag):
             if not lock_p.exists() and pred_p.exists():
                 write_lock_json(root, q, ops)
@@ -355,7 +370,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
                 log(f"no stored subset dated before {rel}")
                 return 1
             rows = events.airframes(faa.read_subset(root, snap))
-            pred = predict(root, q, rows, snap, now)
+            pred = predict(root, q, rows, snap, utcnow() if wall else now)
             write_json(pred_p, pred)
             target = ops.commit_only(pred_p, f"Lock the {q} nowcast")
             if not ops.push():
@@ -366,7 +381,12 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
         if wall and not wall_clock_ok(rel):
             log(f"the real clock is within {LAST_LOCK_MINUTES} minutes of 00:00 ET; no release, no late lock")
             return 1
-        ops.release_create(tag, target, f"Locked nowcast {q}", f"sha256 {digest}")
+        try:
+            ops.release_create(tag, target, f"Locked nowcast {q}", f"sha256 {digest}")
+        except GitError:
+            if not ops.release_view(tag):
+                raise
+            log(f"{tag} was created by another run a moment ago; recording that release")
         obj = write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
         push_with_merge(ops, log)
@@ -408,9 +428,8 @@ def run_score(now=None, offline=False, root=".", log=print):
     q = live_quarter(root)
     if not q:
         return 0
-    rel = config(root).get("releases", {}).get(q)
     end = Calendar.load(root).end(q)
-    if not end or not rel or et_date(now) < dt.date.fromisoformat(rel):
+    if not end or et_date(now) <= dt.date.fromisoformat(end):
         return 0
     c = sec.Client(root, network=not offline)
     try:
@@ -424,7 +443,11 @@ def run_score(now=None, offline=False, root=".", log=print):
         return 0
     finally:
         c.save_manifest()
-    d = sec.parse_deliveries(sec.plain(body))
+    try:
+        d = sec.parse_deliveries(sec.plain(body))
+    except ValueError as e:
+        log(f"{q}: the 8-K {f['accn']} gives no delivery counts ({e}); not scored")
+        return 0
     s = score_quarter(root, q, d, f["accn"])
     write_json(live_dir(root) / f"{q}_score.json", s)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))

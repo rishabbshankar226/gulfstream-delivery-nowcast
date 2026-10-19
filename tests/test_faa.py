@@ -162,3 +162,28 @@ def test_gzip_is_the_same_on_every_platform(tmp_path):
     p.write_bytes(b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\x03" + b[10:])     # the same stream with a Linux header
     assert files.write_gz(p, b"abc")[9] == 3                                  # identical content: kept, no churn
     assert files.write_gz(p, b"abcd")[9] == 255
+
+
+def test_download_replaces_an_ordinary_stored_date(faa_texts, tmp_path, monkeypatch):
+    import datetime as dt
+    sub = faa.subset(faa_texts)
+    bt = tmp_path / "data/raw/faa/ReleasableAircraft-2030-01-02.zip"
+    z = bt.with_name("ReleasableAircraft-2030-01-03.zip")
+    bt.parent.mkdir(parents=True)
+    bt.write_bytes(b"PK bt")
+    z.write_bytes(b"PK old")
+    faa.store_subset(tmp_path, "2030-01-02", sub, bt, backtest=True)
+    faa.store_subset(tmp_path, "2030-01-03", sub, z)
+
+    def curl(dest, max_time):
+        open(dest, "wb").write(b"PK new")
+        return 0
+    monkeypatch.setattr(faa, "_curl", curl)
+    now = dt.datetime(2030, 1, 3, 18, 0, tzinfo=dt.timezone.utc)
+    assert faa.download(tmp_path, now, log=lambda *a: None) == "2030-01-03"
+    assert z.read_bytes() == b"PK new"
+    # Once a prediction names the date, a second run keeps the zip its lock read.
+    (tmp_path / "predictions").mkdir()
+    (tmp_path / "predictions/2030Q1.json").write_text('{"snapshot": "2030-01-03"}')
+    monkeypatch.setattr(faa, "_curl", lambda *a: (_ for _ in ()).throw(AssertionError("downloaded")))
+    assert faa.download(tmp_path, now, log=lambda *a: None) == "2030-01-03"
