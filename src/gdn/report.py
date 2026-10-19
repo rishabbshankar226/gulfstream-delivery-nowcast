@@ -227,7 +227,7 @@ def post(root):
               "How I tested it: I counted each Gulfstream jet's first customer registration or export in a registry "
               "copy, scaled the count by the last four quarters, and checked it on 26 past quarters held out from setting "
               "the rules, "
-              "against GD's own guidance pace and two simple baselines.", "",
+              "against GD's guidance pace and two simple baselines.", "",
               headline(m) + low_line(m) + " That test reads a registry that had years to fill in, so only the "
               "locked quarters show whether it counts jets in time.", "",
               f"Dashboard: {DASH}", f"Code, data and the research note: {REPO}", "",

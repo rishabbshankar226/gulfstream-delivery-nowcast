@@ -31,6 +31,10 @@ def captures():
     return [dict(zip(d[0], r)) for r in d[1:] if r[4] == "200"]
 
 
+def listed(xs):
+    return ", ".join(xs[:-1]) + " and " + xs[-1] if len(xs) > 1 else "".join(xs)
+
+
 def main():
     cal = Calendar.load(ROOT)
     Y = model.load_reported(ROOT)
@@ -84,6 +88,10 @@ def main():
         print(q, ts, f"{est:.1f} against {rep}; the 2026-10-19 copy gave {hold.get(q)}")
     write_csv(ROOT / "results/exploratory/asof.csv", COLS, rows)
     scored = [r for r in rows if r.get("estimate") is not None]
+    lower = [r["quarter"] for r in scored if r["backtest_estimate"] is not None and r["estimate"] < r["backtest_estimate"]]
+    higher = [r for r in scored if r["backtest_estimate"] is not None and r["estimate"] >= r["backtest_estimate"]]
+    both_low = all(r["estimate"] < r["reported"] and r["backtest_estimate"] < r["reported"] for r in higher)
+    higher = [r["quarter"] for r in higher]
     line = (f"Wayback captures exist: {len(caps)} successful captures of ReleasableAircraft.zip; {len(best)} quarters have "
             f"one taken 20 to 30 days after the fiscal end, and {len(scored)} of them can be scored.")
     text = ["# As-of study (preregistered secondary analysis)", "", line, ""]
@@ -98,9 +106,11 @@ def main():
         text += ["", "Each as-of estimate reads both the quarter's own registry events and its four lag quarters from "
                      "the same archived copy, as a live estimate does. The truncation table in the README cuts only the "
                      "quarter's own events and keeps the lags whole. The archived copies held more lag-quarter events than the "
-                     "2026-10-19 copy, because a later file loses a first owner's date when a jet is resold or "
-                     "re-registered, so their estimates came out lower and, given the ratio's upward bias, closer. "
-                     "Four quarters are too "
+                     "2026-10-19 copy, since a later file loses a first owner's date when a jet is resold or "
+                     f"re-registered. In {listed(lower) or 'none'} the as-of estimate came out lower than the "
+                     "2026-10-19 copy's and, given the ratio's upward bias, closer"
+                     + (f"; in {listed(higher)} it came out higher" + (", and both copies missed low" if both_low
+                        else "") if higher else "") + ". Four quarters are too "
                      "few to conclude anything; the locked quarters remain the real test."]
     write_text(ROOT / "results/exploratory/asof.md", "\n".join(text) + "\n")
     print(line)
