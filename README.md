@@ -38,7 +38,7 @@ The quarter-to-quarter differences against GD's guidance pace and last quarter a
 
 GD stated a numeric delivery outlook covering 22 of the 26 held-out quarters, so GD's guidance pace is the baseline named first. The other 4 quarters (2021Q1, 2021Q2, 2021Q3, 2021Q4) fall back to the same quarter last year, because no 2021 call stated a full-year number. On the 22 sourced quarters the guidance pace missed by 7.4 aircraft on average.
 
-The past-miss band, built from each quarter's earlier misses only, held GD's count in 18 of 26 held-out quarters (69.2%, exact 95% interval 48.2% to 85.7%).
+The past-miss band, built from each quarter's earlier misses only, held GD's count in 18 of 26 held-out quarters (69.2%, against a nominal 80%; exact 95% interval 48.2% to 85.7%).
 
 The design window, 2017Q1 to 2019Q4 (12 quarters), chose **E1**: the ratio model's average miss was 5.47 under E1 and 5.58 under E2. In that window the same quarter last year missed by 5.00 and last quarter by 3.83.
 
@@ -48,13 +48,13 @@ Average miss by year, aircraft:
 
 | Year | Ratio | Raw | Guidance | Same quarter last year | Last quarter |
 |---|---|---|---|---|---|
-| 2020 | 6.5 | 8.2 | 4.2 | 5.5 | 9.5 |
-| 2021 | 7.0 | 3.2 | 4.5 | 4.5 | 9.2 |
-| 2022 | 6.1 | 6.0 | 2.5 | 2.2 | 8.2 |
-| 2023 | 3.9 | 2.5 | 14.1 | 3.8 | 8.8 |
-| 2024 | 3.0 | 3.0 | 11.0 | 6.2 | 14.0 |
-| 2025 | 6.6 | 9.0 | 6.3 | 6.5 | 5.0 |
-| 2026 | 5.6 | 16.5 | 4.9 | 2.5 | 5.0 |
+| 2020 | 6.47 | 8.25 | 4.23 | 5.50 | 9.50 |
+| 2021 | 7.03 | 3.25 | 4.50 | 4.50 | 9.25 |
+| 2022 | 6.09 | 6.00 | 2.52 | 2.25 | 8.25 |
+| 2023 | 3.93 | 2.50 | 14.06 | 3.75 | 8.75 |
+| 2024 | 3.04 | 3.00 | 10.97 | 6.25 | 14.00 |
+| 2025 | 6.56 | 9.00 | 6.25 | 6.50 | 5.00 |
+| 2026, first half | 5.60 | 16.50 | 4.86 | 2.50 | 5.00 |
 
 Average miss by cabin, aircraft:
 
@@ -66,7 +66,7 @@ Average miss by cabin, aircraft:
 | Same quarter last year | 4.2 | 1.5 |
 | Last quarter | 7.9 | 1.9 |
 
-GD deliveries per registry event averaged 1.18 from 2017Q1 to 2025Q2. No quarter from 2025Q3 to 2026Q2 sits above the mean plus two standard deviations, so the latest quarters show no sign that the registry is counting fewer jets per delivery than usual.
+GD deliveries per registry event averaged 1.18 from 2017Q1 to 2025Q2. The preregistered flag looks for quarters from 2025Q3 to 2026Q2 above the mean plus two standard deviations, where the registry would be counting fewer events per delivery than usual; none is. The drift runs the other way: the last three quarters sit at 0.69, 0.69, 0.72 against the 1.18 mean, so the registry is counting more events per delivery than usual, which the ratio's trailing scale absorbs only with a lag.
 
 The truncation test cuts each held-out quarter's own registry events a set number of days before the quarter ends, with its four lags left whole. It stands in, crudely, for a registry that has not finished posting:
 
@@ -89,7 +89,7 @@ Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021
 
 ## Live record
 
-- **2026Q3**: not locked yet. The latest estimate is 31.1 (band 20.4 to 36.4) from the 2026-10-19 snapshot. It locks on the evening of the day before GD reports on 2026-10-30.
+- **2026Q3**: not locked yet. The latest estimate is 31.1 (band 20.4 to 36.4) from the 2026-10-19 snapshot. It locks on 2026-10-29, the day before GD reports on 2026-10-30.
 
 ## Method
 
@@ -103,9 +103,9 @@ Either date must fall within a year of the airframe's first airworthiness date (
 
 **The test.** The design window, 2017Q1 to 2019Q4, chose between E1 and E2 before I computed anything for a later quarter, and the rules were committed in [docs/PREREGISTRATION.md](docs/PREREGISTRATION.md) before the held-out quarters were scored. Over the 26 held-out quarters, 2020Q1 to 2026Q2, I run one-sided exact sign tests against each baseline with Holm's correction, report the relative miss and the autocorrelation of the differences, and build a past-miss band for each quarter from the earlier quarters' misses only. A truncation test cuts each quarter's own events 30, 60 and 90 days early, and a coverage-drift check watches the latest quarters.
 
-**Live.** Each day my Mac downloads the registry, writes the latest estimate and its airframe table, and, on the evening before GD reports, locks the estimate as a GitHub release whose notes carry the file's sha256. When GD reports, the run scores the lock against GD's count. A GitHub workflow runs the same job as a fallback.
+**Live.** Each day my Mac downloads the registry, writes the latest estimate and its airframe table, and, on the day before GD reports, locks the estimate as a GitHub release whose notes carry the file's sha256. When GD reports, the run scores the lock against GD's count. A GitHub workflow runs the same job as a fallback.
 
-**The dollars.** The Aerospace estimate is the delivery estimate × trailing Aerospace revenue per delivery, services included: a mechanical estimate. The defense segments use the seasonal naive with drift, the baseline my [defense backlog study](https://rishabbshankar226.github.io/Defense-Backlog-forecast/) found hardest to beat for five other primes; applying it to GD is an assumption.
+**The dollars.** The Aerospace estimate is the delivery estimate × trailing Aerospace revenue per delivery, services included: a mechanical estimate. The defense segments use the seasonal naive with drift, my [defense backlog study](https://rishabbshankar226.github.io/Defense-Backlog-forecast/)'s best next-quarter baseline for five other primes; applying it to GD is an assumption.
 
 ### Secondary analysis: the as-of study
 
@@ -118,7 +118,7 @@ Preregistered as secondary. The Wayback Machine holds 75 successful captures of 
 | 2026Q1 | 2026-05-01 | 26 | 43.3 | 38 | 5.3 | 7.4 |
 | 2026Q2 | 2026-08-03 | 29 | 42.7 | 41 | 1.7 | 3.8 |
 
-In all four the copy from a few weeks after the quarter missed by less than the finished copy, and its past-miss band held GD's count in two of the three held-out quarters. Reading the lags from the same unfinished file seems to offset part of what has not posted, which the truncation table, with its lags left whole, does not allow for. Four quarters prove nothing; the locked quarters remain the real test. Details: [results/exploratory/asof.md](results/exploratory/asof.md).
+In all four the copy from a few weeks after the quarter missed by less than the finished copy, and its past-miss band held GD's count in two of the three held-out quarters. The archived copies held more events for the same lag quarters than the 2026-10-19 copy does (206 against 203 for 2026Q2, 146 against 63 for 2017Q1), so the later file has lost first-owner records since, as the Coverage limitation describes. Their estimates came out lower and, given the ratio's upward bias in the held-out quarters, closer. Four quarters prove nothing; the locked quarters remain the real test. Details: [results/exploratory/asof.md](results/exploratory/asof.md).
 
 ### Exploratory
 
@@ -134,14 +134,14 @@ Nothing tried after seeing the results has changed the headline. Any variant goe
 
 ## Limitations
 
-- **Export.** A jet exported to a foreign registry without a Gulfstream test registration leaves no US record, so the registry never sees that delivery. Many G280s, built by IAI in Israel, carry no Gulfstream registration at all.
+- **Export.** A jet exported to a foreign registry without a US registration leaves no US record, so the registry never sees that delivery. Since 2022 the registry's yearly mid-cabin count has stayed within a few jets of GD's, so G280 exports do not look like a large gap now.
 - **Processing.** Registry processing can lag by months. The backtest reads events by their stamped date in a file that had years to fill in, while a live estimate sees only what has posted; the truncation table shows how fast the miss grows when a quarter's own events are cut early.
 - **Military.** Military and special-mission airframes may never reach the civil registry, though GD may count them as deliveries.
 - **Handover.** GD counts a delivery at its own handover. A registration or cancellation date only approximates that day, so an event can land in the quarter before or after.
 - **Coverage.** The ratio assumes the registry's coverage of GD's count holds steady from one year to the next. It drifted: registry events per reported delivery rose from 0.52 in 2016 to 0.80 in 2019, and sat below 0.5 for mid cabin in 2016 and 2017, because the registry keeps only an airframe's current certificate and a resold or renewed jet loses its first owner's date.
 - **Used jet.** A used jet with no airworthiness date or year of manufacture, or one whose maker code changed between registrations, can read as a new delivery, as can an imported used jet with a new US airworthiness date.
 - **Band.** The past-miss band comes from misses measured on a finished registry file, so it is likely too narrow at a live lock, when recent registrations have not posted.
-- **Audit.** I checked 30 airframes against outside sources ([docs/build/AIRFRAME_AUDIT.csv](docs/build/AIRFRAME_AUDIT.csv)). In 10 of 30 (33.3%) the source disagreed with the registry reading or could not confirm it: five were used jets that a fresh US airworthiness date let through as new deliveries, one military jet was delivered a quarter earlier than its registry date, and four could not be confirmed. Every source was a registry mirror or aircraft-history site, because Gulfstream rarely names individual airframes, so the audit checks the reading more than it checks delivery dates.
+- **Audit.** I checked 30 airframes against outside sources ([docs/build/AIRFRAME_AUDIT.csv](docs/build/AIRFRAME_AUDIT.csv)). In 10 of 30 (33.3%) the source disagreed with the registry reading or could not confirm it: five were used jets (four let through by a fresh US airworthiness date, one with no airworthiness date or year at all), two had a stated delivery earlier than the registry date (a military G-V by one quarter, under E2 only, and a G650ER by two), and three could not be confirmed. All but one source was a registry mirror or aircraft-history site, because Gulfstream rarely names individual airframes, so the audit checks the reading more than it checks delivery dates. The jets checked were delivered by 2019, so it says little about recent quarters.
 
 ## Reproduce
 
@@ -152,6 +152,6 @@ make test
 
 `make all` rebuilds every result, the workbook, the charts, the note and the dashboard data from the tracked files, offline: it never downloads a snapshot, reads SEC, locks or scores. `make data` refetches GD's releases from SEC when the raw files are missing (set `SEC_UA` or write your name and email to `~/.sec_ua`).
 
-The live job is `make daily`. I run it on my Mac once a day until each quarter is scored, because the FAA's site sits behind bot blocking that has refused GitHub's runners; on the Mac it downloads through curl or, failing that, through my own Chrome. The [nowcast workflow](.github/workflows/nowcast.yml) runs the same job twice a day as a fallback and can lock from the evening run on the release date's eve. An independent gate outside this repository rebuilds every figure from the stored registry subsets and checks it.
+The live job is `make daily`. I run it on my Mac once a day until each quarter is scored, because the FAA's site sits behind bot blocking that has refused GitHub's runners; on the Mac it downloads through curl or, failing that, through my own Chrome. The [nowcast workflow](.github/workflows/nowcast.yml) runs the same job twice a day as a fallback and can lock from either run on the release date's eve. An independent gate outside this repository rebuilds every figure from the stored registry subsets and checks it.
 
 Rishabb Shankar, [rshankar.dev](https://rshankar.dev)

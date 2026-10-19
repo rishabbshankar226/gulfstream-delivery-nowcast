@@ -76,6 +76,12 @@ def build(paths, root="."):
     return out
 
 
+def run(root="."):
+    """`make claims`: merge every docs/build/claims_*.json topic file."""
+    build(sorted((Path(root) / "docs/build").glob("claims_*.json")), root)
+    return 0
+
+
 def load(root="."):
     p = Path(root) / "report/claims.json"
     return json.loads(p.read_text()) if p.exists() else []

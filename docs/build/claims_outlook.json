@@ -115,5 +115,14 @@
     "quote": "Our Technologies segment provides a full spectrum of services, technologies and products to a wide range of military, intelligence, federal civilian and state customers. The segment is organized into two business units — Information Technology (GDIT) and Mission Systems",
     "retrieved_on": "2026-10-19",
     "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "os-release-date",
+    "text": "GD said it expected to hold its third-quarter 2026 earnings call on Friday, October 30.",
+    "source_type": "call",
+    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
+    "quote": "we expect to hold our Q3 earnings call on Friday, October 30, at 9:00 a.m.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
   }
 ]

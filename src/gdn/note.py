@@ -12,7 +12,7 @@ from pathlib import Path
 from . import claims as claims_mod
 from . import live, model
 from .estimates import DEFENSE, LABEL, SEGMENTS, basis_path
-from .fiscal import Calendar, qrange
+from .fiscal import Calendar, qrange, shift
 from .files import read_csv, read_json, sha256, write_text
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
@@ -90,6 +90,26 @@ def headline_sentence(m):
             f"distinguishable.")
 
 
+def low_line(m):
+    """A sentence naming a simple rule that missed by less on average than the registry estimate, if one did."""
+    h = m["holdout"]
+    low = min(("seasonal", "last"), key=lambda b: h["mae"][b])
+    if h["mae"][low] < h["mae"]["ratio"]:
+        return f" Simply repeating {BASE_NAMES[low]} missed by less on average, {f1(h['mae'][low])}."
+    return ""
+
+
+def drift_line(h):
+    """The coverage ratio's recent quarters when they all sit below its mean, which the one-sided flag cannot see."""
+    cr = h["coverage_ratio"]
+    recent = [cr["by_quarter"][q] for q in ("2025Q4", "2026Q1", "2026Q2") if q in cr["by_quarter"]]
+    if len(recent) == 3 and all(x < cr["mean"] for x in recent):
+        return (f" The drift runs the other way: the last three quarters sit at {', '.join(f2(x) for x in recent)} "
+                f"against a mean of {f2(cr['mean'])}, so the registry is counting more events per delivery than "
+                "usual, which the ratio's trailing scale absorbs only with a lag.")
+    return ""
+
+
 class Cites:
     """Claims are cited by id; the visible marker numbers each distinct source, listed once."""
 
@@ -126,12 +146,13 @@ def table(head, rows, cls=""):
 
 
 def by_year(root, chosen):
+    """{year: {model: [absolute errors]}} over the held-out quarters."""
     rows = read_csv(Path(root) / "results/holdout.csv")
     out = {}
     for r in rows:
         if r["definition"] in ("none", chosen):
             out.setdefault(r["quarter"][:4], {}).setdefault(r["model"], []).append(float(r["ae"]))
-    return {y: {m: sum(v) / len(v) for m, v in d.items()} for y, d in sorted(out.items())}
+    return dict(sorted(out.items()))
 
 
 def live_state(root, q):
@@ -233,9 +254,19 @@ def build(root="."):
     add(f"<h1>{esc(TITLE)}</h1>")
     add(f'<p class="byline">Data as of {pred["snapshot"]}. Rishabb Shankar, <a href="https://rshankar.dev">'
         f"rshankar.dev</a>. Model, data and code: <a href=\"{REPO_URL}\">{REPO_URL}</a></p>")
+    yago_q = shift(q, -4)
     live_point = (f"My registry estimate for {q} is {f1(pred['nowcast']['total'])} Gulfstream deliveries, with a "
-                  f"past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}"
-                  + (f". GD reports on {rel}." if rel else "."))
+                  f"past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}, against "
+                  f"{Y[yago_q]['total']} delivered in {yago_q}.")
+    t_year, k_q = int(q[:4]), int(q[5])
+    outlook = model.outlook_for(q, calls, cal)
+    if k_q == 3 and outlook and not score:
+        ytd = sum(Y[f"{t_year}Q{j}"]["total"] for j in (1, 2))
+        best = max(Y[x]["total"] for x in Y)
+        if outlook - ytd - pred["nowcast"]["total"] > best:
+            live_point += (f" With {ytd} delivered in the first half, reaching GD's outlook of about {outlook:.0f} "
+                           f"would then take a fourth quarter above {best}, GD's best quarter since 2016.")
+    rel_cite = C.sup("os-release-date") if C.has("os-release-date") else ""
     if lock:
         d, t = et_time(lock["published_at"])
         live_point += f" I locked it as a {lockword} at {t} ET on {d}."
@@ -245,11 +276,14 @@ def build(root="."):
             live_point += f", against a guidance pace of {f1(score['guidance_pace'])}"
         live_point += "."
     add('<div class="keypoints"><ol>')
-    add(f"<li>{esc(headline_sentence(m))} {esc(FRAMING.format(snap=snap))}</li>")
-    add(f"<li>{esc(live_point)}</li>")
+    add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(FRAMING.format(snap=snap))}</li>")
+    add(f"<li>{esc(live_point)}" + (f" GD reports on {rel}.{rel_cite}" if rel and not score else "") + "</li>")
     add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, that estimate "
         f"implies {bn(est['aerospace_from_nowcast_usd'])} of Aerospace revenue for {q}, against "
-        f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier. This is {esc(LABEL)}.</li>")
+        f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier; scaling last year's quarter by trailing growth gives "
+        f"{bn(aero_drift)} instead. The {mn(est['revenue_per_delivery_usd'])} includes services and Jet Aviation, "
+        f"which do not fall with deliveries, so the delivery-based figure overstates the swing. This is "
+        f"{esc(LABEL)}.</li>")
     add("</ol></div>")
     add(f'<div class="disclaimer"><p>{esc(DISCLAIMER)}</p><p id="disclosure">{esc(disclosure(root))}</p></div>')
 
@@ -282,9 +316,12 @@ def build(root="."):
         "whichever comes first, within a year of the jet's first airworthiness date. I count those events in each "
         "of GD's fiscal quarters, by cabin, and scale the count by how many deliveries GD reported per registry "
         "event over the four quarters before. That scaled count is the estimate. A design window from 2017Q1 to "
-        f"2019Q4 chose the event definition ({chosen}) before I scored the 26 quarters from 2020Q1 to 2026Q2.</p>")
+        f"2019Q4 chose the event definition ({chosen}) before I scored the 26 quarters from 2020Q1 to 2026Q2. "
+        "GD's guidance pace, the main comparison, is GD's latest full-year delivery outlook less the deliveries "
+        "already reported that year, spread over the remaining quarters by their usual share of the year; where no "
+        "call gave a number, it falls back to the same quarter last year.</p>")
     add(f'<div class="callout"><p>{esc(FRAMING.format(snap=snap))}</p><p><strong>{esc(headline_sentence(m))}'
-        f"</strong></p></div>")
+        f"</strong>{esc(low_line(m))}</p></div>")
     hrows = []
     for mm in ("ratio", "raw", "guidance", "seasonal", "last"):
         hrows.append([esc(NAMES[mm]), f1(h["mae"][mm]), pct(h["mape"][mm]), f1(h["bias"][mm]),
@@ -307,11 +344,16 @@ def build(root="."):
         + '<div class="src">Relative miss is the registry estimate\'s average miss over the baseline\'s. A positive '
           "autocorrelation of the quarterly differences weakens the sign test.</div></div>")
     g = h["guidance"]
+    on_sourced = {mm: [float(r["ae"]) for r in read_csv(root / "results/holdout.csv")
+                       if r["model"] == mm and r["definition"] in ("none", chosen)
+                       and r["quarter"] not in g["fallback_quarters"]] for mm in ("ratio", "seasonal")}
     add(f"<p>GD stated a numeric delivery outlook covering {g['sourced']} of the 26 held-out quarters; the other "
         f"{len(g['fallback_quarters'])}, all in 2021, fall back to the same quarter last year. On those "
-        f"{g['sourced']} quarters GD's guidance pace missed by {f1(g['mae_sourced'])} aircraft on average. The "
+        f"{g['sourced']} quarters GD's guidance pace missed by {f1(g['mae_sourced'])} aircraft on average, against "
+        f"{f1(sum(on_sourced['ratio']) / len(on_sourced['ratio']))} for the registry estimate and "
+        f"{f1(sum(on_sourced['seasonal']) / len(on_sourced['seasonal']))} for the same quarter last year. The "
         f"registry estimate's past-miss band held GD's count in {h['band']['hits']} of 26 held-out quarters "
-        f"({pct(h['band']['coverage_pct'])}, 95% interval {pct(h['band']['cp95_pct'][0])} to "
+        f"({pct(h['band']['coverage_pct'])}, against a nominal 80%; 95% interval {pct(h['band']['cp95_pct'][0])} to "
         f"{pct(h['band']['cp95_pct'][1])}).</p>")
     add(f'<div class="exhibit"><div class="cap">Exhibit 4. GD\'s reported deliveries against the five estimates'
         f'</div><img src="../output/charts/track_record.png" alt="Line chart of GD\'s reported Gulfstream '
@@ -324,19 +366,25 @@ def build(root="."):
         f"{r['quarter']} ({f1(float(r['total']))} against {r['actual']})" for r in ratio_rows)
         + ". No filing or call states why the registry count differed from GD's count in those quarters. "
           "The truncation test below cuts each quarter's own registry events a set number of days before the "
-          "quarter ends, a crude stand-in for a registry that has not finished posting. It is harsh: archived registry "
-          "copies taken a few weeks after four past quarter ends missed by less than the finished copy, because they "
-          "read the lag quarters from the same unfinished file. Four quarters prove nothing either way.</p>")
-    yr_rows = [[y] + [f1(v[mm]) for mm in ("ratio", "raw", "guidance", "seasonal", "last")] for y, v in yrs.items()]
+          "quarter ends, a crude stand-in for a registry that has not finished posting. Archived registry copies "
+          "taken a few weeks after four past quarter ends missed by less than the finished copy did. They held more "
+          "events for the same past quarters than today's file, which loses a first owner's date when a jet is "
+          "resold or re-registered, so a later file is not simply a more complete one. Four quarters prove nothing "
+          "either way.</p>")
+    yr_rows = [[y + (", first half" if len(v["ratio"]) == 2 else "")] + [f2(sum(v[mm]) / len(v[mm])) for mm in
+               ("ratio", "raw", "guidance", "seasonal", "last")] for y, v in yrs.items()]
     tr = h["truncation_mae"]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 5. Average miss by year, aircraft</div>'
         + table(["Year", "Ratio", "Raw", "Guidance", "Seasonal", "Last"], yr_rows)
+        + '<div class="src">No 2021 call stated a full-year number, so guidance in 2021 is the same quarter last '
+          "year.</div>"
         + '</div><div class="exhibit"><div class="cap">Exhibit 6. Registry estimate\'s average miss with each '
           "quarter's events cut early</div>"
         + table(["Days cut", "Average miss"], [[d, f1(tr[d])] for d in ("0", "30", "60", "90")])
-        + f"<p class=\"small\">Coverage drift: no quarter from 2025Q3 to 2026Q2 sits above the mean plus two "
-          f"standard deviations of GD deliveries per registry event."
-        + (f" Flagged: {', '.join(h['coverage_ratio']['flags'])}." if h["coverage_ratio"]["flags"] else "")
+        + f"<p class=\"small\">Coverage drift: the preregistered flag looks for quarters from 2025Q3 to 2026Q2 "
+          f"above the mean plus two standard deviations of GD deliveries per registry event"
+        + (f"; it flags {', '.join(h['coverage_ratio']['flags'])}." if h["coverage_ratio"]["flags"] else
+           "; none is.") + drift_line(h)
         + "</p></div></div>")
     add('<div class="exhibit"><div class="cap">Exhibit 7. The registry estimate\'s miss by quarter and the band '
         'built from earlier misses</div><img src="../output/charts/signed_errors.png" alt="Bar chart of the '
@@ -354,8 +402,13 @@ def build(root="."):
         d, t = et_time(lock["published_at"])
         body += f" I locked this estimate as a {lockword} at {t} ET on {d}."
     else:
-        body += (f" This is the build estimate; the locked estimate replaces it on the eve of the release"
-                 + (f", {rel}." if rel else "."))
+        eve = (live.parse_now(rel + "T12:00:00Z") - live.dt.timedelta(days=1)).date().isoformat() if rel else None
+        body += (" This is the build estimate; the locked estimate replaces it"
+                 + (f" on {eve}, the day before GD's {rel} release." if rel else " before the release."))
+        age = (live.dt.date.fromisoformat(pred["snapshot"]) - live.dt.date.fromisoformat(pred["window_end"])).days
+        if age < 20:
+            body += (" This snapshot came sooner after the quarter's end than any archived copy the as-of study "
+                     "scored, so more of the quarter's registrations may still be missing.")
     if score:
         body += f" GD then reported {score['reported']['total']}."
         if score.get("guidance_pace") is not None:
@@ -403,7 +456,7 @@ def build(root="."):
         "2026Q3 baseline</div>"
         + table(["Segment", "Backlog, 2026Q2", "Coverage, years", "2026Q3 estimate", "Operating margin"], drows)
         + "</div>")
-    add("<p>For the defense segments I use the baseline my defense backlog study found hardest to beat. That study "
+    add("<p>For the defense segments I use my defense backlog study's best next-quarter baseline. That study "
         "tested five other defense primes; GD was left out because it stopped tagging backlog in XBRL in 2018. Pooled "
         "across those five, the next-quarter error was 9.9% for a backlog model, 7.3% for the seasonal naive and 6.5% "
         "for the seasonal naive with drift; four quarters out it was 9.4% for backlog, 5.8% for trailing revenue and "
@@ -470,18 +523,25 @@ def build(root="."):
     # 11. Sources
     add("<h2>Sources</h2><p class=\"small\">Numbered sources are the ones the superscripts cite.</p>"
         '<ol class="sources">')
+    forms = {"0000040533-26-000006": "GD Form 10-K for 2025", "0000040533-25-000008": "GD Form 10-K for 2024",
+             "0000040533-25-000014": "GD Form 10-Q for 2025Q1", "0000040533-25-000045": "GD Form 10-Q for 2025Q3",
+             "0000040533-26-000029": "GD Form 8-K, Exhibit 99.1, 2026Q2 results",
+             "0000040533-26-000032": "GD Form 10-Q for 2026Q2"}
     kinds = {"filing": "GD SEC filing", "call": "GD earnings call transcript",
              "press": "Gulfstream press release", "faa": "FAA"}
     for kind, where in C.sources:
         got = next(C.by_id[c]["retrieved_on"] for c in C.order
                    if (C.by_id[c]["source_type"], C.by_id[c]["url_or_accn"]) == (kind, where))
         link = edgar(where) if kind == "filing" else where
-        add(f"<li>{kinds.get(kind, kind)}, {esc(link)} , retrieved {got}.</li>")
+        label = forms.get(where, kinds.get(kind, kind)) if kind == "filing" else kinds.get(kind, kind)
+        add(f"<li>{label}, {esc(link)} , retrieved {got}.</li>")
     accns = sorted({r["accn"] for r in dels.values()} | {r["accn"] for r in read_csv(root / "data/processed/segments.csv")})
     add("<li>GD earnings releases, Exhibit 99.1 to each results 8-K, in these SEC EDGAR folders:"
         '<div class="urls">' + "".join(f"<span>{esc(edgar(a))} </span>" for a in accns) + "</div></li>")
+    newest = live.newest_snapshot(root)
     add(f"<li>FAA Releasable Aircraft database, ReleasableAircraft.zip (ACFTREF, MASTER and DEREG), snapshot "
-        f"{snap}; daily snapshots since.</li>")
+        f"{snap} for the backtest" + (f", and daily snapshots since, the newest dated {newest}" if newest and
+                                      newest > snap else "") + ".</li>")
     add("<li>GD earnings calls from 2020-01-29 to 2026-07-29, for the guidance outlooks in data/guidance.csv.</li>")
     add(f'<li>Repository: <a href="{REPO_URL}">{REPO_URL}</a></li></ol>')
     add("</body></html>")
@@ -498,8 +558,9 @@ def build(root="."):
 def limitations(root):
     """The seven limitations from DECISIONS.md's README list, in plain words."""
     return [
-        "Exports: a jet exported to a foreign registry without a Gulfstream test registration leaves no US record, "
-        "so the registry never sees that delivery. Many G280s, built by IAI in Israel, leave no Gulfstream record.",
+        "Exports: a jet exported to a foreign registry without a US registration leaves no US record, "
+        "so the registry never sees that delivery. Since 2022 the registry's yearly mid-cabin count has stayed within "
+        "a few jets of GD's, so G280 exports do not look like a large gap now.",
         "Processing: registry processing can lag by months. The backtest reads events by their stamped date in a "
         "file that had years to fill in, while a live estimate sees only what has posted.",
         "Military: military and special-mission airframes may never reach the civil registry.",
@@ -508,13 +569,15 @@ def limitations(root):
         "Coverage: the ratio assumes the registry's coverage of GD's count holds steady from year to year. It "
         "drifted: the registry keeps only an airframe's current certificate, so a resold or renewed jet loses its "
         "first owner's date.",
-        "Used jets: a used jet with no airworthiness date or year of manufacture, or one whose maker code changed, "
+        "Used jets: a used jet that re-entered the US registry with a fresh airworthiness date, one with no "
+        "airworthiness date or year of manufacture, or one whose maker code changed, "
         "can read as a new delivery.",
         "Band: the past-miss band comes from errors measured on a finished registry file, so it is likely too "
         "narrow at a live lock.",
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
-        "reading or could not confirm it. Five were used jets read as new deliveries; every source was a registry "
-        "mirror or aircraft-history site, since Gulfstream rarely names individual airframes.",
+        "reading or could not confirm it: five were used jets read as new deliveries, two had an earlier stated "
+        "delivery, and three could not be confirmed. All but one source was a registry mirror or aircraft-history "
+        "site, and the jets checked were delivered by 2019, so the audit says little about recent quarters.",
     ]
 
 

@@ -97,7 +97,10 @@ def main():
                         f"{r['reported']} | {r['ae']:.1f} | {r['backtest_ae']:.1f} | {band[0]} | {band[1]} |")
         text += ["", "Each as-of estimate reads both the quarter's own registry events and its four lag quarters from "
                      "the same archived copy, as a live estimate does. The truncation table in the README cuts only the "
-                     "quarter's own events and keeps the lags whole, so it is the harsher test. Four quarters are too "
+                     "quarter's own events and keeps the lags whole. The archived copies held more lag-quarter events than the "
+                     "2026-10-19 copy, because a later file loses a first owner's date when a jet is resold or "
+                     "re-registered, so their estimates came out lower and, given the ratio's upward bias, closer. "
+                     "Four quarters are too "
                      "few to conclude anything; the locked quarters remain the real test."]
     write_text(ROOT / "results/exploratory/asof.md", "\n".join(text) + "\n")
     print(line)
