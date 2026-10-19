@@ -55,5 +55,6 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
+- Review round 2 (two subagents, launched 13:40 ET 2026-10-19): docs/build/review2_code.md, review2_docs.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
