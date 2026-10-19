@@ -154,3 +154,11 @@ Also for `## Data`: the G280 is filed under the maker `IAI LTD` (model `GULFSTRE
 - Same-date runs: a second download on a Chicago date replaces that date's daily table and path row, as §3.11 says, and the stored subset too, except when a prediction file names that snapshot date. A lock's subset is never replaced, so L1 can always rebuild it.
 - Lock rehearsal (`tools/rehearsal.py`, `docs/build/REHEARSAL.md`): all 11 cases pass, including a push that loses a race to a second clone and is retried after `git reset --hard @{u}`. The gate's `live` family on the rehearsal clone: no failing code; L4 warns only that the fixture 8-K is not on SEC.
 - Gate `--only faa,truth,model,prereg,segments,live` at 12:34 EDT: 20 assertions, 0 failing, warnings S3 and L3 ("not locked yet"), both allowed.
+
+## Phases 6 to 8: notes
+
+- **Gate N1 and accession numbers.** §4 says the number check skips accession numbers, but the gate strips dates first, and its date pattern `\d{4}-\d{2}-\d{2}` matches inside an accession ("0533-26-00"), so the accession pattern never fires and the leftovers fail as numbers. Rather than stop, the note prints each source accession as its EDGAR folder URL (`https://sec.gov/Archives/edgar/data/40533/<accession without dashes>`), which the URL rule skips and which is a working link. The README's checked sections carry no accession numbers.
+- **The guidance pace before a score.** The gate accepts the live quarter's guidance pace (33.8 for 2026Q3) in the docs only once the quarter is scored, so the README's Live record and the note print it after the score. The dashboard shows it now, since runtime figures are not number-checked and §3.10 asks for it.
+- **The claims registry** holds only the claims the note cites (32 of 41 sourced; N4 fails on unused entries). The three topic files in `docs/build/claims_*.json` keep all 41; the note's code picks which ten product claims to cite and prunes `report/claims.json` to match.
+- **The defense study's MAPEs** are printed as the owner's own study with a link, not as claims, since `claims.json` admits only filing, call, faa and press sources.
+- Full gate after Phase 8: 42 assertions, 0 failing, warnings S3 and L3 ("not locked yet").
