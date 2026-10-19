@@ -11,7 +11,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import faa, live
+from . import faa, live, sec
 from .gitops import GitError, Ops
 
 LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json"]
@@ -75,6 +75,8 @@ def run(now=None, offline=False, core=False, root="."):
             return 2
     except GitError as e:
         print(f"git pull failed: {e}")
+    if not offline:
+        print(sec.probe())
     date = None if offline else faa.download(root, now)
     if date:
         live.ingest(root, date)

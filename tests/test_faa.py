@@ -14,7 +14,7 @@ def by_key(rows):
 
 def test_network_is_blocked():
     with pytest.raises(RuntimeError):
-        socket.create_connection(("example.com", 80), timeout=1)
+        socket.create_connection(("93.184.215.14", 80), timeout=1)
 
 
 def test_header_normalization():
@@ -138,3 +138,16 @@ def test_serials_csv_has_lf_and_blank_dates(faa_texts):
     text = events.serials_text(events.airframes(faa.subset(faa_texts)))
     assert "\r" not in text
     assert text.splitlines()[0] == ",".join(events.SERIAL_COLS)
+
+
+def test_download_keeps_a_stored_snapshot(faa_texts, tmp_path, monkeypatch):
+    import datetime as dt
+    sub = faa.subset(faa_texts)
+    z = tmp_path / "data/raw/faa/ReleasableAircraft-2030-01-02.zip"
+    z.parent.mkdir(parents=True)
+    z.write_bytes(b"PK\x05\x06" + b"\0" * 18)
+    faa.store_subset(tmp_path, "2030-01-02", sub, z, backtest=True)
+    monkeypatch.setattr(faa, "_curl", lambda *a: (_ for _ in ()).throw(AssertionError("downloaded")))
+    now = dt.datetime(2030, 1, 2, 18, 0, tzinfo=dt.timezone.utc)
+    assert faa.download(tmp_path, now, log=lambda *a: None) == "2030-01-02"
+    assert z.read_bytes().startswith(b"PK\x05\x06")

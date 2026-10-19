@@ -82,6 +82,11 @@ def download(root, now_utc=None, log=print):
     now_utc = now_utc or dt.datetime.now(dt.timezone.utc)
     date = snapshot_date(now_utc)
     out = root / "data/raw/faa" / f"ReleasableAircraft-{date}.zip"
+    if date in manifest(root)["snapshots"] and is_zip(out):
+        # A stored subset (the backtest's, or one a lock may read) is never replaced by a second
+        # download on the same Chicago date.
+        log(f"FAA snapshot {date} is already stored; keeping it")
+        return date
     out.parent.mkdir(parents=True, exist_ok=True)
     part = out.with_suffix(".part")
     ci = bool(os.environ.get("CI"))

@@ -259,3 +259,18 @@ def book_to_bill(text):
     m = re.search(r"was ([\d.]+)-to-1 for the quarter for the defense segments, ([\d.]+)-to-1 for the Aerospace "
                   r"segment, and ([\d.]+)-to-1 on a company-wide basis", text)
     return {"defense": float(m[1]), "aerospace": float(m[2]), "company": float(m[3])} if m else None
+
+
+def probe():
+    """One read of GD's submissions index to report whether SEC is reachable; writes nothing."""
+    ua = user_agent()
+    if not ua:
+        return "SEC not probed: no User-Agent"
+    req = urllib.request.Request(SUBMISSIONS, headers={"User-Agent": ua})
+    try:
+        with urllib.request.urlopen(req, timeout=30) as r:
+            return f"SEC reachable: HTTP {r.status}, {len(r.read())} bytes"
+    except urllib.error.HTTPError as e:
+        return f"SEC refused: HTTP {e.code}"
+    except (urllib.error.URLError, OSError, ValueError) as e:
+        return f"SEC unreachable: {e}"
