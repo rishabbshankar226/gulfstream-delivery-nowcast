@@ -36,8 +36,8 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 9 | Airframe audit | todo | - | |
 | 9 | Mutation pass | done | - | phase 9 commit |
 | 9 | check-determinism | done | - | phase 9 commit |
-| 9 | As-of study | todo | - | |
-| 10 | Fresh clone build and gate | todo | all but repo | |
+| 9 | As-of study | done | - | 9b84384 |
+| 10 | Fresh clone build and gate | done (early run; repeat at the end) | all but repo | 6bef306 |
 | R | Review rounds 1 to 3 | todo | - | |
 | R | Final gate, push, report | todo | all | |
 
@@ -54,7 +54,8 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- Airframe audit 1, 2, 3 (subagents): write docs/build/AIRFRAME_AUDIT_1.csv, _2.csv, _3.csv
-- As-of study (background command): tools/asof.py, log .build/logs/asof.log, writes results/exploratory/asof.csv and asof.md
+- Airframe audit 1 and 3 (subagents): write docs/build/AIRFRAME_AUDIT_1.csv and _3.csv (audit 2 file written)
+- Monitor task: waits for the audit files
+- Review round 1 (five subagents): docs/build/review1_numbers.md, review1_analyst.md, FACT_CHECK.md, review1_spec.md, review1_ops.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
