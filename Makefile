@@ -2,11 +2,14 @@ PY ?= .venv/bin/python
 export PYTHONPATH := src
 RUN := $(PY) -m gdn
 
-.PHONY: data design holdout snapshot nowcast lock score estimates workbook charts claims note pdf site report \
+.PHONY: data diagnostics design holdout snapshot nowcast lock score estimates workbook charts claims note pdf site report \
 	daily-core daily all test check-determinism
 
 data:
 	$(RUN) data
+
+diagnostics:
+	$(RUN) diagnostics
 
 design:
 	$(RUN) design
@@ -59,6 +62,7 @@ daily:
 # Offline rebuild from tracked files: no snapshot download, no SEC, no lock, no score, no live file rewritten.
 all:
 	$(RUN) data --offline
+	$(RUN) diagnostics
 	$(RUN) design
 	$(RUN) holdout
 	$(RUN) estimates

@@ -4,17 +4,17 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 | Phase | Task | State | Gate codes | Commit |
 |---|---|---|---|---|
-| 0 | Smoke test, preflight, .gitignore, .gitattributes | done | - | |
-| 0 | FAA backtest zip, project venv, gate venv, selftest | done | selftest | |
-| 0 | PLAN.md, DECISIONS.md, CLAUDE.md | done | - | |
-| 1 | Makefile, faa.py, sec.py, events.py, __main__.py | todo | - | |
-| 1 | Backtest subset and manifest | todo | F1 F2 | |
-| 1 | SEC releases, gd_deliveries.csv, segments.csv, backlog | todo | T1 T2 S1 S3 | |
-| 1 | serials.csv, registry_quarterly.csv | todo | F3 F4 | |
-| 1 | Fixture tests | todo | - | |
-| 2 | coverage_design.csv and the 0.5 to 1.5 check | todo | - | |
-| 2 | guidance.csv from three checkers | todo | T3 | |
-| 2 | design.csv, chosen definition | todo | M1 | |
+| 0 | Smoke test, preflight, .gitignore, .gitattributes | done | - |  09c16a9 |
+| 0 | FAA backtest zip, project venv, gate venv, selftest | done | selftest |  09c16a9 |
+| 0 | PLAN.md, DECISIONS.md, CLAUDE.md | done | - |  09c16a9 |
+| 1 | Makefile, faa.py, sec.py, events.py, __main__.py | done | - | 6725184 |
+| 1 | Backtest subset and manifest | done | F1 F2 | 6725184 |
+| 1 | SEC releases, gd_deliveries.csv, segments.csv, backlog | done | T1 T2 S1 S3 | 6725184 |
+| 1 | serials.csv, registry_quarterly.csv | done | F3 F4 | 6725184 |
+| 1 | Fixture tests | done | - | 6725184 |
+| 2 | coverage_design.csv and the 0.5 to 1.5 check | done | - | |
+| 2 | guidance.csv from three checkers | done | T3 | |
+| 2 | design.csv, chosen definition | done | M1 | |
 | 2 | PREREGISTRATION.md, committed alone | todo | Q1 Q2 | |
 | 3 | holdout.csv, metrics.json, tests | todo | M2 M3 | |
 | 3 | error_analysis.md | todo | - | |
