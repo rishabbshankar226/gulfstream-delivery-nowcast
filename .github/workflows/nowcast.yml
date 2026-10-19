@@ -1,0 +1,29 @@
+name: nowcast
+on:
+  schedule:
+    - cron: '17 0,12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: nowcast
+  cancel-in-progress: false
+jobs:
+  daily:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: python -m pip install -r requirements.lock
+      - run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - run: make daily PY=python
+        env:
+          SEC_UA: ${{ secrets.SEC_UA }}
+          GH_TOKEN: ${{ github.token }}
