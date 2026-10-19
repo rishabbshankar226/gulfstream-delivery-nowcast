@@ -15,6 +15,7 @@
   var DASH = { reported: [], ratio: [], raw: [7, 4], guidance: [10, 4, 2, 4], seasonal: [5, 4], last: [2, 3] };
   var WIDTH = { reported: 3, ratio: 2.4, raw: 1.6, guidance: 1.6, seasonal: 1.6, last: 1.8 };
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+  var narrow = window.matchMedia("(max-width: 760px)");
   var dark = window.matchMedia("(prefers-color-scheme: dark)");
   var charts = [];
   var data = null;
@@ -82,8 +83,9 @@
     var b = beats(h);
     var base = h.guidance.headline ? "guidance" : "seasonal";
     var s;
+    var low = ["guidance", "seasonal", "last"].reduce(function (a, x) { return h.mae[x] < h.mae[a] ? x : a; }, base);
     if (b.length) {
-      s = "The registry count beat " + b.map(function (x) { return BASE[x]; }).join(" and ") +
+      s = "The registry estimate beat " + b.map(function (x) { return BASE[x]; }).join(" and ") +
         ": off by " + f1(h.mae.ratio) + " jets a quarter on average, when GD delivers about " +
         whole(typicalCount()) + ", against " + f1(h.mae[b[0]]) + " for " + BASE[b[0]] + ".";
     } else {
@@ -91,9 +93,14 @@
         whole(typicalCount()) + ", against " + f1(h.mae[base]) + " for " + BASE[base] +
         ". The difference is not statistically distinguishable.";
     }
-    s += " That is a test on past quarters, read from a registry copy of " + data.snapshot +
-      " that had time to fill in; only the locked quarters test the estimate in real time.";
     text($("lead"), s);
+    var f = "";
+    if (low !== base && h.mae[low] < h.mae.ratio) {
+      f += "Simply repeating " + BASE[low] + " missed by less, " + f1(h.mae[low]) + ". ";
+    }
+    f += "All of this is a test on past quarters, read from a registry copy of " + data.snapshot +
+      " that had months or years to fill in. Only the locked quarters test whether the registry counts deliveries in time.";
+    text($("framing"), f);
   }
 
   /* ---------- the live quarter ---------- */
@@ -118,13 +125,23 @@
     fact("Quarter window", latest.window_start + " to " + latest.window_end);
     if (L.guidance_pace !== null) fact("GD's guidance pace", f1(L.guidance_pace) + " deliveries");
     fact("GD's typical quarter", "about " + whole(typicalCount()) + " deliveries since 2020");
-    if (L.release_date) fact("GD reports", L.release_date);
+    var qi = data.quarters.indexOf(L.quarter);
+    var yago = data.quarters.indexOf(String(Number(L.quarter.slice(0, 4)) - 1) + L.quarter.slice(4));
+    if (yago >= 0) fact("Same quarter last year", data.reported.total[yago] + " deliveries");
+    if (L.release_date) {
+      fact("GD reports", L.release_date);
+      if (!L.lock) {
+        var eve = new Date(L.release_date + "T12:00:00Z");
+        eve = new Date(eve.getTime() - 86400000).toISOString().slice(0, 10);
+        fact("Locks", "the evening of " + eve);
+      }
+    }
     if (L.score) {
       fact("GD reported", String(L.score.reported.total) + " deliveries");
       if (L.score.locked) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries");
     }
     var note = L.lock ? "Locked as a timestamped GitHub release; the file's sha256 is in the release notes." :
-      "Provisional: the estimate is locked on GitHub the evening before GD reports, from the newest registry snapshot.";
+      "Provisional: the estimate locks on GitHub the evening before GD reports, from the newest registry snapshot, and stays on this page whether it hits or misses.";
     note += " The band comes from misses measured on a finished registry file, so it is likely too narrow for a live quarter.";
     text($("live-note"), note);
   }
@@ -175,7 +192,8 @@
     MODELS.forEach(function (m, i) {
       sets.push({
         label: NAME[m], data: data.backtest[m], borderColor: css("--s-" + m), backgroundColor: css("--s-" + m),
-        borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1
+        borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1,
+        hidden: narrow.matches && (m === "raw" || m === "seasonal" || m === "last")
       });
     });
     var opts = baseOptions("Aircraft delivered per quarter", "Fiscal quarter");
@@ -216,7 +234,9 @@
       var li = el("li", b.length && m === low ? "best" : null);
       li.appendChild(el("span", "t-name", NAME[m]));
       li.appendChild(el("span", "t-fig", f1(h.mae[m])));
-      li.appendChild(el("span", "t-cmp", "deliveries a quarter"));
+      var d = h.mae[m] - h.mae.ratio;
+      li.appendChild(el("span", "t-cmp", m === "ratio" ? "this project's estimate" :
+        f1(Math.abs(d)) + (d < 0 ? " less than" : " more than") + " the registry estimate"));
       ul.appendChild(li);
     });
   }
@@ -229,8 +249,14 @@
 
   function pathChart() {
     var L = current();
-    if (!L || !data.path || !data.path[L.quarter]) return;
+    var box = $("c-path").parentNode;
+    if (!L || !data.path || !data.path[L.quarter]) { box.hidden = true; return; }
     var rows = data.path[L.quarter];
+    box.classList.toggle("tall", rows.length >= 3);
+    text($("path-sub"), (rows.length === 1 ? "One snapshot so far (" + rows[0].date + ")." :
+      rows.length + " snapshots so far, " + rows[0].date + " to " + rows[rows.length - 1].date + ".") +
+      " A point posts with each day's registry snapshot, with the band of past misses around it" +
+      (L.lock ? "; the diamond marks the locked estimate." : "; the estimate locks the evening before GD reports."));
     var pred = L.locked || L.latest || L.build;
     var below = pred.nowcast.total - pred.band[0], above = pred.band[1] - pred.nowcast.total;
     var last = rows[rows.length - 1].date;
@@ -278,9 +304,16 @@
   }
 
   function pipeChart() {
-    var p = data.pipeline, names = Object.keys(p).sort(function (a, b) { return p[b] - p[a]; });
-    text($("pipe-sub"), "Jets registered to Gulfstream itself with no delivery event yet, by registry model name, at the " +
-      data.pipeline_snapshot + " snapshot: aircraft in flight test, completion or resale.");
+    var raw = data.pipeline, p = {};
+    Object.keys(raw).forEach(function (n) {
+      var m = n.match(/G\d{3}/), k = m ? m[0] : (n === "550" ? "G550" : n === "GVI" ? "G650" : n);
+      p[k] = (p[k] || 0) + raw[n];
+    });
+    var names = Object.keys(p).sort(function (a, b) { return p[b] - p[a] || (a < b ? -1 : 1); });
+    var all = names.reduce(function (s, n) { return s + p[n]; }, 0);
+    text($("pipe-sub"), "Jets registered to Gulfstream itself with no delivery event yet, at the " + data.pipeline_snapshot +
+      " snapshot: " + all + " in all, about " + whole(all / typicalCount()) + " quarters of deliveries at GD's typical " +
+      whole(typicalCount()) + " a quarter. They include aircraft in flight test, in completion and taken back for resale.");
     $("pipe-box").style.height = Math.max(220, names.length * 30 + 90) + "px";
     var opts = baseOptions("Aircraft", "Aircraft on Gulfstream's own registration");
     opts.indexAxis = "y";
@@ -297,9 +330,9 @@
       data: { labels: names, datasets: [{ label: "Aircraft", data: names.map(function (n) { return p[n]; }), backgroundColor: css("--s-ratio"), borderRadius: 2, barPercentage: 0.7 }] },
       options: opts
     }));
-    var total = names.reduce(function (s, n) { return s + p[n]; }, 0);
+    var total = all;
     $("c-pipe").setAttribute("aria-label", "Bar chart of " + total + " jets on Gulfstream's own registration with no delivery event, by model, at the " + data.pipeline_snapshot + " snapshot.");
-    table("t-pipe", "Jets on Gulfstream's own registration, " + data.pipeline_snapshot, ["Registry model", "Aircraft"],
+    table("t-pipe", "Jets on Gulfstream's own registration, " + data.pipeline_snapshot, ["Model", "Aircraft"],
       names.map(function (n) { return { cells: [n, String(p[n])] }; }));
   }
 
@@ -329,7 +362,8 @@
       "Recent quarters where the registry counted unusually few jets per GD delivery: " + cr.flags.join(", ") + "." :
       "No quarter from 2025Q3 to 2026Q2 shows the registry counting unusually few jets per GD delivery."));
     var tr = h.truncation_mae;
-    table("t-trunc", "Average miss when each test quarter's registrations are cut early", ["Days cut before the quarter ends", "Average miss, deliveries"],
+    table("t-trunc", "Average miss when each test quarter's registrations are cut early, against " + f1(h.mae.guidance) +
+      " for GD's guidance pace on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
       ["0", "30", "60", "90"].map(function (d) { return { cells: [d, f1(tr[d])] }; }));
   }
 
@@ -341,15 +375,24 @@
       rows.push({ cls: cls, cells: [name, usdB(actual), usdB(est), usdM(est - actual), pct((est - actual) / actual * 100)] });
     }
     function q3(s) { return S[s].drift_usd * S[s].ttm_revenue_prior_usd / S[s].ttm_revenue_usd; }
-    row("Aerospace, from the delivery estimate", q3("Aerospace"), e.aerospace_from_nowcast_usd, "emph");
-    row("Aerospace, same quarter scaled by growth", q3("Aerospace"), S.Aerospace.drift_usd);
+    row("Aerospace, delivery estimate", q3("Aerospace"), e.aerospace_from_nowcast_usd, "emph");
+    row("Aerospace, growth rule", q3("Aerospace"), S.Aerospace.drift_usd);
     ["Marine Systems", "Combat Systems", "Technologies"].forEach(function (s) { row(s, q3(s), S[s].drift_usd); });
     var a = ["Aerospace", "Marine Systems", "Combat Systems", "Technologies"].reduce(function (t, s) { return t + q3(s); }, 0);
-    row("All four segments, Aerospace from the delivery estimate", a, e.revenue_total_usd, "emph");
-    table("t-est", e.target + " revenue by segment against " + "the year-ago quarter", ["Segment", "Year-ago quarter", "Estimate", "Change", "Change, %"], rows);
-    table("t-sens", "Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery",
-      ["Deliveries", "Aerospace revenue"],
-      e.sensitivity.map(function (s) { return { cls: s.deliveries_change === 0 ? "emph" : null, cells: [f1(s.deliveries), usdB(s.aerospace_revenue_usd)] }; }));
+    row("Total, four segments", a, e.revenue_total_usd, "emph");
+    table("t-est", e.target + " revenue by segment against the year-ago quarter", ["Segment", "Year-ago quarter", "Estimate", "Change", "Change, %"], rows);
+    var yq = String(Number(e.target.slice(0, 4)) - 1) + e.target.slice(4);
+    var yi = data.quarters.indexOf(yq);
+    text($("est-why"), "The delivery estimate of " + f1(e.nowcast_total) + " sits below the " +
+      (yi >= 0 ? data.reported.total[yi] + " " : "") + "deliveries of " + yq + ", and each delivery carries about " +
+      usdM(e.revenue_per_delivery_usd) + " of Aerospace revenue, so the delivery-based figure falls. The growth row instead scales " +
+      yq + "'s Aerospace revenue by the last four quarters' growth.");
+    var ya = q3("Aerospace");
+    table("t-sens", "Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
+      usdB(ya) + " in the year-ago quarter", ["Deliveries", "Aerospace revenue", "Change on the year-ago quarter"],
+      e.sensitivity.map(function (s) {
+        return { cls: s.deliveries_change === 0 ? "emph" : null, cells: [f1(s.deliveries), usdB(s.aerospace_revenue_usd), usdM(s.aerospace_revenue_usd - ya)] };
+      }));
   }
 
   /* ---------- start ---------- */
@@ -377,7 +420,12 @@
   function fail(err) {
     var e = $("error");
     e.hidden = false;
-    text(e, "The figures could not load (" + err + "). The results are also in the README on GitHub.");
+    e.textContent = "The figures could not load. Reload the page, or read the same results in the ";
+    var a = document.createElement("a");
+    a.href = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#results";
+    a.textContent = "README on GitHub";
+    e.appendChild(a);
+    e.appendChild(document.createTextNode(". (" + err + ")"));
     text($("lead"), "The figures could not load.");
   }
 
