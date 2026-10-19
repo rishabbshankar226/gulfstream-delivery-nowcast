@@ -78,11 +78,34 @@ class Ops:
         self.git("add", "-A", "--", *paths)
         if self.git("diff", "--cached", "--quiet", check=False).returncode == 0:
             return False
+        self.refuse_markers()
         self.git("commit", "-m", message)
         return True
 
+    def refuse_markers(self):
+        """Raise when a staged text file still holds merge conflict markers."""
+        staged = self.git("diff", "--cached", "--name-only", "--diff-filter=AM").stdout.split()
+        bad = []
+        for f in staged:
+            p = self.root / f
+            if p.suffix in (".json", ".csv", ".md", ".html", ".txt", ".py", ".sha256") and p.exists():
+                text = p.read_text(errors="replace")
+                if any(ln.startswith(("<<<<<<< ", ">>>>>>> ")) for ln in text.splitlines()):
+                    bad.append(f)
+        if bad:
+            raise GitError(f"conflict markers in {bad}; not committing")
+
+    def stage_version(self, path, stage):
+        """The text of a conflicted path at a merge stage (2 ours, 3 theirs), or None."""
+        r = self.git("show", f":{stage}:{path}", check=False)
+        return r.stdout if r.returncode == 0 else None
+
+    def add(self, path):
+        self.git("add", "--", str(path))
+
     def commit_only(self, path, message):
         self.git("add", "--", str(path))
+        self.refuse_markers()
         self.git("commit", "-m", message, "--", str(path))
         return self.head()
 
@@ -104,7 +127,10 @@ class Ops:
     # ---- releases ----
     def release_view(self, tag):
         """{"publishedAt", "tagName"} of the release, or None when it does not exist."""
-        r = self.run("gh", "release", "view", tag, "-R", self.slug(), "--json", "publishedAt,tagName", check=False)
+        for attempt in range(2):
+            r = self.run("gh", "release", "view", tag, "-R", self.slug(), "--json", "publishedAt,tagName", check=False)
+            if r.returncode == 0 or re.search(r"not found|could not find|HTTP 404", (r.stderr + r.stdout), re.I):
+                break
         if r.returncode != 0:
             if re.search(r"not found|could not find|HTTP 404", (r.stderr + r.stdout), re.I):
                 return None

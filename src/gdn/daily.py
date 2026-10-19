@@ -4,8 +4,10 @@ Pull, download the snapshot, write the latest nowcast, path row and daily airfra
 §3.6 says so, score any released quarter, then (not for daily-core) rebuild the estimates, the
 workbook, the note, the site data, the README's Live record and the post. Only the paths below are
 staged; the run refuses to start when any other tracked file has uncommitted changes."""
+import fcntl
 import importlib
 import importlib.util
+import json
 import os
 import shutil
 import sys
@@ -45,8 +47,34 @@ def rebuild(root, pdf=True):
     _stage("report", "run", root=root)
 
 
+def merge_manifests(ours, theirs):
+    """Union of two MANIFEST.json texts' snapshot entries; a date never differs between machines."""
+    a, b = json.loads(ours), json.loads(theirs)
+    snaps = dict(a.get("snapshots", {}))
+    snaps.update(b.get("snapshots", {}))
+    return json.dumps({"backtest": b.get("backtest") or a.get("backtest"),
+                       "snapshots": dict(sorted(snaps.items()))}, indent=2) + "\n"
+
+
 def run(now=None, offline=False, core=False, root="."):
     root = Path(root)
+    lock_file = root / ".build/daily.lock"
+    lock_file.parent.mkdir(parents=True, exist_ok=True)
+    held = open(lock_file, "w")
+    try:
+        fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except OSError:
+        print("another daily run holds .build/daily.lock; this one stops")
+        return 0
+    try:
+        return _run(now, offline, core, root)
+    finally:
+        fcntl.flock(held, fcntl.LOCK_UN)
+        held.close()
+
+
+def _run(now, offline, core, root):
+    wall = now is None
     now = live.parse_now(now)
     ops = Ops(root)
     dirty = [p for p in ops.dirty_tracked() if not _under(p, ALLOWED)]
@@ -58,6 +86,13 @@ def run(now=None, offline=False, core=False, root="."):
 
     def on_conflict(paths):
         if all(_under(p, LIVE_PATHS) or _under(p, GENERATED) for p in paths):
+            man = "data/snapshots/MANIFEST.json"
+            if man in paths:
+                ours, theirs = ops.stage_version(man, 2), ops.stage_version(man, 3)
+                if ours and theirs:
+                    (root / man).write_text(merge_manifests(ours, theirs))
+                    ops.add(man)
+                    paths = [p for p in paths if p != man]
             ops.take_theirs(paths)
             ops.finish_merge()
             live.update_latest(root, now)
@@ -87,13 +122,27 @@ def run(now=None, offline=False, core=False, root="."):
         ops.commit(LIVE_PATHS, "Daily outputs before the lock")
         live.push_with_merge(ops, on_conflict=on_conflict)
 
-    rc = live.run_lock(now, offline, root=root, ops=ops, before_prediction=push_outputs)
+    try:
+        rc = live.run_lock(now, offline, root=root, ops=ops, before_prediction=push_outputs,
+                           on_conflict=on_conflict, wall=wall)
+    except GitError as e:
+        print(f"lock step failed: {e}")
+        rc = 1
     before = set(live.scores(root))
     live.run_score(now, offline, root=root)
     if set(live.scores(root)) != before:
         live.update_latest(root, now)
+        ops.commit(LIVE_PATHS, "Score the released quarter")
+        try:
+            live.push_with_merge(ops, on_conflict=on_conflict)
+        except GitError as e:
+            print(f"push of the score failed: {e}")
     if not core:
-        rebuild(root)
+        try:
+            rebuild(root)
+        except Exception as e:  # noqa: BLE001  a rebuild error must not stop the live files reaching GitHub
+            print(f"rebuild failed: {type(e).__name__}: {e}")
+            rc = rc or 1
     ops.commit(LIVE_PATHS + REBUILD_PATHS, "Daily update" + (f" {date}" if date else ""))
     try:
         if not live.push_with_merge(ops, on_conflict=on_conflict):

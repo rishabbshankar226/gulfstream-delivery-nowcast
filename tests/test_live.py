@@ -197,3 +197,63 @@ def test_existing_release_blocks_a_new_lock(repo):
     ops = FakeOps(repo, at("2026-10-29T19:30"), release={"tagName": "lock-2026Q3", "publishedAt": "2026-10-29T23:05:00Z"})
     live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None)
     assert ops.creates == [] and not (repo / "predictions/2026Q3.json").exists()
+
+
+class ConflictOnce(FakeOps):
+    """The first pull comes back conflicted, as when the other machine pushed live files mid-run."""
+
+    def __init__(self, *a, **kw):
+        super().__init__(*a, **kw)
+        self.pulls, self.aborts = 0, 0
+
+    def pull(self):
+        self.pulls += 1
+        return ["results/live/2026Q3_latest.json"] if self.pulls == 1 else []
+
+    def abort_merge(self):
+        self.aborts += 1
+
+
+def test_conflicted_pull_aborts_and_retries(repo):
+    ops = ConflictOnce(repo, at("2026-10-29T19:30"))
+    rc = live.run_lock(at("2026-10-29T19:30"), root=repo, ops=ops, log=lambda *a: None)
+    assert rc == 0 and ops.aborts == 1 and len(ops.creates) == 1
+
+
+def test_wall_clock_stops_a_late_lock(repo, monkeypatch):
+    # The run started at 19:00 ET by its own clock, but the real clock already reads 23:55 ET.
+    monkeypatch.setattr(live, "utcnow", lambda: at("2026-10-29T23:55"))
+    ops = FakeOps(repo, at("2026-10-29T19:00"))
+    rc = live.run_lock(at("2026-10-29T19:00"), root=repo, ops=ops, log=lambda *a: None, wall=True)
+    assert rc == 1 and not ops.creates and not (repo / "predictions/2026Q3.json").exists()
+
+
+def test_commit_refuses_conflict_markers(tmp_path):
+    import subprocess
+    from gdn.gitops import GitError, Ops
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    for k, v in (("user.name", "t"), ("user.email", "t@example.invalid")):
+        subprocess.run(["git", "-C", str(tmp_path), "config", k, v], check=True)
+    f = tmp_path / "results/live/x.json"
+    f.parent.mkdir(parents=True)
+    f.write_text("{\n<<<<<<< HEAD\n  \"a\": 1\n=======\n  \"a\": 2\n>>>>>>> theirs\n}\n")
+    with pytest.raises(GitError, match="conflict markers"):
+        Ops(tmp_path, log=lambda *a: None).commit(["results"], "x")
+
+
+def test_daily_runs_one_at_a_time(tmp_path, capsys):
+    import fcntl
+    from gdn import daily
+    (tmp_path / ".build").mkdir()
+    with open(tmp_path / ".build/daily.lock", "w") as held:
+        fcntl.flock(held, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        assert daily.run(root=tmp_path, offline=True) == 0
+    assert "holds .build/daily.lock" in capsys.readouterr().out
+
+
+def test_manifest_merge_keeps_both_sides():
+    from gdn import daily
+    ours = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"z": 1}, "2026-10-28": {"z": 2}}})
+    theirs = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"z": 1}, "2026-10-29": {"z": 3}}})
+    merged = json.loads(daily.merge_manifests(ours, theirs))
+    assert sorted(merged["snapshots"]) == ["2026-10-19", "2026-10-28", "2026-10-29"]
