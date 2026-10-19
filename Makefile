@@ -2,7 +2,7 @@ PY ?= .venv/bin/python
 export PYTHONPATH := src
 RUN := $(PY) -m gdn
 
-.PHONY: data diagnostics design holdout snapshot nowcast lock score estimates workbook charts claims note pdf site report \
+.PHONY: data diagnostics design holdout errors snapshot nowcast lock score estimates workbook charts claims note pdf site report \
 	daily-core daily all test check-determinism
 
 data:
@@ -16,6 +16,10 @@ design:
 
 holdout:
 	$(RUN) holdout
+	$(RUN) errors
+
+errors:
+	$(RUN) errors
 
 snapshot:
 	$(RUN) snapshot
@@ -65,6 +69,7 @@ all:
 	$(RUN) diagnostics
 	$(RUN) design
 	$(RUN) holdout
+	$(RUN) errors
 	$(RUN) estimates
 	$(RUN) workbook
 	$(RUN) charts

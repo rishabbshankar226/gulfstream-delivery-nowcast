@@ -92,3 +92,34 @@ def test_truncation_edge(faa_texts):
     # A's E1 is 2024-05-15: 2024-06-30 minus 46 days keeps it, minus 47 days drops it.
     assert events.count(rows, "E1", "large", lo, hi, cutoff="2024-05-15") == 1
     assert events.count(rows, "E1", "large", lo, hi, cutoff="2024-05-14") == 0
+
+
+def test_error_statements_are_in_their_cached_sources():
+    import glob
+    import html
+    import re
+    from pathlib import Path
+    from conftest import ROOT
+    from gdn import errors, sec
+
+    checked = 0
+    for q, items in errors.STATEMENTS.items():
+        for src, where, quote in items:
+            if where.startswith("accession"):
+                accn = where.split()[-1]
+                files = glob.glob(str(ROOT / f"data/raw/sec/{accn}/*exhibit99*"))
+                if not files:
+                    continue
+                text = re.sub(r"\s+", " ", sec.plain(Path(files[0]).read_bytes()))
+            else:
+                date = re.search(r"/(\d{4})/(\d{2})/(\d{2})/", where).groups()
+                pages = glob.glob(str(ROOT / f"data/raw/sources/calls/{'-'.join(date)}-*.html"))
+                if not pages:
+                    continue
+                t = re.sub(r"<[^>]+>", " ", Path(pages[0]).read_text(errors="replace"))
+                text = re.sub(r"\s+", " ", html.unescape(t))
+            assert quote in text, (q, where)
+            checked += 1
+    if not checked:
+        import pytest
+        pytest.skip("source cache absent, as in a clone")
