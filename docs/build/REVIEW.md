@@ -106,3 +106,15 @@ Round 2's findings were all minor. I fixed those that were real defects rather t
 | R2D-9 | `.build/shots/note/page-02.png` | minor | One page image predated the final PDF | Page images re-rendered from the final PDF | not tracked | none |
 
 Still open after round 2: A2's Exhibit 9 range and the guidance pace on the cover, N11, O1, O3, O4 and T9, each with its reason above.
+
+## Bug hunt (2026-10-19)
+
+A read of the lock, score and post-score code, plus two readers on the data and model modules. Each fix's test failed before the fix.
+
+| Id | File and line | Severity | Evidence | Fix | Commit | Regression test |
+|---|---|---|---|---|---|---|
+| BH-1 | `site/app.js:107`, `src/gdn/charts.py:161` | major | The score run writes 2026Q4's first files, so the page and the path chart switched to a partial 2026Q4 estimate (2.9 in a copy with a made-up score) and never showed the score | Feature the newest quarter with a lock or a score, else the newest | e4cdebc | `tests/test_site_a11y.py::test_a_scored_quarter_stays_featured_after_the_next_one_starts`, `::test_without_a_lock_or_score_the_newest_quarter_is_featured`, `tests/test_outputs.py::test_the_path_chart_keeps_a_scored_quarter_until_the_next_lock` |
+| BH-2 | `src/gdn/files.py:66-81` | minor | A truncated `.gz` raised `EOFError`, which the repair path did not catch, so every later run on that date failed; writes were in place | Catch `EOFError` and `zlib.error`; write through a temp file; ignore `*.tmp` | 17cd427 | `tests/test_files.py` |
+| BH-3 | `src/gdn/sec.py:77` | minor | `http.client.IncompleteRead` is not an `OSError`, so a dropped connection aborted a score run | Catch `http.client.HTTPException` | 60bffbb | `tests/test_sec.py::test_a_dropped_connection_is_sec_unavailable` |
+| BH-4 | `src/gdn/workbook.py:235` | minor | The rebuild check left out five of the workbook's inputs | Hash them; the manifest by its backtest date only | 9f6015f, 733559a | `tests/test_outputs.py::test_workbook_digest_covers_every_input_but_new_snapshot_entries` |
+| BH-5 | `src/gdn/claims.py:67` | minor | `problems` saw one claim at a time, so a repeated id passed; a missing key raised `KeyError` | Track ids across files; drop a claim with the wrong keys | 383bc45 | `tests/test_claims.py::test_build_drops_a_repeated_id_and_a_claim_missing_a_key` |
