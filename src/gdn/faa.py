@@ -108,7 +108,7 @@ def download(root, now_utc=None, log=print):
 
 # ---------- reading ----------
 def norm_header(h):
-    return re.sub(r"[^A-Z0-9]", "", h.replace("﻿", "").upper())
+    return re.sub(r"[^A-Z0-9]", "", h.replace("\ufeff", "").upper())
 
 
 def parse_date(s):
@@ -133,7 +133,7 @@ def zip_texts(zpath):
 
 
 def header_of(text):
-    lines = text.lstrip("﻿").splitlines()
+    lines = text.lstrip("\ufeff").splitlines()
     return [norm_header(h) for h in next(csv.reader([lines[0]]))] if lines else []
 
 
@@ -151,7 +151,7 @@ def read_table(text, kind):
 
     Lines split with the csv reader; when that gives a different field count from the
     header's, the line is cut at the header line's comma positions instead."""
-    text = text.lstrip("﻿")
+    text = text.lstrip("\ufeff")
     lines = text.splitlines()
     if not lines:
         return []

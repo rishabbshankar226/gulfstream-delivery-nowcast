@@ -34,8 +34,8 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | done | R1 to R4 K1 K2 V1 | phase 8 commit |
 | 8 | Full gate | todo | all | |
 | 9 | Airframe audit | todo | - | |
-| 9 | Mutation pass | todo | - | |
-| 9 | check-determinism | todo | - | |
+| 9 | Mutation pass | done | - | phase 9 commit |
+| 9 | check-determinism | done | - | phase 9 commit |
 | 9 | As-of study | todo | - | |
 | 10 | Fresh clone build and gate | todo | all but repo | |
 | R | Review rounds 1 to 3 | todo | - | |
@@ -54,5 +54,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
+- Airframe audit 1, 2, 3 (subagents): write docs/build/AIRFRAME_AUDIT_1.csv, _2.csv, _3.csv
+- As-of study (background command): tools/asof.py, log .build/logs/asof.log, writes results/exploratory/asof.csv and asof.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
