@@ -1,0 +1,31 @@
+{
+  "quarter": "2026Q3",
+  "window_start": "2026-07-05",
+  "window_end": "2026-10-04",
+  "snapshot": "2026-10-19",
+  "definition": "E1",
+  "events": {
+    "large": 35,
+    "mid": 6
+  },
+  "trailing": {
+    "reported": {
+      "large": 140,
+      "mid": 23
+    },
+    "registry": {
+      "large": 187,
+      "mid": 28
+    }
+  },
+  "nowcast": {
+    "large": 26.203208556149733,
+    "mid": 4.928571428571429,
+    "total": 31.131779984721163
+  },
+  "band": [
+    20.411952398514266,
+    36.41965877259995
+  ],
+  "made_utc": "2026-10-19T16:04:41Z"
+}

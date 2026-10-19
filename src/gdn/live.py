@@ -411,3 +411,10 @@ def run_score(now=None, offline=False, root=".", log=print):
     write_json(live_dir(root) / f"{q}_score.json", s)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))
     return 0
+
+
+def run_build(now=None, offline=False, root="."):
+    pred = write_build(root, now)
+    update_latest(root, parse_now(now))
+    print(f"build nowcast {pred['quarter']}: {pred['nowcast']['total']:.2f} from {pred['snapshot']}")
+    return 0
