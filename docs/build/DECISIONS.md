@@ -71,3 +71,18 @@ All passed with exit 0, and no prompt came up:
 - Subagent types available: `general-purpose`, `Explore`, `Plan`, `claude`. Checkers and reviewers run as `general-purpose` from briefs in `docs/build/briefs/`.
 
 ## Limitations (collected for the README)
+
+## Phase 1: data
+
+Real FAA header lines of the 2026-10-19 zip (each starts with a UTF-8 byte-order mark and ends `,\r\n`):
+- `ACFTREF.txt`: `CODE,MFR,MODEL,TYPE-ACFT,TYPE-ENG,AC-CAT,BUILD-CERT-IND,NO-ENG,NO-SEATS,AC-WEIGHT,SPEED,TC-DATA-SHEET,TC-DATA-HOLDER,`
+- `MASTER.txt`: `N-NUMBER,SERIAL NUMBER,MFR MDL CODE,ENG MFR MDL,YEAR MFR,TYPE REGISTRANT,NAME,STREET,STREET2,CITY,STATE,ZIP CODE,REGION,COUNTY,COUNTRY,LAST ACTION DATE,CERT ISSUE DATE,CERTIFICATION,TYPE AIRCRAFT,TYPE ENGINE,STATUS CODE,MODE S CODE,FRACT OWNER,AIR WORTH DATE,OTHER NAMES(1),OTHER NAMES(2),OTHER NAMES(3),OTHER NAMES(4),OTHER NAMES(5),EXPIRATION DATE,UNIQUE ID,KIT MFR, KIT MODEL,MODE S CODE HEX,`
+- `DEREG.txt`: `N-NUMBER,SERIAL-NUMBER,MFR-MDL-CODE,STATUS-CODE,NAME,STREET-MAIL,STREET2-MAIL,CITY-MAIL,STATE-ABBREV-MAIL,ZIP-CODE-MAIL,ENG-MFR-MDL,YEAR-MFR,CERTIFICATION,REGION,COUNTY-MAIL,COUNTRY-MAIL,AIR-WORTH-DATE,CANCEL-DATE,MODE-S-CODE,INDICATOR-GROUP,EXP-COUNTRY,LAST-ACT-DATE,CERT-ISSUE-DATE,STREET-PHYSICAL,STREET2-PHYSICAL,CITY-PHYSICAL,STATE-ABBREV-PHYSICAL,ZIP-CODE-PHYSICAL,COUNTY-PHYSICAL,COUNTRY-PHYSICAL,OTHER-NAMES(1),OTHER-NAMES(2),OTHER-NAMES(3),OTHER-NAMES(4),OTHER-NAMES(5),KIT MFR, KIT MODEL,MODE S CODE HEX,`
+- Every field §3.3 names is present after normalization, `YEARMFR` included.
+- Every file decodes as strict UTF-8, so the stored subset, written as the decoded text re-encoded, is the zip's own bytes.
+- In the real files, the header line is not aligned with the fixed-width data, so "cut at the header line's comma positions" would garble a row. No in-scope row needs the fallback: every one splits into the header's field count (14, 35 and 39), and none holds a double quote. The fallback is implemented as written, and the gate does the same; the fixtures align their header with the data so a test can exercise it.
+- Scope: 54 ACFTREF codes, including the G280 under `IAI LTD` (codes 3980218 and 4500314). Subset: 2,821 MASTER and 1,296 DEREG rows; 4,053 airframes.
+- The model "GULFSTREAM 200" under the maker "GULFSTREAM AEROSPACE" (codes 3980202, 3980211) reads `large` by §3.3's cabin rule, since it contains no `G200` and its maker is not IAI or Israel. Gulfstream's own G200 files under the IAI codes, which read `mid`. I kept the rule as written.
+- SEC: all 38 results releases, 2017Q1 to 2026Q2, parsed. Fiscal ends come from the 10-Q report dates and match the gate's pins. The sentence check ran where a release has the sentence: 2020Q2 (total only), 2024Q2, 2024Q3 and 2024Q4, all agreeing. Every prior-year column matches the year-earlier release.
+- Gate `--only faa,truth`: F1 to F4, T1 and T2 pass with no warning, so T2 read every release from SEC's text. T3 fails until Phase 2 writes `data/guidance.csv`.
+- I added `data/processed/book_to_bill.csv` (the 2026Q2 orders paragraph: defense 1.4, Aerospace 1.5, company 1.4) so the note can quote it on an offline rebuild.

@@ -1,0 +1,11 @@
+﻿N-NUMBER,SERIAL NUMBER,MFR MDL CODE,YEAR MFR,NAME                     ,CERT ISSUE DATE,AIR WORTH DATE,
+N700AA  ,75001        ,3980221     ,2024    ,SKY JETS, INC            ,20240515       ,20240301      ,
+N280ZZ  ,2101         ,4500314     ,2016    ,GULFSTREAM AEROSPACE CORP,20230301       ,20170110      ,
+N703GD  ,75003        ,3980221     ,2024    ,GULFSTREAM AEROSPACE CORP,20250105       ,20241201      ,
+        ,             ,            ,        ,                         ,               ,              ,
+N280RN  ,2050         ,4500314     ,2016    ,RENEWAL HOLDINGS LLC     ,20240301       ,20160301      ,
+N704GA  ,75004        ,3980221     ,2026    ,GULFSTREAM AEROSPACE CORP,               ,              ,
+N69PT   ,695001       ,3980700     ,1981    ,PROP OWNER               ,19900101       ,19810101      ,
+N560X   ,75001        ,1234567     ,2005    ,CESSNA OWNER             ,20050101       ,20050101      ,
+N999ZZ  ,             ,3980221     ,2024    ,NO SERIAL LLC            ,20240101       ,20240101      ,
+
