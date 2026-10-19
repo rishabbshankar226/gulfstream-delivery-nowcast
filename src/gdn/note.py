@@ -324,7 +324,9 @@ def build(root="."):
         f"{r['quarter']} ({f1(float(r['total']))} against {r['actual']})" for r in ratio_rows)
         + ". No filing or call states why the registry count differed from GD's count in those quarters. "
           "The truncation test below cuts each quarter's own registry events a set number of days before the "
-          "quarter ends, a crude stand-in for a registry that has not finished posting.</p>")
+          "quarter ends, a crude stand-in for a registry that has not finished posting. It is harsh: archived registry "
+          "copies taken a few weeks after four past quarter ends missed by less than the finished copy, because they "
+          "read the lag quarters from the same unfinished file. Four quarters prove nothing either way.</p>")
     yr_rows = [[y] + [f1(v[mm]) for mm in ("ratio", "raw", "guidance", "seasonal", "last")] for y, v in yrs.items()]
     tr = h["truncation_mae"]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 5. Average miss by year, aircraft</div>'

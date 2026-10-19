@@ -1,0 +1,5 @@
+# Brief: review round 1, spec auditor
+
+Repository: `~/Desktop/projects/gulfstream-delivery-nowcast`. Output: `docs/build/review1_spec.md`. Write only your output file; never edit the repository. A finding has an id, a file and line, a severity (blocking, major or minor), evidence (a quote or command output), and a concrete fix. No evidence, no finding. Default to wrong under doubt: when you cannot confirm something reads right, report it.
+
+Read §3 of `~/Desktop/prompt library/gulfstream-delivery-nowcast/GULFSTREAM_NOWCAST_PROMPT.md` (in windows of 120 lines or less) against `src/gdn/` and `tests/`. Above all, check the code the independent gate cannot yet see working: the lock and the score (`src/gdn/live.py`, `src/gdn/gitops.py`, `src/gdn/daily.py`), the snapshot ingest, the path rows, and the estimates and workbook basis rules. For each §3 rule, say whether the code implements it as written, citing the line. Report every divergence, every rule with no test, and any path that would lock late, lock twice, rewrite a committed prediction, or replace a subset a lock depends on. Time box: 45 minutes.

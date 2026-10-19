@@ -107,6 +107,19 @@ Either date must fall within a year of the airframe's first airworthiness date (
 
 **The dollars.** The Aerospace estimate is the delivery estimate × trailing Aerospace revenue per delivery, services included: a mechanical estimate. The defense segments use the seasonal naive with drift, the baseline my [defense backlog study](https://rishabbshankar226.github.io/Defense-Backlog-forecast/) found hardest to beat for five other primes; applying it to GD is an assumption.
 
+### Secondary analysis: the as-of study
+
+Preregistered as secondary. The Wayback Machine holds 75 successful captures of `ReleasableAircraft.zip`; six quarters have one taken 20 to 30 days after the fiscal end, and four of them can be scored (2016Q3 and 2016Q4 need lag quarters before the reported series). Scored as each capture would have read it, with the quarter's own events and its four lags all from that capture, as a live estimate reads them:
+
+| Quarter | Capture | Days after end | As-of estimate | GD reported | As-of miss | Miss on the 2026-10-19 copy |
+|---|---|---|---|---|---|---|
+| 2017Q1 | 2017-04-27 | 25 | 33.3 | 30 | 3.3 | 5.6 |
+| 2025Q3 | 2025-10-21 | 23 | 32.4 | 39 | 6.6 | 6.8 |
+| 2026Q1 | 2026-05-01 | 26 | 43.3 | 38 | 5.3 | 7.4 |
+| 2026Q2 | 2026-08-03 | 29 | 42.7 | 41 | 1.7 | 3.8 |
+
+In all four the copy from a few weeks after the quarter missed by less than the finished copy, and its past-miss band held GD's count in two of the three held-out quarters. Reading the lags from the same unfinished file seems to offset part of what has not posted, which the truncation table, with its lags left whole, does not allow for. Four quarters prove nothing; the locked quarters remain the real test. Details: [results/exploratory/asof.md](results/exploratory/asof.md).
+
 ### Exploratory
 
 Nothing tried after seeing the results has changed the headline. Any variant goes in `results/exploratory/`, labelled as tried after the fact.
