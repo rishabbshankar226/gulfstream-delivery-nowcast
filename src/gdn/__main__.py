@@ -10,6 +10,7 @@ STAGES = {
     "diagnostics": ("diagnostics", "run"),
     "design": ("model", "run_design"),
     "holdout": ("model", "run_holdout"),
+    "errors": ("errors", "run"),
     "snapshot": ("live", "run_snapshot"),
     "nowcast": ("live", "run_nowcast"),
     "lock": ("live", "run_lock"),
