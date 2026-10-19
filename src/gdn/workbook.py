@@ -235,10 +235,10 @@ def pin(path, date):
 def input_digest(root):
     root = Path(root)
     lines = []
-    # The builder's own source counts as an input, so a change to a formula or a format rebuilds the file.
-    for p in (basis_path(root), root / "results/metrics.json", root / "data/processed/segments.csv",
-              root / "src/gdn/workbook.py"):
+    for p in (basis_path(root), root / "results/metrics.json", root / "data/processed/segments.csv"):
         lines.append(f"{sha256(p.read_bytes())}  {p.relative_to(root)}")
+    # The builder's own source counts as an input, so a change to a formula or a format rebuilds the file.
+    lines.append(f"{sha256(Path(__file__).read_bytes())}  src/gdn/workbook.py")
     return "\n".join(lines) + "\n"
 
 
