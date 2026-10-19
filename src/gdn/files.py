@@ -54,3 +54,28 @@ def write_csv(path, cols, rows):
 def read_csv(path):
     with open(path, newline="") as f:
         return list(csv.DictReader(f))
+
+
+def gz_bytes(data):
+    """gzip with mtime 0 and the header's OS byte set to 255 (unknown), so macOS and Linux write the same bytes."""
+    import gzip as _gzip
+    b = bytearray(_gzip.compress(data, mtime=0))
+    b[9] = 255
+    return bytes(b)
+
+
+def write_gz(path, data):
+    """Write gzip-compressed data unless the file already holds exactly this content. Returns the file's bytes."""
+    import gzip as _gzip
+    path = Path(path)
+    if path.exists():
+        old = path.read_bytes()
+        try:
+            if _gzip.decompress(old) == data:
+                return old
+        except OSError:
+            pass
+    path.parent.mkdir(parents=True, exist_ok=True)
+    new = gz_bytes(data)
+    path.write_bytes(new)
+    return new

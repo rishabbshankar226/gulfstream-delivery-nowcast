@@ -12,7 +12,7 @@ from zoneinfo import ZoneInfo
 
 from . import events, faa, model, sec, stats
 from .fiscal import LIVE_FIRST, Calendar, qidx, shift
-from .files import csv_text, read_csv, read_json, sha256, write_json, write_text
+from .files import csv_text, read_csv, read_json, sha256, write_gz, write_json, write_text
 from .gitops import GitError, Ops
 
 ET = ZoneInfo("America/New_York")
@@ -94,11 +94,7 @@ def table_dates(root):
 
 
 def write_table(root, date, rows):
-    p = table_path(root, date)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    gz = events.serials_gz(rows)
-    if not p.exists() or p.read_bytes() != gz:
-        p.write_bytes(gz)
+    write_gz(table_path(root, date), events.serials_text(rows).encode("utf-8"))
 
 
 def read_table(root, date):
@@ -199,7 +195,10 @@ def ingest(root, date, log=print):
     texts = faa.zip_texts(z)
     sub = faa.subset(texts)
     write_table(root, date, events.airframes(sub))
-    if in_lock_window(root, date):
+    locked_on = {read_json(p).get("snapshot") for p in (Path(root) / "predictions").glob("*.json")}
+    if date in locked_on:
+        log(f"the stored subset for {date} backs a lock; kept as it is")
+    elif in_lock_window(root, date):
         faa.store_subset(root, date, sub, z)
         log(f"stored the full subset for {date} (lock window)")
 

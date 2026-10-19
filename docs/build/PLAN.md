@@ -1,6 +1,6 @@
 # Plan
 
-Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:00 ET.
+Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:00 ET; done 2026-10-19 12:35 EDT.
 
 | Phase | Task | State | Gate codes | Commit |
 |---|---|---|---|---|
@@ -12,19 +12,19 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 1 | SEC releases, gd_deliveries.csv, segments.csv, backlog | done | T1 T2 S1 S3 | 6725184 |
 | 1 | serials.csv, registry_quarterly.csv | done | F3 F4 | 6725184 |
 | 1 | Fixture tests | done | - | 6725184 |
-| 2 | coverage_design.csv and the 0.5 to 1.5 check | done | - | |
-| 2 | guidance.csv from three checkers | done | T3 | |
-| 2 | design.csv, chosen definition | done | M1 | |
-| 2 | PREREGISTRATION.md, committed alone | todo | Q1 Q2 | |
-| 3 | holdout.csv, metrics.json, tests | todo | M2 M3 | |
-| 3 | error_analysis.md | todo | - | |
-| 4 | calendar.json, live.py, build nowcast, path, latest, daily table | todo | L1 L2 | |
-| 4 | estimates.json | todo | S2 | |
-| 4 | Lock and score tests with fixed clocks, limitations notes | todo | - | |
-| 5 | make daily-core / daily, workflows, LICENSE, SEC_UA secret | todo | Y4 | |
-| 5 | Workflow run and watch | todo | - | |
-| 5 | Lock rehearsal, REHEARSAL.md | todo | L1 to L4 | |
-| 5 | Critical path ready | todo | faa truth model prereg segments live | |
+| 2 | coverage_design.csv and the 0.5 to 1.5 check | done | - | 5c84d36 |
+| 2 | guidance.csv from three checkers | done | T3 | 5c84d36 |
+| 2 | design.csv, chosen definition | done | M1 | 5c84d36 |
+| 2 | PREREGISTRATION.md, committed alone | done | Q1 Q2 | 2c62ad3 |
+| 3 | holdout.csv, metrics.json, tests | done | M2 M3 | 48c1ea0 |
+| 3 | error_analysis.md | done | - | 48c1ea0 |
+| 4 | calendar.json, live.py, build nowcast, path, latest, daily table | done | L1 L2 | 3d94197 |
+| 4 | estimates.json | done | S2 | 3d94197 |
+| 4 | Lock and score tests with fixed clocks, limitations notes | done | - | 3d94197 |
+| 5 | make daily-core / daily, workflows, LICENSE, SEC_UA secret | done | Y4 | 9b3176e |
+| 5 | Workflow run and watch | done | - | runs 39283382067, 39283387767 |
+| 5 | Lock rehearsal, REHEARSAL.md | done | L1 to L4 | 81ceefb |
+| 5 | Critical path ready | done | faa truth model prereg segments live | see log |
 | 6 | Workbook | todo | W1 to W5 | |
 | 6 | Charts, VISUAL_QA rows | todo | - | |
 | 6 | claims.json, test_claims.py | todo | N4 | |
@@ -54,4 +54,6 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-(none)
+- claims sourcing, product cycle (subagent): writes docs/build/claims_product.json
+- claims sourcing, outlook and business overview (subagent): writes docs/build/claims_outlook.json
+- claims sourcing, risks (subagent): writes docs/build/claims_risks.json

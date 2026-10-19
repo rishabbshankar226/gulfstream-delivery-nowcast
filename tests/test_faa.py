@@ -151,3 +151,13 @@ def test_download_keeps_a_stored_snapshot(faa_texts, tmp_path, monkeypatch):
     now = dt.datetime(2030, 1, 2, 18, 0, tzinfo=dt.timezone.utc)
     assert faa.download(tmp_path, now, log=lambda *a: None) == "2030-01-02"
     assert z.read_bytes().startswith(b"PK\x05\x06")
+
+
+def test_gzip_is_the_same_on_every_platform(tmp_path):
+    from gdn import files
+    b = files.gz_bytes(b"abc")
+    assert b[:4] == b"\x1f\x8b\x08\x00" and b[4:8] == b"\0\0\0\0" and b[9] == 255
+    p = tmp_path / "x.gz"
+    p.write_bytes(b"\x1f\x8b\x08\x00\x00\x00\x00\x00\x02\x03" + b[10:])     # the same stream with a Linux header
+    assert files.write_gz(p, b"abc")[9] == 3                                  # identical content: kept, no churn
+    assert files.write_gz(p, b"abcd")[9] == 255

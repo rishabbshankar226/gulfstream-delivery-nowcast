@@ -144,3 +144,13 @@ Asked the owner how to proceed; the guidance checkers kept running meanwhile.
 7. **Band.** The past-miss band comes from errors measured on a finished registry file, so it is likely too narrow at a live lock, when recent registrations have not posted.
 
 Also for `## Data`: the G280 is filed under the maker `IAI LTD` (model `GULFSTREAM G280`); GD's counts use the delivered basis that came with ASC 606, adopted 2017-01-01 and applied back to 2016.
+
+## Phase 5: critical path
+
+- Workflows: `pages.yml` word for word; `nowcast.yml` per §3.11; `test.yml` also installs Playwright's Chromium, as the backlog project's does, so the browser test runs in CI instead of skipping. MIT `LICENSE` copied from the backlog project (Rishabb Shankar). `SEC_UA` stored as a repository secret at 16:10 UTC.
+- GitHub Actions was "degraded" on githubstatus.com and both runs sat queued about 17 minutes. While waiting I started Phase 6's workbook and charts; nothing from them was committed before this "Critical path ready" commit.
+- **The runner reached both sources.** `nowcast` run 39283382067 (workflow_dispatch, 2026-10-19 16:10 UTC): "SEC reachable: HTTP 200, 155154 bytes" and "FAA snapshot 2026-10-19 by curl, 72927535 bytes", the same size as the Mac's download. Akamai did not refuse the runner this time, against eight refusals reported to 2026-10-18; it may refuse again, so the Mac stays the primary. The `test` run 39283387767 passed.
+- The run pushed b205fbe, rewriting `data/snapshots/daily/2026-10-19.serials.csv.gz` with identical content but a different gzip header: Python 3.11's `gzip.compress(..., mtime=0)` goes through zlib, which stamps the OS (0x13 on macOS, 0x03 on Linux). Fixed: every `.gz` is written with the OS byte set to 255 and is never rewritten when its decompressed content is unchanged (`files.write_gz`), so the Mac and the runner no longer churn each other's files. Existing files keep their bytes.
+- Same-date runs: a second download on a Chicago date replaces that date's daily table and path row, as §3.11 says, and the stored subset too, except when a prediction file names that snapshot date. A lock's subset is never replaced, so L1 can always rebuild it.
+- Lock rehearsal (`tools/rehearsal.py`, `docs/build/REHEARSAL.md`): all 11 cases pass, including a push that loses a race to a second clone and is retried after `git reset --hard @{u}`. The gate's `live` family on the rehearsal clone: no failing code; L4 warns only that the fixture 8-K is not on SEC.
+- Gate `--only faa,truth,model,prereg,segments,live` at 12:34 EDT: 20 assertions, 0 failing, warnings S3 and L3 ("not locked yet"), both allowed.
