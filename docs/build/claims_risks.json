@@ -1,0 +1,74 @@
+[
+  {
+    "id": "risk-bizjet-demand-economy",
+    "text": "GD says customer demand for its business aircraft can be affected by changes in general economic conditions, the availability and cost of credit, pricing pressures and trends in capital goods markets.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "Customer demand can be affected by a number of factors, including changes in general economic conditions, the availability and cost of credit, pricing pressures and trends in capital goods markets.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-supply-chain-disruption",
+    "text": "GD says it sometimes relies on only one or two sources of supply, and any supply chain disruption could hurt its ability to meet customer commitments.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "We sometimes rely on only one or two sources of supply, and any disruption in our supply chain could have an adverse effect on our ability to meet our customer commitments",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-new-product-regulatory-delays",
+    "text": "GD says many of its new products must meet extensive, time-consuming regulatory requirements that are often outside its control and may cause unanticipated delays.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "Many of our new products must meet extensive and time-consuming regulatory requirements that are often outside our control and may result in unanticipated delays.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-aerospace-customer-defaults",
+    "text": "GD says that if Aerospace customers default on existing contracts and the contracts are not replaced, the segment's anticipated revenue and profitability could be reduced materially.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "In addition, if customers default on existing contracts and the contracts are not replaced, the segment’s anticipated revenue and profitability could be reduced materially.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-us-government-spending",
+    "text": "GD says decreases in U.S. government defense and other spending, or changes in spending allocation or priorities, could reduce, delay or terminate its programs and impact its financial performance.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "Decreases in U.S. government defense and other spending or changes in spending allocation or priorities could result in one or more of our programs being reduced, delayed or terminated, which could impact our financial performance.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-fixed-price-contracts",
+    "text": "GD says it typically assumes more risk with fixed-price contracts, which offer additional profits when it completes the work for less than originally estimated.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "Typically, we assume more risk with fixed-price contracts. However, these types of contracts offer additional profits when we complete the work for less than originally estimated.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-tariffs",
+    "text": "GD says tariffs have not had a material impact on its results to date but reduced Aerospace operating margins by 30 basis points in 2025, and their duration and extent continue to evolve.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "To date, the tariffs have not had a material impact on our results but did reduce the Aerospace operating margins by 30 basis points in 2025. The duration and extent of the tariffs continue to evolve.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-international-fx",
+    "text": "GD says non-U.S. transactions can involve increased risks from foreign exchange rate variability, which could hurt sales and the translation of international revenue into U.S. dollars, and from differing legal systems.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000006",
+    "quote": "Non-U.S. transactions can involve increased risks arising from foreign exchange rate variability, which could, among other things, negatively impact sales and the translation of our international revenue from local currencies into U.S. dollars, and differing legal systems.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  }
+]
