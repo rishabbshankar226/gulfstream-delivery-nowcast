@@ -33,7 +33,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 | 7 | Impeccable critique, audit, polish; shots | done | site | phase 7 commit |
 | 8 | README, LINKEDIN_POST, INTERVIEW_NOTES, RESUME_BULLETS | done | R1 to R4 K1 K2 V1 | phase 8 commit |
 | 8 | Full gate | todo | all | |
-| 9 | Airframe audit | todo | - | |
+| 9 | Airframe audit | done; 25-non-mirror requirement open | - | phase 9 audit commit |
 | 9 | Mutation pass | done | - | phase 9 commit |
 | 9 | check-determinism | done | - | phase 9 commit |
 | 9 | As-of study | done | - | 9b84384 |
@@ -54,8 +54,6 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-- Airframe audit 1 and 3 (subagents): write docs/build/AIRFRAME_AUDIT_1.csv and _3.csv (audit 2 file written)
-- Monitor task: waits for the audit files
 - Review round 1 (five subagents): docs/build/review1_numbers.md, review1_analyst.md, FACT_CHECK.md, review1_spec.md, review1_ops.md
 - http.server on 127.0.0.1:8766 serving site/ (background); stop with `pkill -f "http.server 8766"`
 - CronCreate job 8599714f: morning daily-job reminder at 06:43 local, session-only
