@@ -84,3 +84,24 @@ def test_offline_client_never_fetches(tmp_path):
     c = sec.Client(tmp_path, network=False)
     with pytest.raises(sec.SECUnavailable):
         c.get("https://www.sec.gov/x", "x.htm")
+
+
+def test_a_dropped_connection_is_sec_unavailable(tmp_path, monkeypatch):
+    import http.client
+
+    class Dropped:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *a):
+            return False
+
+        def read(self):
+            raise http.client.IncompleteRead(b"partial")
+
+    monkeypatch.setattr(sec, "user_agent", lambda: "test test@example.com")
+    monkeypatch.setattr(sec.urllib.request, "urlopen", lambda *a, **k: Dropped())
+    c = sec.Client(tmp_path, network=True)
+    with pytest.raises(sec.SECUnavailable):
+        c._fetch("https://www.sec.gov/x")
+    assert c.failed
