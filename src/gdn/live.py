@@ -20,6 +20,7 @@ PATH_COLS = ["date", "events_large", "events_mid", "trailing_registry_large", "t
              "nowcast_large", "nowcast_mid", "nowcast_total"]
 CABINS = ("large", "mid")
 LOCK_HOUR_ET = 19
+LAST_LOCK_MINUTES = 10          # never start a release within this many minutes of 00:00 ET on the release date
 LOCK_WINDOW_DAYS = 7
 
 
@@ -247,6 +248,12 @@ def before_release(now, release_date):
     return now.astimezone(ET).date() < dt.date.fromisoformat(release_date)
 
 
+def wall_clock_ok(release_date):
+    """True while the real clock is more than LAST_LOCK_MINUTES before 00:00 ET on the release date."""
+    midnight = dt.datetime.fromisoformat(release_date).replace(tzinfo=ET)
+    return utcnow() < midnight - dt.timedelta(minutes=LAST_LOCK_MINUTES)
+
+
 def newest_stored(root):
     snaps = sorted(faa.manifest(root)["snapshots"])
     return snaps[-1] if snaps else None
@@ -289,8 +296,12 @@ def push_with_merge(ops, log=print, on_conflict=None):
     return False
 
 
-def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_prediction=None):
-    """Lock the live quarter on its release date's eve (§3.6). Returns 0, or 1 when the lock failed."""
+def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_prediction=None, on_conflict=None,
+             wall=False):
+    """Lock the live quarter on its release date's eve (§3.6). Returns 0, or 1 when the lock failed.
+
+    `now` decides whether a lock is due; with `wall` (a real run, not a rehearsal), the real clock must also be
+    more than LAST_LOCK_MINUTES before midnight ET when the prediction is written and when the release is made."""
     now = parse_now(now)
     ops = ops or Ops(root, log)
     q = live_quarter(root)
@@ -313,7 +324,12 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             log(f"{q} missed its lock window (release {rel}); no late lock")
         return 0
     for attempt in range(1, 4):
-        ops.pull()
+        conflicted = ops.pull()
+        if conflicted:
+            if not (on_conflict and on_conflict(conflicted)):
+                ops.abort_merge()
+                log(f"pull conflicted in {conflicted} (attempt {attempt}); merge aborted, retrying")
+                continue
         if ops.release_view(tag):
             if not lock_p.exists() and pred_p.exists():
                 write_lock_json(root, q, ops)
@@ -321,8 +337,8 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
                 push_with_merge(ops, log)
             log(f"{tag} already exists; one lock per quarter")
             return 0
-        if not before_release(now, rel):
-            log("past 00:00 ET on the release date; no late lock")
+        if not before_release(now, rel) or (wall and not wall_clock_ok(rel)):
+            log("too close to or past 00:00 ET on the release date; no late lock")
             return 1
         if before_prediction:
             before_prediction()
@@ -347,6 +363,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
                 ops.reset_to_upstream()
                 continue
         digest = sha256(pred_p.read_bytes())
+        if wall and not wall_clock_ok(rel):
+            log(f"the real clock is within {LAST_LOCK_MINUTES} minutes of 00:00 ET; no release, no late lock")
+            return 1
         ops.release_create(tag, target, f"Locked nowcast {q}", f"sha256 {digest}")
         obj = write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
