@@ -268,7 +268,8 @@ def main():
     tgt = state().get("lock-2026Q3", {}).get("targetCommitish", "")
     in_up = sh("git", "merge-base", "--is-ancestor", tgt, "origin/main", cwd=WORK, check=False).returncode == 0 if tgt else False
     record("Rejected push", "gdn lock --now 2026-10-29 19:30 ET, second clone pushes first", r,
-           "reset to upstream, lock on retry", ok and in_up, "competing commit kept, lock target on main")
+           "reset to upstream, lock on retry", ok and in_up and "lock push rejected (attempt 1)" in r.stdout,
+           "attempt 1 rejected and reset; competing commit kept; lock target on main")
 
     # 10. The eve through make daily-core (offline download), as the session's 19:05 waiter runs it.
     fresh(["2026-10-28"])
