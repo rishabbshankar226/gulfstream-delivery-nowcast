@@ -96,7 +96,8 @@ a { color: var(--focus); text-underline-offset: 2px; }
 .hero { border-bottom: 1px solid var(--rule); padding: var(--sp-8) 0 var(--sp-6); background: var(--surface); }
 .eyebrow { margin: 0 0 var(--sp-2); font-size: var(--fs-xs); font-weight: var(--w-medium); color: var(--muted); letter-spacing: 0.02em; }
 h1 { margin: 0 0 var(--sp-3); font-size: var(--fs-title); line-height: 1.2; font-weight: var(--w-strong); max-width: 30ch; }
-.lead { margin: 0 0 var(--sp-4); font-size: var(--fs-lg); line-height: 1.45; max-width: 60ch; color: var(--ink-3); }
+.framing { margin: 0 0 var(--sp-4); max-width: 58ch; color: var(--muted); font-size: var(--fs-xs); }
+.lead { margin: 0 0 var(--sp-2); font-size: var(--fs-lg); line-height: 1.45; max-width: 60ch; color: var(--ink-3); }
 .links { display: flex; flex-wrap: wrap; gap: var(--sp-2) var(--sp-6); font-size: var(--fs-sm); }
 .links a { display: inline-block; padding: var(--sp-1) 0; min-height: 24px; }
 
@@ -105,8 +106,8 @@ h1 { margin: 0 0 var(--sp-3); font-size: var(--fs-title); line-height: 1.2; font
 .panel:last-child { border-bottom: 0; }
 h2 { margin: 0 0 var(--sp-2); font-size: var(--fs-lg); font-weight: var(--w-strong); }
 h3 { margin: var(--sp-6) 0 var(--sp-2); font-size: var(--fs-md); font-weight: var(--w-strong); }
-.sub { margin: 0 0 var(--sp-3); color: var(--muted); max-width: 72ch; }
-.note { margin: var(--sp-3) 0 0; color: var(--muted); max-width: 72ch; font-size: var(--fs-xs); }
+.sub { margin: 0 0 var(--sp-3); color: var(--muted); max-width: 62ch; }
+.note { margin: var(--sp-3) 0 0; color: var(--muted); max-width: 58ch; font-size: var(--fs-xs); }
 
 /* live */
 .live { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: var(--sp-6); align-items: start; }
@@ -144,9 +145,9 @@ td { text-align: right; padding: var(--sp-1) var(--sp-2); border-bottom: 1px sol
 th:first-child, td:first-child { text-align: left; }
 tr.emph td { font-weight: var(--w-strong); }
 
-ul.plain { margin: 0; padding-left: var(--sp-4); max-width: 80ch; }
+ul.plain { margin: 0; padding-left: var(--sp-4); max-width: 62ch; }
 ul.plain li { margin-bottom: var(--sp-2); }
-.method { margin: 0 0 var(--sp-3); padding-left: var(--sp-6); max-width: 80ch; }
+.method { margin: 0 0 var(--sp-3); padding-left: var(--sp-6); max-width: 62ch; }
 .method li { margin-bottom: var(--sp-1); }
 .two { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--sp-6); }
 

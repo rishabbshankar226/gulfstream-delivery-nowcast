@@ -21,6 +21,7 @@
     <p class="eyebrow">General Dynamics · Gulfstream</p>
     <h1>How closely do FAA registrations track Gulfstream deliveries?</h1>
     <p class="lead" id="lead" aria-live="polite">Loading the results.</p>
+    <p class="framing" id="framing"></p>
     <nav class="links" aria-label="Related links">
       <a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast">Code and data on GitHub</a>
       <a href="GD_research_note.pdf">Research note (PDF)</a>
@@ -48,14 +49,14 @@
 
   <section class="panel" aria-labelledby="h-path">
     <h2 id="h-path">The estimate's path</h2>
-    <p class="sub">The estimate as each day's registry snapshot posts, with the band of past misses around it. The locked estimate is the one that counts.</p>
-    <div class="chart tall"><canvas id="c-path" role="img" aria-label="Chart of the estimate by snapshot date"></canvas></div>
+    <p class="sub" id="path-sub">The estimate as each day's registry snapshot posts, with the band of past misses around it.</p>
+    <div class="chart"><canvas id="c-path" role="img" aria-label="Chart of the estimate by snapshot date"></canvas></div>
     <details class="figures"><summary>The figures as a table</summary><div class="scroll" tabindex="0" role="region" aria-label="Table of the estimate by snapshot date"><table id="t-path"></table></div></details>
   </section>
 
   <section class="panel" aria-labelledby="h-track">
     <h2 id="h-track">Track record</h2>
-    <p class="sub">GD's reported deliveries each quarter against five estimates. The shaded quarters set the rule; the quarters after them test it.</p>
+    <p class="sub">GD's reported deliveries each quarter against five estimates. The shaded quarters set the rule; the quarters after them test it. The raw registry count is the count before scaling. Select a name in the key to show or hide its line.</p>
     <div class="chart tall"><canvas id="c-track" role="img" aria-label="Chart of reported deliveries against five estimates by quarter"></canvas></div>
     <h3 class="tiles-title">Average miss on the quarters held out for the test</h3>
     <ul class="tiles" id="tiles"></ul>
@@ -84,6 +85,7 @@
       <div class="scroll" tabindex="0" role="region" aria-label="Table of revenue estimates by segment"><table id="t-est"></table></div>
       <div class="scroll" tabindex="0" role="region" aria-label="Table of Aerospace revenue by delivery count"><table id="t-sens"></table></div>
     </div>
+    <p class="note" id="est-why"></p>
   </section>
 
   <section class="panel" aria-labelledby="h-method">
@@ -93,7 +95,7 @@
       <li>Those dates are counted in GD's fiscal quarters, by cabin size.</li>
       <li>The count is scaled by how many deliveries GD reported per registration over the four quarters before.</li>
       <li>The quarters from 2017Q1 to 2019Q4 set the rule; the 26 quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace and two simple rules of thumb.</li>
-      <li>Each live quarter's estimate is locked on GitHub the day before GD reports, and kept whether it hits or misses.</li>
+      <li>Each live quarter's estimate is locked on GitHub the evening before GD reports, and kept whether it hits or misses.</li>
     </ol>
     <p class="sub"><a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#limitations">What this method cannot see</a>, and why the test on past quarters flatters it.</p>
   </section>

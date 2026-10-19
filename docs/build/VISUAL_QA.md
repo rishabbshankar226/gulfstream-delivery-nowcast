@@ -56,3 +56,21 @@ Round 1 (8 pages): a forced page break left half-empty pages; "Gd's" capitalisat
 | 6 to 7 | Model page | pass | Summary and Segments as the workbook computes them |
 | 7 | Sources | pass | 8 cited sources, every release folder, the FAA file and snapshot, the repository |
 | all | Colours consistent | pass | the chart PNGs' palette; one accent for citation markers and links |
+
+## The dashboard (Phase 7), read as Playwright screenshots after the Impeccable fixes
+
+Headless Chrome cannot render narrower than its minimum window width, so the 390 px shots come from Playwright at a true 390 px viewport (`tools/shoot.py`).
+
+| Image | Criterion | Result | Reason |
+|---|---|---|---|
+| desktop_light.png, desktop_dark.png | Live card | pass | status, big estimate, band, registrations by cabin, guidance pace, typical quarter, same quarter last year, release and lock dates |
+| desktop_light.png | Path chart | pass | one snapshot shown with its band, guidance pace line, caption with the lock date |
+| desktop_light.png | Track record and tooltips | pass | five estimates against GD's line; tooltip lists each value with its miss; design window shaded |
+| desktop_light.png | Test panel | pass | sign tests in words, guidance coverage, band coverage, coverage drift, truncation table with a comparator |
+| desktop_light.png | Bars | pass | twelve models by name with a total and scale in the caption |
+| desktop_light.png | Tables | pass | estimates with the year-ago comparator; sensitivity with its change column |
+| phone_light.png, phone_dark.png | No sideways scroll | pass | scrollWidth equals the viewport; tables scroll in their own regions |
+| phone_dark_top.png | Legibility | pass | lead, live card and facts readable at 390 px in dark mode |
+| all | Colours consistent | pass | one ink, one accent, warm greys, matching the PNG charts |
+| all | Figures match files | pass | 5.5, 6.9, 4.6, 31.1, 20.4 to 36.4, 33.8 as in metrics.json, the latest file and data.json |
+| output/charts/dashboard.png | README image | pass | 1280 x 900, light, the first screen |
