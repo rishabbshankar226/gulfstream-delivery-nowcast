@@ -73,7 +73,7 @@
 
   <section class="panel" aria-labelledby="h-pipe">
     <h2 id="h-pipe">On Gulfstream's own registration</h2>
-    <p class="sub" id="pipe-sub">Jets registered to Gulfstream itself with no delivery event yet, by model: aircraft in flight test, completion or resale.</p>
+    <p class="sub" id="pipe-sub">Jets registered to Gulfstream itself with no delivery event yet, by model: aircraft in flight test, completion or resale, and registrations held for jets not yet airworthy.</p>
     <div class="chart" id="pipe-box"><canvas id="c-pipe" role="img" aria-label="Bar chart of jets on Gulfstream's own registration by model"></canvas></div>
     <details class="figures"><summary>The figures as a table</summary><div class="scroll" tabindex="0" role="region" aria-label="Table of jets on Gulfstream's own registration"><table id="t-pipe"></table></div></details>
   </section>
@@ -94,8 +94,8 @@
       <li>Each Gulfstream jet in the FAA registry gets a delivery date: a customer's registration, or an export off Gulfstream's own registration, whichever comes first.</li>
       <li>Those dates are counted in GD's fiscal quarters, by cabin size.</li>
       <li>The count is scaled by how many deliveries GD reported per registration over the four quarters before.</li>
-      <li>The quarters from 2017Q1 to 2019Q4 set the rule; the 26 quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace and two simple rules of thumb.</li>
-      <li>Each live quarter's estimate is locked on GitHub the evening before GD reports, and kept whether it hits or misses.</li>
+      <li>The quarters from 2017Q1 to 2019Q4 set the rule; the 26 quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace (its full-year delivery outlook less the deliveries already reported, spread by each quarter's usual share of the year) and two simple rules of thumb.</li>
+      <li>Each live quarter's estimate is locked on GitHub the day before GD reports, and kept whether it hits or misses.</li>
     </ol>
     <p class="sub"><a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#limitations">What this method cannot see</a>, and why the test on past quarters flatters it.</p>
   </section>

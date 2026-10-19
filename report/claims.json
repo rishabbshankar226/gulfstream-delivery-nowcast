@@ -99,6 +99,15 @@
     "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
   },
   {
+    "id": "os-release-date",
+    "text": "GD said it expected to hold its third-quarter 2026 earnings call on Friday, October 30.",
+    "source_type": "call",
+    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
+    "quote": "we expect to hold our Q3 earnings call on Friday, October 30, at 9:00 a.m.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
+  },
+  {
     "id": "os-rev",
     "text": "GD expects Aerospace revenue of around $13.8 billion for 2026.",
     "source_type": "call",
@@ -145,7 +154,7 @@
   },
   {
     "id": "pc-g400-timing-update",
-    "text": "GD said it has whipped up its efforts on the G400 and will say more over the next couple of quarters about where the G400 will be.",
+    "text": "GD said it has stepped up its work on the G400 and will say more over the next couple of quarters about where the G400 will be.",
     "source_type": "call",
     "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
     "quote": "On the 400, we've whipped up our efforts on the 400, and we'll have more to say over the next couple of quarters about where we think the 400 will be",
