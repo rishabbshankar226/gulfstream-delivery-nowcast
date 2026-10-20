@@ -69,6 +69,7 @@ class Ops:
             self.git("add", "--", p)
 
     def finish_merge(self):
+        self.refuse_markers()
         self.git("commit", "--no-edit")
 
     def abort_merge(self):
@@ -152,6 +153,13 @@ class Ops:
 
     def tag_commit(self, tag):
         return self.git("rev-list", "-n", "1", tag).stdout.strip()
+
+    def file_at_ref(self, ref, path):
+        """Exact bytes of a repository-relative path at a commit or tag."""
+        r = subprocess.run(["git", "show", f"{ref}:{path}"], cwd=self.root, capture_output=True)
+        if r.returncode != 0:
+            raise GitError(f"cannot read {path} at {ref}: {r.stderr.decode('utf-8', errors='replace').strip()[:400]}")
+        return r.stdout
 
 
 def warn(msg):
