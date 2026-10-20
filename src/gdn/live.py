@@ -283,6 +283,9 @@ def write_lock_json(root, q, ops):
     ops.fetch_tag(tag)
     info = ops.release_view(tag)
     body = prediction_path(root, q).read_bytes()
+    tagged = ops.file_at_ref(f"refs/tags/{tag}", f"predictions/{q}.json")
+    if body != tagged:
+        raise GitError(f"prediction for {q} differs from release tag {tag}; refusing an invalid lock record")
     obj = {"tag": info["tagName"], "published_at": info["publishedAt"], "sha256": sha256(body),
            "commit": ops.tag_commit(tag)}
     write_json(lock_json_path(root, q), obj)
@@ -320,6 +323,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
     `now` decides whether a lock is due; with `wall` (a real run, not a rehearsal), the real clock must also be
     more than LAST_LOCK_MINUTES before midnight ET when the prediction is written and when the release is made."""
     now = parse_now(now)
+    root = Path(root).resolve()
     ops = ops or Ops(root, log)
     pull_clean(ops, on_conflict, log)
     q = live_quarter(root)
