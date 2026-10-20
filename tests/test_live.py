@@ -168,6 +168,37 @@ def test_three_rejected_pushes_give_up(repo):
     assert rc == 1 and not ops.creates and ops.resets == 3
 
 
+@pytest.mark.parametrize("state", ["new", "recover", "exists", "recorded"])
+def test_a_lock_record_that_cannot_be_pushed_fails_the_run(repo, state):
+    when = at("2026-10-29T19:00")
+
+    class RejectRecord(FakeOps):
+        def push(self):
+            return not (repo / "results/live/2026Q3_lock.json").exists()
+
+    ops = RejectRecord(repo, when)
+    if state in ("recover", "recorded"):
+        lock(repo, "2026-10-29T19:00")
+        if state == "recover":
+            (repo / "results/live/2026Q3_lock.json").unlink()
+        else:
+            ops.ahead = lambda: 1
+        ops.released = {"tagName": "lock-2026Q3", "publishedAt": live.stamp(when)}
+    elif state == "exists":
+        original = ops.release_view
+        views = []
+
+        def created_between_pulls(tag):
+            views.append(tag)
+            if len(views) > 1:
+                ops.released = {"tagName": tag, "publishedAt": live.stamp(when)}
+            return original(tag)
+
+        write_json(repo / "predictions/2026Q3.json", {"quarter": "2026Q3", "snapshot": "2026-10-29"})
+        ops.release_view = created_between_pulls
+    assert live.run_lock(when, root=repo, ops=ops, log=lambda *a: None) == 1
+
+
 def test_release_without_lock_json_is_recorded(repo):
     rc, ops = lock(repo, "2026-10-29T19:00")
     (repo / "results/live/2026Q3_lock.json").unlink()
