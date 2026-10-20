@@ -39,7 +39,7 @@ class DailyOps:
         return True
 
     def stage_version(self, path, stage):
-        return self.stages.get(stage)
+        return self.stages.get((path, stage), self.stages.get(stage))
 
     def add(self, path):
         self.calls.append(("add", str(path)))
@@ -108,9 +108,90 @@ def test_a_conflicted_manifest_keeps_both_machines_dates(run, tmp_path):
     (tmp_path / "data/snapshots").mkdir(parents=True)
     ours = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {}, "2026-10-28": {}}})
     theirs = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {}, "2026-10-29": {}}})
-    ops = DailyOps(conflicts=[[MAN, "results/live/2026Q3_path.csv"]], stages={2: ours, 3: theirs})
+    path = "results/live/2026Q3_path.csv"
+    from gdn.files import csv_text
+    path_text = csv_text(live.PATH_COLS, [])
+    (tmp_path / path).parent.mkdir(parents=True)
+    ops = DailyOps(conflicts=[[MAN, path]], stages={(MAN, 2): ours, (MAN, 3): theirs,
+                                                   (path, 2): path_text, (path, 3): path_text})
     rc, ops, _ = run(ops)
     merged = json.loads((tmp_path / MAN).read_text())
     assert sorted(merged["snapshots"]) == ["2026-10-19", "2026-10-28", "2026-10-29"]
-    assert ("add", MAN) in ops.calls and ("theirs", ("results/live/2026Q3_path.csv",)) in ops.calls
+    assert ("add", MAN) in ops.calls and ("add", path) in ops.calls
     assert "finish" in ops.calls and rc == 0
+
+
+def test_a_conflicted_path_keeps_both_machines_history(run, tmp_path):
+    from gdn.files import csv_text, read_csv
+    path = "results/live/2026Q3_path.csv"
+    (tmp_path / path).parent.mkdir(parents=True)
+    ours = csv_text(live.PATH_COLS, [{"date": "2026-10-27", "nowcast_total": 30},
+                                      {"date": "2026-10-28", "nowcast_total": 31}])
+    theirs = csv_text(live.PATH_COLS, [{"date": "2026-10-28", "nowcast_total": 32},
+                                        {"date": "2026-10-29", "nowcast_total": 33}])
+    (tmp_path / path).write_text(theirs)
+    ops = DailyOps(conflicts=[[path]], stages={(path, 2): ours, (path, 3): theirs})
+    rc, ops, _ = run(ops)
+    rows = read_csv(tmp_path / path)
+    assert [r["date"] for r in rows] == ["2026-10-27", "2026-10-28", "2026-10-29"]
+    assert rows[1]["nowcast_total"] == "32"
+    assert ("add", path) in ops.calls and "finish" in ops.calls and rc == 0
+
+
+@pytest.mark.parametrize("field", ["backtest", "snapshots"])
+def test_a_manifest_merge_refuses_different_immutable_inputs(field):
+    ours = {"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"zip_sha256": "aaa"}}}
+    theirs = json.loads(json.dumps(ours))
+    if field == "backtest":
+        theirs[field] = "2026-10-20"
+    else:
+        theirs[field]["2026-10-19"]["zip_sha256"] = "bbb"
+    with pytest.raises(ValueError, match="conflict"):
+        daily.merge_manifests(json.dumps(ours), json.dumps(theirs))
+
+
+def test_a_manifest_collision_aborts_before_finishing_the_merge(run, tmp_path):
+    (tmp_path / "data/snapshots").mkdir(parents=True)
+    ours = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"zip_sha256": "aaa"}}})
+    theirs = json.dumps({"backtest": "2026-10-19", "snapshots": {"2026-10-19": {"zip_sha256": "bbb"}}})
+    rc, ops, events = run(DailyOps(conflicts=[[MAN]], stages={2: ours, 3: theirs}))
+    assert rc == 2 and "abort" in ops.calls and "finish" not in ops.calls and events == []
+
+
+@pytest.mark.parametrize("suffix", ["lock", "score", "build"])
+def test_immutable_live_records_are_not_resolved_by_taking_upstream(run, suffix):
+    rc, ops, events = run(DailyOps(conflicts=[[f"results/live/2026Q3_{suffix}.json"]]))
+    assert rc == 2 and "abort" in ops.calls and "finish" not in ops.calls and events == []
+
+
+def test_daily_merges_diverged_path_history_in_real_git(tmp_path, monkeypatch):
+    from gdn.files import csv_text, read_csv
+    from gdn.gitops import Ops
+    remote, first, second = (tmp_path / n for n in ("remote", "first", "second"))
+    Ops(tmp_path).git("init", "--bare", "-q", str(remote))
+    Ops(tmp_path).git("clone", "-q", str(remote), str(first))
+    a = Ops(first)
+    a.git("config", "user.name", "Test")
+    a.git("config", "user.email", "test@example.invalid")
+    path = "results/live/2026Q3_path.csv"
+    (first / path).parent.mkdir(parents=True)
+    base = {"date": "2026-10-27", "nowcast_total": 30}
+    (first / path).write_text(csv_text(live.PATH_COLS, [base]))
+    a.commit([path], "base")
+    a.git("push", "-u", "origin", "HEAD")
+    Ops(tmp_path).git("clone", "-q", str(remote), str(second))
+    b = Ops(second)
+    b.git("config", "user.name", "Test")
+    b.git("config", "user.email", "test@example.invalid")
+    (first / path).write_text(csv_text(live.PATH_COLS, [base, {"date": "2026-10-28", "nowcast_total": 31}]))
+    a.commit([path], "local observation")
+    (second / path).write_text(csv_text(live.PATH_COLS, [base, {"date": "2026-10-29", "nowcast_total": 32}]))
+    b.commit([path], "upstream observation")
+    assert b.push()
+    monkeypatch.setattr(live, "update_latest", lambda *a, **k: None)
+    monkeypatch.setattr(live, "run_lock", lambda *a, **k: 0)
+    monkeypatch.setattr(live, "run_score", lambda *a, **k: 0)
+    assert daily.run(now="2026-10-29T23:05:00Z", offline=True, core=True, root=first) == 0
+    assert [r["date"] for r in read_csv(first / path)] == ["2026-10-27", "2026-10-28", "2026-10-29"]
+    assert not a.merging() and not a.dirty_tracked() and a.ahead() == 0
+    assert "2026-10-28" in a.git("show", f"origin/{a.git('branch', '--show-current').stdout.strip()}:{path}").stdout

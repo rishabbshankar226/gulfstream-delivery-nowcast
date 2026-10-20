@@ -88,14 +88,16 @@ class Ops:
 
     def refuse_markers(self):
         """Raise when a staged text file still holds merge conflict markers."""
-        staged = self.git("diff", "--cached", "--name-only", "--diff-filter=AM").stdout.split()
+        staged = self.git("diff", "--cached", "--name-only", "--diff-filter=AM", "-z").stdout.split("\0")
         bad = []
         for f in staged:
-            p = self.root / f
-            if p.suffix in (".json", ".csv", ".md", ".html", ".txt", ".py", ".sha256") and p.exists():
-                text = p.read_text(errors="replace")
-                if any(ln.startswith(("<<<<<<< ", ">>>>>>> ")) for ln in text.splitlines()):
-                    bad.append(f)
+            if not f:
+                continue
+            # Read the index, which is what commit writes, rather than potentially newer working text.
+            blob = subprocess.run(["git", "show", f":{f}"], cwd=self.root, capture_output=True, check=True).stdout
+            if b"\0" not in blob and any(re.match(rb"^(?:<{7,}|>{7,})(?: |$)", ln)
+                                         for ln in blob.splitlines()):
+                bad.append(f)
         if bad:
             raise GitError(f"conflict markers in {bad}; not committing")
 

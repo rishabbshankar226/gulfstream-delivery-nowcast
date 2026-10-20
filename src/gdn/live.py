@@ -333,10 +333,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
         log(f"{tag} exists without {lock_p.name}: writing it from the release")
         write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
-        push_with_merge(ops, log)
-        return 0
+        return 0 if push_with_merge(ops, log, on_conflict) else 1
     if lock_p.exists():
-        return 0
+        return 0 if not ops.ahead() or push_with_merge(ops, log, on_conflict) else 1
     if not lock_due(now, rel, newest_snapshot(root)):
         if not before_release(now, rel):
             log(f"{q} missed its lock window (release {rel})"
@@ -351,7 +350,8 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             if not lock_p.exists() and pred_p.exists():
                 write_lock_json(root, q, ops)
                 ops.commit([lock_p], f"Record the {q} lock")
-                push_with_merge(ops, log)
+                if not push_with_merge(ops, log, on_conflict):
+                    return 1
             log(f"{tag} already exists; one lock per quarter")
             return 0
         if not before_release(now, rel) or (wall and not wall_clock_ok(rel)):
@@ -361,7 +361,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             before_prediction()
         if ops.ahead():
             log("daily outputs are not pushed yet; retrying")
-            if not push_with_merge(ops, log):
+            if not push_with_merge(ops, log, on_conflict):
                 continue
         if ops.tracked(pred_p):
             # Committed and pushed by an earlier attempt that failed before the release: never rewrite it.
@@ -391,7 +391,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             log(f"{tag} was created by another run a moment ago; recording that release")
         obj = write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
-        push_with_merge(ops, log)
+        if not push_with_merge(ops, log, on_conflict):
+            log(f"{tag} exists but its lock record could not be pushed; retry to record it")
+            return 1
         published = parse_now(obj["published_at"])
         if not before_release(published, rel):
             log(f"WARNING: {tag} published at {obj['published_at']}, on or after the release date")
