@@ -89,7 +89,7 @@ Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021
 
 ## Live record
 
-- **2026Q3**: not locked yet. The latest estimate is 31.1 (band 20.4 to 36.4) from the 2026-10-21 snapshot. It locks on 2026-10-29, the day before GD reports on 2026-10-30.
+- **2026Q3**: not locked yet. The latest estimate is 31.1 (band 20.4 to 36.4) from the 2026-10-22 snapshot. It locks on 2026-10-29, the day before GD reports on 2026-10-30.
 
 ## Method
 
