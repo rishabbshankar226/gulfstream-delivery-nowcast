@@ -10,6 +10,16 @@
         "MASTER.txt.gz": "286aec07a1885e8e2afba39531ef75079351948491cbe7ad4de0f748745496a9",
         "DEREG.txt.gz": "82a464c205ea288214ccb7685a9350983ddbd4bc6f955bdcfe197a5fdbbaaf34"
       }
+    },
+    "2026-10-23": {
+      "downloaded_utc": "2026-10-23T10:43:54Z",
+      "zip_sha256": "5e0778af0afe6c8b9e02fb9e5bd97e2a4f66c17cbdb1ca8b071e19554eb9c6f9",
+      "zip_bytes": 72990997,
+      "files": {
+        "ACFTREF.txt.gz": "9377ff8940abf7a65c05cbac13b9948205a0c3ed6b44c3a811850a269c7278fa",
+        "MASTER.txt.gz": "e55350232e3451cea724159c5cd01c5d030229d5b1bc0e657b735faa795661fd",
+        "DEREG.txt.gz": "535184f15b86c8ec11c41e1efcc5c7351ec2c45f6fca01bb1d70eeef7fdbba7d"
+      }
     }
   }
 }
