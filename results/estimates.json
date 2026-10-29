@@ -2,8 +2,8 @@
   "origin": "2026Q2",
   "target": "2026Q3",
   "basis": {
-    "path": "results/live/2026Q3_build.json",
-    "sha256": "233f857269709454ac000591abd0e32aa36617b9afdcd39b4652d1aca45c57a0"
+    "path": "predictions/2026Q3.json",
+    "sha256": "3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23"
   },
   "segments": {
     "Aerospace": {
@@ -41,56 +41,56 @@
   },
   "ttm_deliveries": 163,
   "revenue_per_delivery_usd": 84822085.88957055,
-  "nowcast_total": 31.131779984721163,
-  "aerospace_from_nowcast_usd": 2640662515.759232,
-  "aerospace_oe_from_nowcast_usd": 365559674.1764191,
-  "revenue_total_usd": 13123102690.655073,
-  "operating_earnings_total_usd": 1362637745.6387167,
+  "nowcast_total": 31.953208556149733,
+  "aerospace_from_nowcast_usd": 2710337800.597093,
+  "aerospace_oe_from_nowcast_usd": 375205160.591844,
+  "revenue_total_usd": 13192777975.492935,
+  "operating_earnings_total_usd": 1372283232.0541418,
   "sensitivity": [
     {
       "deliveries_change": -4,
-      "deliveries": 27.131779984721163,
-      "aerospace_revenue_usd": 2301374172.2009497
+      "deliveries": 27.953208556149733,
+      "aerospace_revenue_usd": 2371049457.038811
     },
     {
       "deliveries_change": -3,
-      "deliveries": 28.131779984721163,
-      "aerospace_revenue_usd": 2386196258.0905204
+      "deliveries": 28.953208556149733,
+      "aerospace_revenue_usd": 2455871542.9283814
     },
     {
       "deliveries_change": -2,
-      "deliveries": 29.131779984721163,
-      "aerospace_revenue_usd": 2471018343.9800906
+      "deliveries": 29.953208556149733,
+      "aerospace_revenue_usd": 2540693628.817952
     },
     {
       "deliveries_change": -1,
-      "deliveries": 30.131779984721163,
-      "aerospace_revenue_usd": 2555840429.8696613
+      "deliveries": 30.953208556149733,
+      "aerospace_revenue_usd": 2625515714.7075224
     },
     {
       "deliveries_change": 0,
-      "deliveries": 31.131779984721163,
-      "aerospace_revenue_usd": 2640662515.759232
+      "deliveries": 31.953208556149733,
+      "aerospace_revenue_usd": 2710337800.597093
     },
     {
       "deliveries_change": 1,
-      "deliveries": 32.13177998472116,
-      "aerospace_revenue_usd": 2725484601.6488023
+      "deliveries": 32.95320855614973,
+      "aerospace_revenue_usd": 2795159886.486664
     },
     {
       "deliveries_change": 2,
-      "deliveries": 33.13177998472116,
-      "aerospace_revenue_usd": 2810306687.538373
+      "deliveries": 33.95320855614973,
+      "aerospace_revenue_usd": 2879981972.376234
     },
     {
       "deliveries_change": 3,
-      "deliveries": 34.13177998472116,
-      "aerospace_revenue_usd": 2895128773.427943
+      "deliveries": 34.95320855614973,
+      "aerospace_revenue_usd": 2964804058.265805
     },
     {
       "deliveries_change": 4,
-      "deliveries": 35.13177998472116,
-      "aerospace_revenue_usd": 2979950859.317514
+      "deliveries": 35.95320855614973,
+      "aerospace_revenue_usd": 3049626144.1553755
     }
   ]
 }

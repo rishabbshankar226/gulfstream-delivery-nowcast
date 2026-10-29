@@ -877,7 +877,7 @@
     "GVIII-G700": 54,
     "GVIII-G800": 75
   },
-  "pipeline_snapshot": "2026-10-28",
+  "pipeline_snapshot": "2026-10-29",
   "estimates": {
     "origin": "2026Q2",
     "target": "2026Q3",
@@ -917,56 +917,56 @@
     },
     "ttm_deliveries": 163,
     "revenue_per_delivery_usd": 84822085.88957055,
-    "nowcast_total": 31.131779984721163,
-    "aerospace_from_nowcast_usd": 2640662515.759232,
-    "aerospace_oe_from_nowcast_usd": 365559674.1764191,
-    "revenue_total_usd": 13123102690.655073,
-    "operating_earnings_total_usd": 1362637745.6387167,
+    "nowcast_total": 31.953208556149733,
+    "aerospace_from_nowcast_usd": 2710337800.597093,
+    "aerospace_oe_from_nowcast_usd": 375205160.591844,
+    "revenue_total_usd": 13192777975.492935,
+    "operating_earnings_total_usd": 1372283232.0541418,
     "sensitivity": [
       {
         "deliveries_change": -4,
-        "deliveries": 27.131779984721163,
-        "aerospace_revenue_usd": 2301374172.2009497
+        "deliveries": 27.953208556149733,
+        "aerospace_revenue_usd": 2371049457.038811
       },
       {
         "deliveries_change": -3,
-        "deliveries": 28.131779984721163,
-        "aerospace_revenue_usd": 2386196258.0905204
+        "deliveries": 28.953208556149733,
+        "aerospace_revenue_usd": 2455871542.9283814
       },
       {
         "deliveries_change": -2,
-        "deliveries": 29.131779984721163,
-        "aerospace_revenue_usd": 2471018343.9800906
+        "deliveries": 29.953208556149733,
+        "aerospace_revenue_usd": 2540693628.817952
       },
       {
         "deliveries_change": -1,
-        "deliveries": 30.131779984721163,
-        "aerospace_revenue_usd": 2555840429.8696613
+        "deliveries": 30.953208556149733,
+        "aerospace_revenue_usd": 2625515714.7075224
       },
       {
         "deliveries_change": 0,
-        "deliveries": 31.131779984721163,
-        "aerospace_revenue_usd": 2640662515.759232
+        "deliveries": 31.953208556149733,
+        "aerospace_revenue_usd": 2710337800.597093
       },
       {
         "deliveries_change": 1,
-        "deliveries": 32.13177998472116,
-        "aerospace_revenue_usd": 2725484601.6488023
+        "deliveries": 32.95320855614973,
+        "aerospace_revenue_usd": 2795159886.486664
       },
       {
         "deliveries_change": 2,
-        "deliveries": 33.13177998472116,
-        "aerospace_revenue_usd": 2810306687.538373
+        "deliveries": 33.95320855614973,
+        "aerospace_revenue_usd": 2879981972.376234
       },
       {
         "deliveries_change": 3,
-        "deliveries": 34.13177998472116,
-        "aerospace_revenue_usd": 2895128773.427943
+        "deliveries": 34.95320855614973,
+        "aerospace_revenue_usd": 2964804058.265805
       },
       {
         "deliveries_change": 4,
-        "deliveries": 35.13177998472116,
-        "aerospace_revenue_usd": 2979950859.317514
+        "deliveries": 35.95320855614973,
+        "aerospace_revenue_usd": 3049626144.1553755
       }
     ]
   },
@@ -1008,7 +1008,7 @@
         "quarter": "2026Q3",
         "window_start": "2026-07-05",
         "window_end": "2026-10-04",
-        "snapshot": "2026-10-28",
+        "snapshot": "2026-10-29",
         "definition": "E1",
         "events": {
           "large": 35,
@@ -1033,10 +1033,45 @@
           21.233380969942836,
           37.24108734402852
         ],
-        "made_utc": "2026-10-28T05:44:54Z"
+        "made_utc": "2026-10-29T05:51:07Z"
       },
-      "locked": null,
-      "lock": null,
+      "locked": {
+        "quarter": "2026Q3",
+        "window_start": "2026-07-05",
+        "window_end": "2026-10-04",
+        "snapshot": "2026-10-29",
+        "definition": "E1",
+        "events": {
+          "large": 35,
+          "mid": 7
+        },
+        "trailing": {
+          "reported": {
+            "large": 140,
+            "mid": 23
+          },
+          "registry": {
+            "large": 187,
+            "mid": 28
+          }
+        },
+        "nowcast": {
+          "large": 26.203208556149733,
+          "mid": 5.75,
+          "total": 31.953208556149733
+        },
+        "band": [
+          21.233380969942836,
+          37.24108734402852
+        ],
+        "made_utc": "2026-10-29T05:51:22Z"
+      },
+      "lock": {
+        "tag": "lock-2026Q3",
+        "published_at": "2026-10-29T05:51:24Z",
+        "sha256": "3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23",
+        "commit": "a44e5aca3756941a075150d9e381020826f3fb81"
+      },
       "score": null,
       "guidance_pace": 33.839999999999996,
       "release_date": "2026-10-30"
@@ -1136,6 +1171,16 @@
       },
       {
         "date": "2026-10-28",
+        "events_large": 35,
+        "events_mid": 7,
+        "trailing_registry_large": 187,
+        "trailing_registry_mid": 28,
+        "nowcast_large": 26.203208556149733,
+        "nowcast_mid": 5.75,
+        "nowcast_total": 31.953208556149733
+      },
+      {
+        "date": "2026-10-29",
         "events_large": 35,
         "events_mid": 7,
         "trailing_registry_large": 187,
