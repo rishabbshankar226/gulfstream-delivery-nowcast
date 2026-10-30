@@ -1,4 +1,4 @@
-How closely do FAA aircraft registrations track the Gulfstream deliveries General Dynamics reports? I built a tracker to find out. Its first real test comes on 2026-10-30, when GD reports 2026Q3 and I score the estimate I lock on GitHub the day before.
+One locked quarter so far: off by 8.0. I locked an estimate of 32.0 Gulfstream deliveries for 2026Q3 on GitHub before GD reported, and GD reported 40. One quarter shows how it works live, not whether it works.
 
 How I tested it: I counted each Gulfstream jet's first customer registration or export in a registry copy, scaled the count by the last four quarters, and checked it on 26 past quarters held out from setting the rules, against GD's guidance pace and two simple baselines.
 

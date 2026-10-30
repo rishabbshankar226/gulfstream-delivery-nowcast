@@ -1072,9 +1072,68 @@
         "sha256": "3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23",
         "commit": "a44e5aca3756941a075150d9e381020826f3fb81"
       },
-      "score": null,
+      "score": {
+        "quarter": "2026Q3",
+        "reported": {
+          "large": 35,
+          "mid": 5,
+          "total": 40
+        },
+        "accn": "0000040533-26-000036",
+        "locked": true,
+        "nowcast": {
+          "large": 26.203208556149733,
+          "mid": 5.75,
+          "total": 31.953208556149733
+        },
+        "ae_total": 8.046791443850267,
+        "ape_pct": 20.11697860962567,
+        "inside_band": false,
+        "guidance_pace": 33.839999999999996,
+        "guidance_ae": 6.160000000000004
+      },
       "guidance_pace": 33.839999999999996,
       "release_date": "2026-10-30"
+    },
+    {
+      "quarter": "2026Q4",
+      "build": null,
+      "latest": {
+        "quarter": "2026Q4",
+        "window_start": "2026-10-04",
+        "window_end": "2026-12-31",
+        "snapshot": "2026-10-30",
+        "definition": "E1",
+        "events": {
+          "large": 11,
+          "mid": 1
+        },
+        "trailing": {
+          "reported": {
+            "large": 142,
+            "mid": 22
+          },
+          "registry": {
+            "large": 189,
+            "mid": 30
+          }
+        },
+        "nowcast": {
+          "large": 8.264550264550264,
+          "mid": 0.7333333333333333,
+          "total": 8.997883597883597
+        },
+        "band": [
+          -1.7219439883233,
+          15.79942205942206
+        ],
+        "made_utc": "2026-10-30T14:47:36Z"
+      },
+      "locked": null,
+      "lock": null,
+      "score": null,
+      "guidance_pace": 41.0,
+      "release_date": null
     }
   ],
   "path": {
@@ -1198,6 +1257,18 @@
         "nowcast_large": 26.203208556149733,
         "nowcast_mid": 5.75,
         "nowcast_total": 31.953208556149733
+      }
+    ],
+    "2026Q4": [
+      {
+        "date": "2026-10-30",
+        "events_large": 11,
+        "events_mid": 1,
+        "trailing_registry_large": 189,
+        "trailing_registry_mid": 30,
+        "nowcast_large": 8.264550264550264,
+        "nowcast_mid": 0.7333333333333333,
+        "nowcast_total": 8.997883597883597
       }
     ]
   }
