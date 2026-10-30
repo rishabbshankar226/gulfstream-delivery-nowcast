@@ -303,6 +303,14 @@
     "sha256": "7e94a96901b3565834444e4721bc28b3eaed22d38a51519419a35fdf59893bb9",
     "bytes": 2084
   },
+  "0000040533-26-000036/gd-20261004exhibit991.htm": {
+    "sha256": "70a41a1d5c4873d9d7dc82eb47a4a877ecc6d83b729f587eae78bd3d4555218f",
+    "bytes": 335542
+  },
+  "0000040533-26-000036/index.json": {
+    "sha256": "53c2ded66092453c8730498190ac282bcf2aeae735c58d30461d3098ee120042",
+    "bytes": 2082
+  },
   "submissions/CIK0000040533-submissions-001.json": {
     "sha256": "4a8a92e3400b8acbac4f80efa8ebb90bbeacc17c274d849a764080beb0f26de5",
     "bytes": 310653
@@ -312,7 +320,7 @@
     "bytes": 115564
   },
   "submissions/CIK0000040533.json": {
-    "sha256": "ee324543f326be39abfc5c23b93e89eb17841666ce97b042be15e4a4f566a3cf",
-    "bytes": 155154
+    "sha256": "1e6c6edef72ce52d6d0ea528d1c237aadd86a93f88664304c83a7d92986b5dba",
+    "bytes": 155482
   }
 }
