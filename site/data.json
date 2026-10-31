@@ -868,7 +868,7 @@
     "G-IV": 2,
     "G-V": 2,
     "GIV-X (G450)": 6,
-    "GULFSTREAM G280": 7,
+    "GULFSTREAM G280": 6,
     "GV-SP (G550)": 4,
     "GVI": 1,
     "GVII-G400": 5,
@@ -877,7 +877,7 @@
     "GVIII-G700": 53,
     "GVIII-G800": 75
   },
-  "pipeline_snapshot": "2026-10-30",
+  "pipeline_snapshot": "2026-10-31",
   "estimates": {
     "origin": "2026Q2",
     "target": "2026Q3",
@@ -1102,11 +1102,11 @@
         "quarter": "2026Q4",
         "window_start": "2026-10-04",
         "window_end": "2026-12-31",
-        "snapshot": "2026-10-30",
+        "snapshot": "2026-10-31",
         "definition": "E1",
         "events": {
           "large": 11,
-          "mid": 1
+          "mid": 2
         },
         "trailing": {
           "reported": {
@@ -1120,14 +1120,14 @@
         },
         "nowcast": {
           "large": 8.264550264550264,
-          "mid": 0.7333333333333333,
-          "total": 8.997883597883597
+          "mid": 1.4666666666666666,
+          "total": 9.731216931216931
         },
         "band": [
-          -1.7219439883233,
-          15.79942205942206
+          -0.9886106549899658,
+          16.532755392755394
         ],
-        "made_utc": "2026-10-30T14:47:36Z"
+        "made_utc": "2026-10-31T05:45:21Z"
       },
       "locked": null,
       "lock": null,
@@ -1269,6 +1269,16 @@
         "nowcast_large": 8.264550264550264,
         "nowcast_mid": 0.7333333333333333,
         "nowcast_total": 8.997883597883597
+      },
+      {
+        "date": "2026-10-31",
+        "events_large": 11,
+        "events_mid": 2,
+        "trailing_registry_large": 189,
+        "trailing_registry_mid": 30,
+        "nowcast_large": 8.264550264550264,
+        "nowcast_mid": 1.4666666666666666,
+        "nowcast_total": 9.731216931216931
       }
     ]
   }
