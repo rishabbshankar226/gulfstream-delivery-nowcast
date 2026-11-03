@@ -873,11 +873,11 @@
     "GVI": 1,
     "GVII-G400": 5,
     "GVII-G500": 56,
-    "GVII-G600": 51,
+    "GVII-G600": 50,
     "GVIII-G700": 53,
-    "GVIII-G800": 75
+    "GVIII-G800": 74
   },
-  "pipeline_snapshot": "2026-11-02",
+  "pipeline_snapshot": "2026-11-03",
   "estimates": {
     "origin": "2026Q2",
     "target": "2026Q3",
@@ -1102,10 +1102,10 @@
         "quarter": "2026Q4",
         "window_start": "2026-10-04",
         "window_end": "2026-12-31",
-        "snapshot": "2026-11-02",
+        "snapshot": "2026-11-03",
         "definition": "E1",
         "events": {
-          "large": 11,
+          "large": 14,
           "mid": 2
         },
         "trailing": {
@@ -1114,20 +1114,20 @@
             "mid": 22
           },
           "registry": {
-            "large": 189,
+            "large": 188,
             "mid": 30
           }
         },
         "nowcast": {
-          "large": 8.264550264550264,
+          "large": 10.574468085106384,
           "mid": 1.4666666666666666,
-          "total": 9.731216931216931
+          "total": 12.04113475177305
         },
         "band": [
-          -0.9886106549899658,
-          16.532755392755394
+          1.3213071655661537,
+          18.842673213311514
         ],
-        "made_utc": "2026-11-02T06:08:45Z"
+        "made_utc": "2026-11-03T06:50:36Z"
       },
       "locked": null,
       "lock": null,
@@ -1299,6 +1299,16 @@
         "nowcast_large": 8.264550264550264,
         "nowcast_mid": 1.4666666666666666,
         "nowcast_total": 9.731216931216931
+      },
+      {
+        "date": "2026-11-03",
+        "events_large": 14,
+        "events_mid": 2,
+        "trailing_registry_large": 188,
+        "trailing_registry_mid": 30,
+        "nowcast_large": 10.574468085106384,
+        "nowcast_mid": 1.4666666666666666,
+        "nowcast_total": 12.04113475177305
       }
     ]
   }
