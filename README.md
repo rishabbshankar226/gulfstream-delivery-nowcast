@@ -90,7 +90,7 @@ Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021
 ## Live record
 
 - **2026Q3**: locked at 32.0 (band 21.2 to 37.2) from the 2026-10-29 snapshot, as a timestamped GitHub release ([`lock-2026Q3`](https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/releases/tag/lock-2026Q3)) at 01:51 ET on 2026-10-29, sha256 `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`; GD's guidance pace for the quarter was 33.8. GD reported 40: the lock missed by 8.0, outside the band.
-- **2026Q4**: not locked yet. Its window runs to 2026-12-31, so the 2026-11-04 snapshot counts only part of it and no estimate is shown yet.
+- **2026Q4**: not locked yet. Its window runs to 2026-12-31, so the 2026-11-05 snapshot counts only part of it and no estimate is shown yet.
 
 ## Method
 
