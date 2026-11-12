@@ -110,6 +110,7 @@ The pages workflow runs on a push that touches `site/**` or by hand. The daily j
 - The research note link on the dashboard opens an 8-page PDF whose page footer starts "Student research project. Not investment advice."
 - From the README: the dashboard link, the note, the workbook, `docs/PREREGISTRATION.md`, `docs/prepub/ERRATA.md`, `results/exploratory/sensitivity.md`, `data/quarter_plans.csv`.
 - Both links in the post (`POST_CHECK.md`).
+- `https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/preview.png` shows the track-record chart. It is the image LinkedIn will show for the dashboard link (`og:image`). LinkedIn's Post Inspector (`https://www.linkedin.com/post-inspector/`) shows the preview before you post. The link check does not read meta tags, so this URL is not in `LINKS.csv`.
 
 ### 7. Check the lock as an outsider would
 

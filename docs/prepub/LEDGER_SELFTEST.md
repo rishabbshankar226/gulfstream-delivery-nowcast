@@ -70,9 +70,9 @@ The real tree also carries a stale PDF (lead L13). The clean copy does not show 
 
 ## Rerun on the final tree (P6.4, P8.6)
 
-Run 2026-11-12, about 09:30 ET, at commit `bbf88fd`: after the last code fix and after the merge of the daily workflow's 2026-11-12 commits. The same run at `3e8c0f9` the evening before, after round 3's fixes, gave the same nine catches. The ledger's rules grew with every rewritten sentence, and a looser rule could have stopped catching a plant, so the nine plants were run again on the tree that ships. (A rerun at `7277a6d`, after the first fix pass, also caught nine of nine.)
+Run 2026-11-12, about 09:55 ET, at commit `a964df8`: after the last change to any public surface and after the merge of the daily workflow's 2026-11-12 commits. The same run at `bbf88fd`, straight after the merge, gave the same nine catches. The same run at `3e8c0f9` the evening before, after round 3's fixes, gave the same nine catches. The ledger's rules grew with every rewritten sentence, and a looser rule could have stopped catching a plant, so the nine plants were run again on the tree that ships. (A rerun at `7277a6d`, after the first fix pass, also caught nine of nine.)
 
-- Copies: `git archive prepub-audit | tar -x -C <dir>` into `~/gdn-prepub/plantA5/` (clean) and `~/gdn-prepub/plantB5/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link.
+- Copies: `git archive prepub-audit | tar -x -C <dir>` into `~/gdn-prepub/plantA6/` (clean) and `~/gdn-prepub/plantB6/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link.
 - Plants: `tools/prepub/plant_selftest.py plant <planted copy>`, then `make pdf` in the planted copy for plant 7.
 - Ledgers: `tools/prepub/ledger.py --root <copy> --out <copy>/LEDGER_*.csv`. Clean: `rows 2866  flagged 2`. Planted: `rows 2868  flagged 38`.
 - Compare: `tools/prepub/plant_selftest.py compare <clean csv> <planted csv>`.
