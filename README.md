@@ -163,9 +163,13 @@ The headline is the preregistered figure, whatever I tried afterwards. Two readi
 ## Reproduce
 
 ```bash
+python3.11 -m venv .venv
+.venv/bin/python -m pip install -r requirements.lock
 make all
 make test
 ```
+
+The pinned requirements need Python 3.11 or later; an older `python3` fails at the install step.
 
 `make all` rebuilds every result, the workbook, the charts, the note and the dashboard data from the tracked files, offline: it never downloads a snapshot, reads SEC, locks or scores. `make data` refetches GD's releases from SEC when the raw files are missing (set `SEC_UA` or write your name and email to `~/.sec_ua`).
 
