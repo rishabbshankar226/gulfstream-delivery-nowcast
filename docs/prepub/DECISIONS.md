@@ -99,3 +99,25 @@ One thing I saw and did not do: at 09:44 ET `git status -sb` showed `prepub-audi
 - The README's Reproduce claim was run the way a public reader will run it, in a clone with no `data/raw/`: it builds and the tree stays clean (`BASELINE.md`, "As a public reader gets it").
 - No reviewer has read the tree after `4ca7d35`. `VERDICT.md` says so under criterion 9.
 - The chart legends and the tables now name the pace differently ("Pace built from GD's outlook" against "GD's guidance pace"). Noted under F098; no further fix cycle was opened for it.
+
+## D23. Round 4: eleven auditors, audit only (2026-11-12)
+The owner asked for "a harsh audit using 11 independent auditors to determine whether this project is ready to go public, and what improvements need to be made". Readings taken:
+
+- **Scope.** Audit only. Round 4 writes findings, a verdict and a ranked list of improvements. It changes no public surface and no generator. A fix pass is a separate step, offered at the end.
+- **Frozen tree.** Commit `4388294`. At 13:59 ET, `git fetch --all --prune` showed nothing on `origin/main` that `prepub-audit` lacks. `origin/prepub-audit` now equals `4388294`; this session ran no push, so the owner pushed it after D22. The repository is still private (`gh repo view --json visibility` prints `PRIVATE`).
+- **Roster.**
+  - Eight cold auditors read a copy with no git history and without `docs/prepub/` or `tools/prepub/` (`ERRATA.md` excepted): `hiring`, `sellside`, `stats`, `registry`, `editor`, `compliance`, `recompute` and `rendered`. `recompute` first works blind on a data-only copy.
+  - Three informed auditors read history or the earlier audit: `code` (its own clone; it builds and tests there), `exposure` (a bare mirror plus the tracked files) and `attacker` (its own clone and `docs/prepub/`).
+  - Briefs are `docs/prepub/briefs/round4_*.md`. Each writes only `docs/prepub/reviews/round4_<name>.md`.
+- **Permissions.** No deny rule is enforced by a settings file this session. `~/.claude/settings.json` has none. The project's `.claude/settings.local.json` allows `git push`, `gh release`, `gh workflow run`, `make` and `curl`. The deny list in this repository's `CLAUDE.md` therefore rests on instructions. So:
+  - every brief carries the never-run list word for word;
+  - cold copies carry no `.git`;
+  - each informed auditor's clone or mirror has its push URL set to an invalid value.
+- **Leak check.** The earlier form of the check, `git grep -E '\bF[0-9]{3}\b'`, printed nothing, because `\b` is not ERE. The working form, `(^|[^A-Za-z0-9])F[0-9]{3}([^0-9]|$)`, finds finding numbers in code comments in `src/gdn/daily.py`, `src/gdn/note.py` and `tests/test_after_score.py`. They are public code and carry numbers, not the findings' text. They stay in the cold copy, as in D17.
+- **Verdict rule, fixed before launch.**
+  - The verdict is the spec's §7, its 13 criteria, re-measured at the frozen commit.
+  - F015, F016 and F081 are still open with no owner decision logged, so round 4 starts NO-GO.
+  - Any S1 that the main session verifies keeps it NO-GO.
+  - Each auditor's own verdict is reported; none of them overrides §7.
+- **Verification.** The main session verifies every S1 and S2 by a command whose output it records, and regrades by the spec's §2. S3 findings are verified where that is cheap, and otherwise are marked `reported, unverified`. New rows start at F109.
+- **Dashboard in a browser.** The main session checks the dashboard in the app's own browser pane, at desktop width and 375 px. It serves the cold copy on localhost from a `.claude/launch.json`, which is gitignored.

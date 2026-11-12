@@ -59,9 +59,23 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P8.7 | GO_PUBLIC.md | done | five decisions and ten steps, each with its check, and the post's text |
 | Finish | OUTCOME_SELF.md and final message | done | `OUTCOME_SELF.md` in the project root, not tracked |
 
+## Round 4: eleven auditors (DECISIONS D23)
+
+Started 2026-11-12 13:59 ET on the frozen commit `4388294`. Audit only.
+
+| ID | Item | Status | Done test |
+|---|---|---|---|
+| R4.0 | Freeze and battery | done | `BASELINE.md`, Round 4 |
+| R4.1 | Briefs | done | `briefs/round4_common.md` and 11 role briefs |
+| R4.2 | Cold copy, data-only copy, clones, leak check | pending | each tree exists; push URL disabled on the three git trees |
+| R4.3 | Eleven auditors | pending | 11 files `reviews/round4_*.md`, each with a verdict and counts |
+| R4.4 | Dashboard in a browser (main session) | pending | desktop and 375 px checked, console read |
+| R4.5 | Verify and consolidate | pending | `FINDINGS.md` Round 4 section, F109 onward; every S1 and S2 cites a command |
+| R4.6 | Verdict and improvements | pending | `ROUND4_VERDICT.md`; gate rerun after the last commit |
+
 ## Running
 
-Nothing is running. Every subagent has reported and no background command is live.
+Nothing yet. The eleven auditors will be listed here while they run.
 
 ## Cut items
 

@@ -91,3 +91,15 @@ The clone above had `data/raw/` copied in, as P8.4 says. A reader of the public 
 
 - 2026-11-11, 21:06 and 22:09 ET: `origin/main` was still at `36fed31`; `git merge --no-commit --no-ff origin/main` on the throwaway branch `prepub-mergecheck` printed `Already up to date.`
 - 2026-11-12, 09:25 ET: `origin/main` had two new commits from the daily workflow (`1481ce0`, `8c7692f`). A trial merge on `prepub-mergecheck2` stopped on two generated files, `README.md` and `report/note.html`. Both were regenerated from the merged data, the merge was committed (`bbf88fd`) and `prepub-audit` was fast-forwarded to it (DECISIONS D19). `git log prepub-audit..origin/main` is now empty, so `main` can take `prepub-audit` with no conflict until the workflow commits again. `GO_PUBLIC.md` step 2 says what to do when it has.
+
+## Round 4 (11 auditors), before launch
+
+Measured 2026-11-12, 13:59 to about 14:10 ET, on a clean tree at the frozen commit `4388294`, before any round 4 file existed. `git fetch --all --prune` at 13:59 ET: `git log --oneline prepub-audit..origin/main` printed nothing, and `origin/prepub-audit` equals `4388294` (DECISIONS D23). `make all` was not run in the owner's checkout this round; the `code` auditor runs it in its own clone.
+
+| Check | Command | Result |
+|---|---|---|
+| Gate, all ten families | the R11 command, `--output .build/gate_round4.json`, log `.build/logs/round4_gate.log` | `42 assertions, 4 failing, 3 warning`, exit 1. Failing: `R2`, `K1`, `N1`, `Y1`, with the same lists as D18. Warnings: `T3`, `S3`, `L3`. |
+| Tests | `make test` | `178 passed, 14 warnings in 85.57s` |
+| Determinism | `make check-determinism` | `identical (50 files)` |
+| Record | `shasum -a 256 -c docs/prepub/RECORD_HASHES.txt` | 59 of 61 OK. The two that fail are `results/live/2026Q4_latest.json` and `results/live/2026Q4_path.csv`, as in D20. `predictions/2026Q3.json` hashes to `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`. |
+| Ledger | `tools/prepub/ledger.py --root . --out <scratch>/LEDGER_round4.csv` | `rows 2864  flagged 0`; `cmp` with the committed `docs/prepub/LEDGER.csv` finds no difference. |
