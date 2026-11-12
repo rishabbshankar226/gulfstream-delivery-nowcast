@@ -24,7 +24,7 @@ Read `VERDICT.md` first. If it says NO-GO, the list of what remains is there, an
 
 The README (line 15) says "I hold no position in General Dynamics". The note says "The author holds no position in General Dynamics." on page 1 and in every page footer. The build copies that sentence forward; it carries no date. Only you can state it.
 
-If it is true today, date it:
+If it is true today, date it in both places. First edit `README.md` line 15 so the sentence reads "I hold no position in General Dynamics as of <today's date>, and I am not affiliated with General Dynamics, Gulfstream or the FAA." Then:
 
 ```
 printf '%s\n' "The author holds no position in General Dynamics as of $(date +%F)." > ~/.gdn_disclosure
@@ -34,7 +34,8 @@ PYTHONPATH=src .venv/bin/python -m gdn note && make pdf
 If it is not true, write the true sentence into `~/.gdn_disclosure` and into `README.md` line 15 before anything else, then run the same two commands.
 
 - Check: `grep -o '<p id="disclosure">[^<]*' report/note.html` prints your sentence, and `shasum -a 256 report/note.html | cut -c1-64` equals `cut -c1-64 output/GD_research_note.inputs.sha256`.
-- Commit by path: `git add report/note.html output/GD_research_note.pdf site/GD_research_note.pdf output/GD_research_note.inputs.sha256 && git commit -m "Date the position disclosure"`.
+- Check: `sed -n 15p README.md` shows the dated sentence.
+- Commit by path: `git add README.md report/note.html output/GD_research_note.pdf site/GD_research_note.pdf output/GD_research_note.inputs.sha256 && git commit -m "Date the position disclosure"`.
 
 ### 2. Merge `prepub-audit` into `main`
 
@@ -160,6 +161,6 @@ Commit the PDFs and the stamp by path, push, then `gh workflow run pages`. `outp
 
 - When GD announces its fourth-quarter release date, add it to `config/calendar.json` under `releases` as `"2026Q4": "YYYY-MM-DD"`. Without it no lock is made (`ERRATA.md` E4). Check: the README's Live record no longer says "No release date is set".
 - Add 2027Q1's fiscal quarter end under `fiscal_ends` from GD's filings.
-- The 2026-10-30 call is in `data/guidance.csv` with a blank outlook (GD said "We do not plan to update segment guidance."), so the 2026Q4 pace still rests on the 160 of 2026-07-29. Add each later call the same way, with its quote, speaker and link. Check: `make all` changes no held-out figure.
+- The 2026-10-30 call is in `data/guidance.csv` with a blank outlook (GD said "We do not plan to update segment guidance."), so the 2026Q4 pace still rests on the 160 of 2026-07-29. Add each later call the same way, with its quote, speaker and link. Check: `make all` changes no held-out figure. `tools/build_guidance.py` is the build-time tool that first wrote the file from checker files and cached transcripts; no Makefile target or daily step runs it. If you ever rerun it, cache the 2026-10-30 transcript under `data/raw/sources/calls/` first and give it a checker row, or the tool will write the file without that call (F107).
 - Decide C above.
 - On the release date's eve, check by noon ET that the release `lock-2026Q4` exists (`gh release view lock-2026Q4`). The workflow's runs land four to seven hours after their cron time (`ERRATA.md` E2). If there is no lock, run `make daily` on the Mac before midnight ET.
