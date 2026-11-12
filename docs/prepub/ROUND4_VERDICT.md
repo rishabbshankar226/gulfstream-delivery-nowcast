@@ -1,6 +1,12 @@
 # Round 4 verdict: eleven auditors
 
-**NO-GO.** Five of the spec's 13 criteria fail (1, 2, 10, 11 literally, 12). Round 4 found three new S1 findings. One is a false sentence in the note about GD's filings (F109). Two are personal data the earlier audit did not catch or counted short (F110, F111). It also found seven S2 findings on first screens that the earlier verdict called clean. No figure is wrong: a blind recompute matched every headline number on all seven surfaces. What blocks posting is framing, disclosure and exposure, and most of it can be fixed in one fix pass. The rest are decisions only the owner can make.
+**NO-GO.** Five of the spec's 13 criteria fail (1, 2, 10, 11 literally, 12). Round 4 found four new S1 findings:
+
+- a false sentence in the note about GD's filings (F109);
+- two items of personal data that the earlier audit missed or counted short (F110, F111);
+- a guard on the score path that fails open (F124).
+
+It also found six new S2 findings on first screens that the earlier verdict called clean. No figure is wrong: a blind recompute matched every headline number on all seven surfaces. What blocks posting is framing, disclosure and exposure, and most of it can be fixed in one fix pass. The rest are decisions only the owner can make.
 
 Written 2026-11-12, after a round 4 audit of the frozen commit `4388294` (DECISIONS D23). Round 4 was an audit only: it changed no public surface. The measurements below were printed by commands run after the last commit that could change them. The battery is in `BASELINE.md`, section Round 4. The findings are in `FINDINGS.md`, section 5.
 
@@ -8,15 +14,15 @@ Written 2026-11-12, after a round 4 audit of the frozen commit `4388294` (DECISI
 
 | # | Criterion | Holds | Measurement |
 |---|---|---|---|
-| 1 | Zero open S1 | **no** | Five open: F015 and F016 (owner decisions A and B), plus three new ones. F109 is the note's XBRL sentence, which SEC's `companyconcept` data contradicts. F110 is the owner's private name in `DECISIONS.md:36` and in branch history from `aa273cb`. F111 is home paths at the tip, in two of the audit's own files and one build note. |
-| 2 | Zero open S2 on the five first screens | **no** | Eight open. On the post: F113 (the band named without its 18 of 26 coverage). On the dashboard's first screen: F114 ("GD's guidance pace" with no sign it is my construction). On the note's first page: F114, F115 (GD's own "Q3 and Q4 highest" statement and the 40.5 even split are absent), F116 (the 5.5 against 6.9 edge comes from 2023 and 2024, unsaid) and F081. On the README's first screen: F117 (the hero image, also the post's link card, stops at 2026Q2 and leaves out the live quarter) and F081. On the workbook's Summary sheet: F123 ("beat"). |
+| 1 | Zero open S1 | **no** | Six open: F015 and F016 (owner decisions A and B), plus four new ones. F109 is the note's XBRL sentence, which SEC's `companyconcept` data contradicts. F110 is the owner's private name in `DECISIONS.md:36` and in branch history from `aa273cb`. F111 is home paths at the tip, in two of the audit's own files and one build note. F124 is the late-lock guard in `live.py:468`, which is skipped when SEC gives no acceptance time. |
+| 2 | Zero open S2 on the five first screens | **no** | Seven distinct findings open, six of them new. On the post: F113 (the band named without its 18 of 26 coverage). On the dashboard's first screen: F114 ("GD's guidance pace" with no sign it is my construction). On the note's first page: F114, F115 (GD's own "Q3 and Q4 highest" statement and the 40.5 even split are absent), F116 (the 5.5 against 6.9 edge comes from 2023 and 2024, unsaid) and F081. On the README's first screen: F117 (the hero image, also the post's link card, stops at 2026Q2 and leaves out the live quarter) and F081. On the workbook's Summary sheet: F123 ("beat"). |
 | 3 | Ledger: zero `mismatch`, `untraced`, `stale` after its plants | yes | `rows 2864  flagged 0`, byte-identical to the committed `LEDGER.csv`. The nine plants were not rerun this round; the public surfaces have not changed since they last passed. The ledger checks numbers against labels. It cannot see the round 4 findings, which are omissions and framing. |
 | 4 | Recompute matches at displayed precision | yes | Round 4's blind recompute (`reviews/round4_recompute.md`) matched every headline figure on all seven surfaces. It covered 615 `data.json` values and 414 workbook values, and gave the design averages to every digit (E1 5.472548294344893, E2 5.5807858422376135). |
 | 5 | Lock checks pass | yes | `gh release view lock-2026Q3` prints `publishedAt` 2026-10-29T05:51:24Z, and its notes hold `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`. That equals `shasum -a 256 predictions/2026Q3.json`. The tag points at `a44e5ac`. SEC's submissions data, refetched this round, gives GD's 8-K `0000040533-26-000036` an `acceptanceDateTime` of 2026-10-30T12:09:27Z (08:09:27 ET), 30 hours after the lock. |
 | 6 | Post links resolve, or will after a named step | yes | No change since `POST_CHECK.md`. Both links return 404 until `GO_PUBLIC.md` steps 4 and 5. |
 | 7 | Tests, gate and determinism on a fresh clone | yes, with logged gate failures | Checked in two places. In the `code` auditor's fresh clone, with no `data/raw/`: `make all` then `git status --short` printed nothing, `make test` printed `176 passed, 2 skipped`, and `make check-determinism` printed `identical (50 files)`. On the owner's checkout: `make test` printed `178 passed`. The gate printed `42 assertions, 4 failing, 3 warning`; the failures are `R2`, `K1`, `N1` and `Y1`, the same as in D18, and were logged under R11. |
 | 8 | Interview notes and resume bullets state the scored record | yes | The recompute matched their figures. F120 (an unqualified "held-out" in a bullet) is a framing finding; no figure differs. |
-| 9 | Round 3 found no S1 | yes, but superseded | Round 3 found none. Round 4 found three new S1, all verified, so the record behind this criterion no longer reads clean. |
+| 9 | Round 3 found no S1 | yes, but superseded | Round 3 found none. Round 4 found four new S1, all verified, so the record behind this criterion no longer reads clean. |
 | 10 | Every source row verified or carrying a closed finding | **no** | `SOURCES_CLAIMS.csv:55`, the XBRL sentence, reads "not checked" and was closed by F043 as "refuted: matches the study's README". The filings contradict the sentence (F109). The closing ID is a wrong refutation, and the row now carries an open S1. |
 | 11 | Every hash in `RECORD_HASHES.txt` matches | yes by D3's reading, **no** literally | `shasum -c` gives 59 of 61. The two that miss are `results/live/2026Q4_latest.json` and `results/live/2026Q4_path.csv`, the open quarter's working files, as in D20. `git diff --stat 4388294..HEAD` on every protected path prints nothing. |
 | 12 | P3.5 found nothing open | **no** | F015 and F016, plus F110 and F111. |
@@ -44,9 +50,9 @@ Seven said NO-GO and four said GO. The four GO verdicts came from the auditors w
 
 ### A. Only the owner can do these
 
-1. **Decision A, the email address (F015, F112).** It is on 62 commits of `main`, 58 of them under the lock commit, and on 121 once `prepub-audit` is merged normally. A squash merge of `prepub-audit` adds one commit, not 59. Rewriting history is not an option: it changes the lock commit's hash. Either accept the exposure or keep the repository private.
+1. **Decision A, the email address (F015, F112).** It is on 62 commits of `main`, 58 of them under the lock commit. At `e9095ce`, `prepub-audit` holds 62 more, the four round 4 commits among them. A normal merge would put 124 on `main`; a squash merge adds 1. Rewriting history is not an option: it changes the lock commit's hash. Either accept the exposure or keep the repository private.
 2. **Decision B, the home paths (F016, F111).** The same choice for history. At the tip, the fix pass can replace them with `~`.
-3. **The private name in history (F110).** It entered in `aa273cb`, which is not under the lock. A squash merge, with `origin/prepub-audit` deleted before the repository goes public, keeps it out of public history. A normal merge publishes it.
+3. **The private name in history (F110).** It entered in `aa273cb`, which is not under the lock. A normal merge publishes it. A local `git merge --squash`, with `origin/prepub-audit` deleted before the repository goes public, keeps it off `main`'s history. That is not a full removal. GitHub's "Removing sensitive data from a repository" says commits can stay "accessible" by SHA in cached views until GitHub Support removes them, and pull-request refs keep them too, so do not merge through a pull request. The cost: the fix commits that the audit's records cite would not be on `main`, so a reader could not open them.
 4. **Step 1, the position line (F081).** Date it. Decide whether the post carries a short form; the post is at 1,281 of its 1,300-character cap.
 5. **Protect the record on GitHub (F129).** After going public, add a ruleset on `lock-*` tags (no update, no deletion) and branch protection on `main` (no force-push, no deletion). Before 2026Q4, turn on immutable releases. Never edit or republish `lock-2026Q3`.
 6. **Pages redeploy (E1).** This needs a `.github/` edit, so the dashboard can redeploy after the workflow's own commits. Until then, the dashboard goes stale the day after its first deploy (CODE-1).
@@ -67,6 +73,7 @@ Each code change follows R4 and R6: fix the generator, rebuild, run `make claims
 | F116 | The 2023 and 2024 concentration, and the combined reading labelled as tried after the fact, on note page 1 | `note.py` | 20 min |
 | F117 | Mark the scored lock on the track chart, or title it "Backtest, 2016Q1 to 2026Q2". The image is also the post's link card and note Exhibit 4 | `src/gdn/charts.py` | 10 min to retitle; about 1 h to draw the lock |
 | F123 | Remove "beat" from the Summary sheet | `workbook.py:142` | 5 min |
+| F124 (S1) | Fail closed when SEC gives no acceptance time; add a test that fails with the fix reverted (R6) | `src/gdn/live.py:468` | 30 min |
 | F112 | Correct "124 commits" in five places | `GO_PUBLIC.md`, `VERDICT.md`, `FINDINGS.md`, `EXPOSURE.md` | 10 min |
 
 ### C. Should fix (S2 off the first screens)
@@ -78,7 +85,6 @@ Each code change follows R4 and R6: fix the generator, rebuild, run `make claims
 | F120 | Qualify "held-out" in the resume bullets | `docs/RESUME_BULLETS.md` |
 | F121 | Name the unit at 0.69 to 0.72 | `README.md:156` |
 | F122 | Add the mid-cabin supplier delay from GD's 10-Q to the risks | `note.py` |
-| F124 | Make the late-lock guard fail closed when SEC gives no acceptance time, with a test | `src/gdn/live.py:468` |
 | F125 | Fixture tests for the neither-date branch of the used-jet bound | `tests/test_faa.py`, fixtures |
 | F126 | Pin the dashboard test to a frozen copy of `data.json`, so the 2026Q4 lock does not turn CI red | `tests/test_site_a11y.py:218-225` |
 | F127 | Tests for the old-airframe counts (5 of 42, 246 of 1,251) | `tests/` |
@@ -128,3 +134,9 @@ Plus the runbook corrections in `FINDINGS.md` 5.4: the stale `f14a400`, the bran
 - `git log -p` on `nowcast.yml` was refused to `code`.
 - Auditors used some read-only commands outside their briefs' lists, each disclosed in its report and none writing outside its scratch folder: `zcat`, `awk`, `sort`, `uniq`, `tr`, `gzip -dc`, inline Python, `git rev-list`, `git count-objects`, `git config --get` and `git grep`.
 - The nine ledger plants and the 22 revert pairs were not rerun this round. No code changed since they last passed.
+- **Independence.** Three auditors came near another's work, and all three disclosed it.
+  - `recompute` ran `ls` on the reviews folder; it printed a count only.
+  - `exposure`'s pattern scans matched other auditors' `round4_*` briefs; they printed counts and paths, and it did not open those files.
+  - `stats` ran `sed -i` on its own scratch script.
+
+  No report cites another's findings.
