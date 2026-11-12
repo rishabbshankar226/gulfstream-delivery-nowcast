@@ -1,5 +1,7 @@
 # Verdict
 
+> Round 4 (2026-11-12, eleven auditors) re-measured this verdict. It is still NO-GO, now on criteria 1, 2, 10, 11 (literally) and 12, and some measurements below no longer hold. Read `ROUND4_VERDICT.md` first.
+
 **NO-GO.** Three of the 13 criteria fail (1, 2 and 12), each on something only the owner can do: decide about the email address and the home paths that the commit history would expose (F015, F016), and confirm and date the no-position sentence (F081). Every other S1 and S2 finding is fixed, refuted or an erratum. Criterion 11 holds by the reading logged before the run began and misses by its literal words, on two working files of the open quarter that the required merge of the daily workflow's commits changed; the record itself is untouched.
 
 Written 2026-11-12 at the end of the pre-publication audit, on branch `prepub-audit`. The final battery ran at commit `4c922cd`; later commits change only files under `docs/prepub/`. Every figure below was printed by a command run after the last edit that could change it; the commands and their logs are in `BASELINE.md`.

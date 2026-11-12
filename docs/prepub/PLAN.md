@@ -68,16 +68,14 @@ Started 2026-11-12 13:59 ET on the frozen commit `4388294`. Audit only.
 | R4.0 | Freeze and battery | done | `BASELINE.md`, Round 4 |
 | R4.1 | Briefs | done | `briefs/round4_common.md` and 11 role briefs |
 | R4.2 | Cold copy, data-only copy, clones, leak check | done | each tree exists; push URL disabled on the three git trees |
-| R4.3 | Eleven auditors | pending | 11 files `reviews/round4_*.md`, each with a verdict and counts |
+| R4.3 | Eleven auditors | done | 11 files `reviews/round4_*.md`, each with a verdict and counts |
 | R4.4 | Dashboard in a browser (main session) | done | desktop and 375 px checked, console read |
-| R4.5 | Verify and consolidate | pending | `FINDINGS.md` Round 4 section, F109 onward; every S1 and S2 cites a command |
-| R4.6 | Verdict and improvements | pending | `ROUND4_VERDICT.md`; gate rerun after the last commit |
+| R4.5 | Verify and consolidate | done | `FINDINGS.md` Round 4 section, F109 onward; every S1 and S2 cites a command |
+| R4.6 | Verdict and improvements | done | `ROUND4_VERDICT.md`; gate rerun after the last commit |
 
 ## Running
 
-Launched 2026-11-12 at about 14:07 ET, all in one message, each as a background subagent:
-`hiring`, `sellside`, `stats`, `registry`, `editor`, `compliance`, `recompute`, `rendered` (cold); `code`, `exposure`, `attacker` (informed).
-Each writes only `docs/prepub/reviews/round4_<name>.md`.
+Nothing is running. All eleven auditors reported between about 14:25 and 14:40 ET; their reports are committed in `1030d7a`. The verdict is `ROUND4_VERDICT.md`: NO-GO.
 
 ## Cut items
 
