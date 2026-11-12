@@ -131,7 +131,7 @@ def test_the_post_is_short_and_carries_its_disclaimer(scored):
         p = report.post(scored(lock))
         assert len(p) <= report.POST_MAX, len(p)
         assert report.DISCLAIMER in p and "not investment advice" in p
-        assert "held out from setting the rules" in p and "missed by less on average" in p
+        assert "rules set minutes before scoring" in p and "missed by less on average" in p
         assert "had months or years to fill in" in p and "#GeneralDynamics" not in p and "$GD" not in p
 
 

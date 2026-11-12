@@ -167,7 +167,7 @@
     var note = L.lock ? "Locked as a " + lockWords(L) + ", on " + etTime(L.lock.published_at) + "; the file's sha256 is in the release notes." :
       L.score ? "Not locked: the quarter missed its lock window, so this is the build estimate, shown beside GD's count." :
       "Provisional: the estimate locks on GitHub the day before GD reports, from the newest stored registry snapshot, and stays on this page whether it hits or misses.";
-    note += " The band comes from misses measured on a finished registry file, so it is likely too narrow for a live quarter.";
+    note += " The band comes from misses measured on a finished registry file, so it may not fit a live quarter.";
     text($("live-note"), note);
   }
 

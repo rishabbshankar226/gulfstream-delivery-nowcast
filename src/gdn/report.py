@@ -575,8 +575,10 @@ def post(root):
         lines += ["How closely do FAA aircraft registrations track the Gulfstream deliveries General Dynamics reports?",
                   what, ""]
     one = (" One quarter is one data point." if len(ls) == 1 else "")
-    lines += ["Backtest, held out from setting the rules: "
-              + headline(m) + low_line(m) + " (Registry count: my scaled estimate; the pace: mine.) It reads a "
+    # "Held out" needs its qualifier wherever it is claimed: the rules were committed minutes before the scores.
+    lines += ["Backtest (rules set minutes before scoring): "
+              + headline(m) + low_line(m).replace(" Simply repeating", " Repeating")
+              + " (Registry count: my scaled estimate; the pace: mine.) The test reads a "
               "registry copy that had months or years to fill in, so only locked quarters show whether it counts jets "
               "in time." + one, "",
               f"Dashboard: {DASH}", f"Code: {REPO}", "",

@@ -71,7 +71,7 @@ def test_baseline_wording():
     absent(README, "hardest to beat")
     absent(NOTE, "hardest to beat")
     present(NOTE, "missed by less on average", "for the registry estimate and")
-    present(POST, "held out from setting the rules", "missed by less on average")
+    present(POST, "rules set minutes before scoring", "missed by less on average")
 
 
 def test_band_is_set_against_its_nominal_coverage():

@@ -86,11 +86,11 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 | F073 | README footer and line 7 (old tree), `LICENSE` | S3 | "once the repository is public"; plain MIT with no word on data (COMPLIANCE-26, -27). | Sentence dropped; "License and data" section. | 4ea45a0 | none | fixed |
 | F074 | README Results | S3 | The test counts wins while the headline talks about the average; no interval on the difference in averages (STAT-11). "Nominal 80%" is more than nearest rank delivers on 12 to 37 past errors (STAT-13). The as-of sentence would be tighter with margins (STAT-15). | none | none | none | open: each adds a statistic the preregistration does not define; left as stated limits |
 | F075 | `data/snapshots/2026-10-19/*.gz` | S3 | Byte 9 of the stored gzip header differs from what the current writer produces; decompressed bytes identical (REGISTRY-10, not re-measured). | none: a stored snapshot | none | none | erratum: `ERRATA.md` E7 |
-| F076 | note claim `pc-g700-first-deliveries` | S3 | "began G700 deliveries ... after FAA and EASA certification" copies the 10-K; EASA certification came after first deliveries (SELL-19, from web search). | none | none | none | open: needs a sourced claim for the EASA date; the sentence quotes GD's filing as written |
+| F076 | note claim `pc-g700-first-deliveries` | S3 | "began G700 deliveries ... after FAA and EASA certification" copies the 10-K; EASA certification came after first deliveries (SELL-19, from web search). | The clause is cut: "Gulfstream began G700 deliveries in the second quarter of 2024." (R3-7). | the round 3 fix commit | claims build | fixed |
 | F077 | README Data | S3 | The sha256 on each claim is of the bytes as fetched; a later download of an SEC page can differ (SELL-21: the reviewer's byte diff found a script tag that changes). | README Data says the hash is of the bytes as fetched and a later download may not match. | a354170 | none | fixed |
 | F078 | dashes outside the main surfaces | S3 | 12 lines in `docs/build/` and `docs/PREREGISTRATION.md` hold an en or em dash, names and quotes among them (COMPLIANCE-30). | none | none | none | refuted: build notes are kept as written and the preregistration never changes (R7) |
 | F079 | `site/app.js`, note | S3 | The quarter window was shown with its start date included; the rule is `start < date <= end` (REGISTRY-11). | "after ..., through ..." in the note; the dashboard shows the day after the start. | d0247f7, ba8453f | none | fixed |
-| F080 | note sources | S2 | "GD reported 40" had no source in the note (SELL-15). | Accession 0000040533-26-000036 is in the sources list (`grep -c`: 1). | d0247f7 | none | fixed |
+| F080 | note sources | S2 | "GD reported 40" had no source in the note (SELL-15). | The note's sources list carries the EDGAR folder of every results 8-K, the 2026Q3 release among them (`grep -c 000004053326000036 report/note.html`: 1; the list prints folder URLs, which have no dashes). Exhibit 10 also names the accession. | d0247f7, 37a72ea | none | fixed |
 | F081 | note page 1 and footer, `README.md:15` | S2 | "The author holds no position in General Dynamics" is undated and carried forward by the build (BUYSIDE-27, COMPLIANCE-12). The README's "I hold no position" is the same statement. Only the owner can make it. | none possible here | none | none | open: the owner confirms and dates it (`GO_PUBLIC.md` step 1); P4.7 asks for exactly this |
 | F082 | README Data | S2 | P4.7, restatements. `reviews/sources_deliveries.csv`: GD restated only 2016 (first reported totals 27, 34, 27, 27; restated 28, 36, 29, 28) and nothing from 2017Q1 on. `data/processed/gd_deliveries.csv`: each restated 2016 count comes from the same quarter's 2017 release (filed 2017-04-26 to 2018-01-24), so the design window's 2017 estimates use 2016 counts not public in that form at the time. No held-out quarter uses a 2016 count. | README Data bullet says so. | 048dbb3 | none: hand-written | fixed |
 | F083 | `docs/INTERVIEW_NOTES.md:30` (round 2 copy) | S1 | "So the registry had the quarter's jets in time: the count had settled at 42 by the lock." The lock's own airframe table has 5 of the 42 events on airframes at least three years old by the year field, so the registry did not show 40 new jets, and R9 forbids the claim. The sentence was written by this audit's fix pass (EDITOR-1, FINANCE-1, R2-STAT-9). | Replaced with the count, the five older airframes and the two ratios. The README's lock paragraph now gives the two ratios and no cause (EDITOR-8, R2-STAT-12, R2-STAT-20). | a354170 | `tests/test_prepub_text.py::test_the_lock_timing_sentence_reads_the_lock_and_the_later_snapshots` (F034's pair) | fixed |
@@ -111,6 +111,13 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 | F098 | round 2 minor points | S3 | Not fixed: more than one name for some things (EDITOR-16); dashboard small points (EDITOR-18, FINANCE-13 in part); Exhibit 11 leaves out the workbook's guidance row (EDITOR-19); style points in the post and owner material (EDITOR-20); unsized military and export gaps (FINANCE-12); workbook and small wording (FINANCE-15, FINANCE-16); "nominal 80%" is about 76% as built, two kinds of average for deliveries per event, a test on wins not on the difference, missing sensitivity rows, and four more wording points (R2-STAT-11, -13 to -19). Fixed among the minor points: README "below" to "above" (EDITOR-12), "nearly every" (EDITOR-13), the screenshot (EDITOR-15, FINANCE-14), two already fixed before round 2 read its copy (EDITOR-11, EDITOR-14). | see Evidence | a354170, 37a72ea | none | open: wording and added statistics, each over 15 minutes or a matter of taste; FINANCE-10 is F064 |
 | F099 | `README.md` Reproduce | S2 | P8.4: a fresh clone with this Mac's `python3` (3.9.6) failed at `pip install -r requirements.lock` (`No matching distribution found for contourpy==1.3.3`, `.build/logs/clone_check1.log`). The README gave `make all` and `make test` with no word on the environment. | Reproduce section gives the two setup commands and says the pinned requirements need Python 3.11 or later. A second fresh clone with Python 3.11 builds (`BASELINE.md`, Fresh clone). | 9061039 | none: the fresh clone is the test | fixed |
 | F100 | `tests/` (v1's T9) | S3 | `truncated_mae`, `coverage_drift` and `holdout_metrics` had no direct test (v1 T9, P5.4). | `tests/test_model_direct.py`: six tests rebuild each figure from the data files. `daily.run` is covered by `tests/test_daily.py`. | 9061039 | new tests, not a fix to revert | fixed |
+| F101 | `output/gd_gulfstream_model.xlsx` `Live!B18` | S2 | Round 3 (R3-1, attacking F086): the cell `=B17/B16` had format `0.0%`, so the workbook still showed 20.1% beside 32.0, 40 and 8.0. | Format `0%`. | the round 3 fix commit | none: a number format | fixed |
+| F102 | `report/note.html:56`, `:78` | S2 | Round 3 (R3-2, attacking F093): the "5 of the 42" caveat reached the README and not the note. | Both places in the note carry it, from the same function as the README. By the registry's year field the five include one G700 whose year reads 2006; the sentence says "by the registry's year of manufacture" for that reason. | the round 3 fix commit | ledger rows on the note | fixed |
+| F103 | `docs/INTERVIEW_NOTES.md:33` | S2 | Round 3 (R3-3, attacking F092): "I fixed the rules before I scored the held-out quarters" was qualified on line 7 and not on line 33. | Same qualifier on line 33. | the round 3 fix commit | none | fixed |
+| F104 | post, alternates | S2 | Round 3 (R3-4): the post's label "Backtest, held out from setting the rules" carried no qualifier, while the README says the commit order is all that backs "held out". Graded S2 by the precedent of F027 and F092: the sentence is true of the commit order and misleading without it. | The label reads "Backtest (rules set minutes before scoring)"; both alternates say the same. Two wording tests follow. | the round 3 fix commit | `tests/test_wording.py::test_baseline_wording` and `tests/test_after_score.py::test_the_post_is_short_and_carries_its_disclaimer` assert the new label | fixed |
+| F105 | note, `site/app.js:170`, interview notes | S3 | Round 3 (R3-5): "likely too narrow" survived on three surfaces where the README says "may not fit" (see F034). R3-6: "It reads" after a parenthesis in the post read as the pace. R3-7: the G700 sentence's "after FAA and EASA certification" could be cut with no source (F076). | "may not fit a live lock" on all three; "The test reads"; the clause is cut from the claim. | the round 3 fix commit | none | fixed |
+| F106 | `docs/prepub/` records | S3 | Round 3 (R3-8, R3-9): the after-state on file predated the last changes; fifteen source-reviewer IDs had no row in section 2; F080's evidence line was wrong; `BASELINE.md` had no "Fresh clone" section. | One battery rerun on the final tree and every count rewritten from it (`BASELINE.md`); the IDs mapped below; F080 corrected. | the final records commit | none | fixed |
+| F107 | `data/guidance.csv:29` | S3 | Round 3 (R3-10, attacking F054): no cached transcript backs the new row. The passage, both sentences, and the speaker's printed title were read from the Fool page twice on 2026-11-11 (DECISIONS D16); the page is not cached under `data/raw/sources/calls/`. | none | none | none | open: the owner caches the transcript when next online, as the other calls are |
 
 ## 2. Reviewer findings, each mapped to a row
 
@@ -191,7 +198,7 @@ Round 1 reviewers read the tree at `9a5cb5a`. Round 2 reviewers (EDITOR, FINANCE
 | STAT-13 | S3 | F074 | open |
 | STAT-14 | S3 | F050 | fixed |
 | STAT-15 | S3 | F074 | open |
-| STAT-16 | S3 | F040 | fixed |
+| STAT-16 | S3 | F040 | fixed: the README names the working file and says it is not an estimate (the lead F040 itself is refuted) |
 | REGISTRY-1 | S1 | F033 | fixed |
 | REGISTRY-2 | S1 | F011 | fixed |
 | REGISTRY-3 | S2 | F033, F045 | fixed |
@@ -228,7 +235,7 @@ Round 1 reviewers read the tree at `9a5cb5a`. Round 2 reviewers (EDITOR, FINANCE
 | SELL-16 | S2 | F061 | fixed |
 | SELL-17 | S2 | F060 | fixed |
 | SELL-18 | S3 | F064 | open |
-| SELL-19 | S3 | F076 | open |
+| SELL-19 | S3 | F076 | fixed |
 | SELL-20 | S3 | F008 | fixed |
 | SELL-21 | S3 | F077 | fixed |
 | SELL-22 | S3 | F067 | fixed |
@@ -279,6 +286,25 @@ Round 1 reviewers read the tree at `9a5cb5a`. Round 2 reviewers (EDITOR, FINANCE
 | R2-STAT-10 | S2 | F089 | fixed |
 | R2-STAT-12, R2-STAT-20 | S3, S2 | F083 | fixed |
 | R2-STAT-11, -13 to -19 | S3 | F098 | open |
+| sources_claims SC-2, SC-14 (the preview section) | S1, S3 | F036 | fixed: the section is dropped once scored |
+| sources_claims SC-3 | S2 | F066 | fixed |
+| sources_claims SC-5, SC-7, SC-8 (July statements read after October) | S1, S2 | F036 | fixed: dated to the 2026-07-29 call under "before the release" |
+| sources_claims SC-6 | S2 | F065 | fixed |
+| sources_claims SC-9 | S3 | F004 | fixed |
+| sources_claims SC-10 | S3 | F098 | open: the claim cites the 2024 10-K accurately; the 2025 10-K rewords it |
+| sources_claims SC-11 | S2 | F035, F061 | fixed |
+| sources_claims SC-12 | S3 | F035 | fixed: the sentence is no longer in the note (`grep -c "mix moves revenue per jet"`: 0) |
+| sources_claims SC-13 | S3 | F077 | fixed |
+| sources_guidance SRC-G-2 | S3 | F098 | open: the preregistration's example quote prints dollars where the transcripts print "150 to 155"; the preregistration does not change (R7) |
+| sources_guidance SRC-G-3 | S3 | F098 | open: three MarketBeat links refuse automated readers (`LINKS.csv`: 3 of 144 external links, status 403); each quote was verified on another transcript |
+| sources_guidance SRC-G-5 | S3 | F098 | open: the speaker column copies each page's label, so one 2021 title is shorter than the rest |
+| R3-1 | S2 | F101 | fixed |
+| R3-2 | S2 | F102 | fixed |
+| R3-3 | S2 | F103 | fixed |
+| R3-4 | S2 | F104 | fixed |
+| R3-5, R3-6, R3-7 | S3 | F105, F076 | fixed |
+| R3-8, R3-9 | S3 | F106 | fixed |
+| R3-10 | S3 | F107 | open: owner |
 | recompute (547 figures) | | `RECOMPUTE_DIFF.md` | 547 match, no finding |
 | sources_deliveries (43 quarters) | | `SOURCES_DELIVERIES.csv` | 43 verified, no finding |
 

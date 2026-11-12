@@ -12,7 +12,7 @@ from pathlib import Path
 from . import claims as claims_mod
 from . import live, model
 from .estimates import DEFENSE, LABEL, SEGMENTS, basis_path
-from .report import comparators, lock_words, readings_footnote
+from .report import comparators, lock_old_events, lock_words, readings_footnote
 from .fiscal import Calendar, qrange, shift
 from .files import read_csv, read_json, sha256, write_text
 
@@ -312,6 +312,7 @@ def build(root="."):
         if cmp_:
             live_point += (" Other misses for the quarter: "
                            + ", ".join(f"{lab} ({val}) by {miss}" for lab, val, miss in cmp_) + ".")
+            live_point += old_events_line(root, pred)
     elif lock:
         d, t = et_time(lock["published_at"])
         live_point += f" I locked it as a {lock_words(cfg, lock['published_at'])}, at {t} ET on {d}."
@@ -482,13 +483,14 @@ def build(root="."):
         raw = pred["events"]["large"] + pred["events"]["mid"]
         scale = (tr_["reported"]["large"] + tr_["reported"]["mid"]) / (tr_["registry"]["large"] + tr_["registry"]["mid"])
         body += (f" The raw count of {raw} events missed by {abs(raw - score['reported']['total'])}; the estimate "
-                 f"came out lower because the four quarters before gave a scale of {f2(scale)} deliveries per event.")
+                 f"came out lower because the four quarters before gave a scale of {f2(scale)} deliveries per event."
+                 + old_events_line(root, pred))
     elif score:
         body += f" GD then reported {score['reported']['total']}."
         if score.get("guidance_pace") is not None:
             body += f" GD's guidance pace for the quarter had been {f1(score['guidance_pace'])}."
     add(f"<p>{esc(body)} The band comes from errors measured on a registry file that had months or years to fill in, so "
-        "at a live lock it is likely too narrow.</p>")
+        "it may not fit a live lock.</p>")
 
     # 5. Backlog, book-to-bill, estimates
     before = ", before the release" if score else ""
@@ -638,6 +640,15 @@ def build(root="."):
     return text
 
 
+def old_events_line(root, pred):
+    """What the lock's raw count held: how many of its events sat on airframes at least three years old."""
+    old = lock_old_events(root, pred)
+    if not old:
+        return ""
+    return (f" Of the {old[1]} events in the raw count, {old[0]} were airframes at least three years old by the "
+            "registry's year of manufacture, so the raw count is not a count of new jets.")
+
+
 def used_share(root):
     """How many counted events sit on airframes at least three years old by the registry's year of manufacture."""
     root = Path(root)
@@ -673,8 +684,7 @@ def limitations(root):
         "Mid-cabin gap: the mid-cabin count rests on the G280 alone, and GD has said G280 deliveries end in 2027 with a "
         "production break before the G300 (product cycle, above). The method is untested in a quarter with few or no "
         "mid-cabin deliveries.",
-        "Band: the past-miss band comes from errors measured on a finished registry file, so it is likely too "
-        "narrow at a live lock.",
+        "Band: the past-miss band comes from errors measured on a finished registry file, so it may not fit a live lock.",
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
         "reading or could not confirm it: five were used jets read as new deliveries, two had an earlier stated "
         "delivery, and three could not be confirmed. All but one source was a registry mirror or aircraft-history "

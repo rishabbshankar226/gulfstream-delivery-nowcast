@@ -858,6 +858,7 @@ NEW = [
     # post
     ("post", "My first locked estimate of Gulfstream deliveries missed: I said {live.Q.score.nowcast.total:f1} for 2026Q3, "
              "General Dynamics reported {live.Q.score.reported.total:int}"),
+    ("post", "Repeating the same quarter last year missed by less on average, {m.holdout.mae.seasonal:f1}"),
     ("post", "The 2026Q3 miss was {live.Q.score.ae_total:f1}, outside my {const.band_nominal_pct:pct0} band of past misses. "
              "A pace I derived from GD's own full-year outlook missed by {live.Q.score.guidance_ae:f1}, and last year's same "
              "quarter ({cmp.Q.yago:int}) by {cmp.Q.yago_miss:int}"),
@@ -956,7 +957,7 @@ NEW = [
              "and with the plans GD stated for single quarters in its place, by {sv.quarter_plans.mae.guidance:f1}, not "
              "{m.holdout.mae.guidance:f1}"),
     ("note", "these percentages are from its published data file as of {const.study_asof:date}"),
-    ("readme", "Of the {used.lock.Q.n:int} events in the raw count, {used.lock.Q.old3:int} were airframes at least "
+    ("readme,note", "Of the {used.lock.Q.n:int} events in the raw count, {used.lock.Q.old3:int} were airframes at least "
                "{const.old_years:word} years old by the registry's year of manufacture"),
     ("readme", "My pace split the {even.Q.left:int} jets GD's outlook left for the rest of the year by the last "
                "{const.pace_years:word} years' pattern and said {live.Q.score.guidance_pace:f1}; an even split would have "
@@ -1496,6 +1497,8 @@ def live_ok(F):
          r"before GD reports, and scores it from GD's SEC filing", G),
         (r"The band comes from (misses|errors) measured on a (finished )?registry file.*(live quarter|live lock)", G),
         (r"so it is likely too narrow (live|at a live lock|for a live quarter)", G),
+        (r"it may not fit a live (lock|quarter)", G),
+        (r"^Backtest \(rules set minutes before scoring\): Over # held-out quarters", G),
         (r"the past-miss band comes from (misses|errors) measured on a finished registry file", G),
         (r"A live estimate sees only what has posted|while a live estimate sees only what has posted", G),
         (r"as a live estimate (reads them|does)", G),

@@ -186,7 +186,7 @@ def live_sheet(wb, root, pred):
         s = read_json(sp)
         rows = [("GD reported", s["reported"]["total"], F_AIR, True),
                 ("Miss of the lock", "=ABS(B11-B16)", F_AIR, False),
-                ("Miss, % of reported", "=B17/B16", F_PCT, False),
+                ("Miss, % of reported", "=B17/B16", "0%", False),
                 ("GD's count against the band", '=IF(B16<B14,"outside",IF(B16>B15,"outside","inside"))', None, False)]
         if s.get("guidance_pace") is not None:
             rows += [("Guidance pace", s["guidance_pace"], F_AIR, True),
