@@ -67,3 +67,28 @@ The real tree also carries a stale PDF (lead L13). The clean copy does not show 
 - Numbers drawn inside chart images are listed by hand in `tools/prepub/chart_numbers.csv`. Values read off an axis are marked "read by eye".
 - `docs/build/` is handled as one row: dated build logs, which need a notice saying so.
 - The staleness check covers sentences about a lock or a score. Other stale claims (who runs the daily job, what a site blocks) are found by reading, in P4 and P5.
+
+## Rerun on the final tree (P6.4)
+
+Run 2026-11-11, about 20:50 ET, after the fix pass, because the ledger's rules grew with every rewritten sentence and a looser rule could have stopped catching a plant.
+
+- Copies: `git archive prepub-audit | tar -x -C <dir>` at commit `7277a6d` into `~/gdn-prepub/plant3/` (clean) and `~/gdn-prepub/plant4/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link.
+- Plants: `tools/prepub/plant_selftest.py plant <planted copy>`, then `make pdf` in the planted copy for plant 7.
+- Ledgers: `tools/prepub/ledger.py --root <copy> --out <copy>/LEDGER_*.csv`. Clean: `rows 2796  flagged 2`. Planted: `rows 2798  flagged 38`.
+- Compare: `tools/prepub/plant_selftest.py compare <clean csv> <planted csv>`.
+
+| # | Plant | Caught | By (surface, place, status, shown, expected) |
+|---|---|---|---|
+| 1 | post 32.0 to 32.1 | yes | `post`, `docs/LINKEDIN_POST.md:1`, `mismatch`, shown 32.1, expected 32.0 |
+| 2 | README 69.2% to 69.3% | yes | `readme`, `README.md:51`, `rounding`, shown 69.3%, expected 69.2 |
+| 3 | "will be scored" sentence | yes | `readme`, `README.md:109`, `stale` |
+| 4 | right value, wrong label (4.6 to 5.5) | yes | `readme`, `README.md:32`, `mismatch`, shown 5.5, expected 4.6 |
+| 5 | unit swap on 1.18 | yes | `readme`, `README.md:81`, `mismatch`, shown 1.18, expected 0.91 |
+| 6 | workbook `Summary!C2` plus 0.1 | yes | `workbook`, `Summary!C2`, `mismatch`, computed 5.623395319586227, expected 5.523395319586225 |
+| 7 | note PDF 4.6 to 4.7 | yes | `note-pdf`, `output/GD_research_note.pdf:p2`, `rounding`, shown 4.7 |
+| 8 | `site/data.json` locked total plus 0.1 | yes | `dashboard`, rendered first screen, `mismatch`, shown 32.1, expected 32.0 |
+| 9 | "The first lock is still ahead" | yes | `readme`, `README.md:111`, `stale` |
+
+9 planted, 9 caught, 0 missed.
+
+The clean copy's two flagged rows are both `stale` rows on sentences that say the workflow made the lock while the repository was private (`README.md:121`, `docs/INTERVIEW_NOTES.md:29`). The ledger admits those sentences only when `git log` shows the lock commit's author, and an archive copy has no history. On the real tree, which has the history, the same run prints `rows 2794  flagged 0`. On the clean copy the post, the dashboard, the note, the PDF and the workbook have zero flagged rows.

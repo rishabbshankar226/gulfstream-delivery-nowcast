@@ -34,3 +34,31 @@ The merge into `prepub-audit` waits until the P4 reviewers have written their re
 
 ## D8. Owner's name in tracked files (2026-11-11)
 The spec calls the owner [private name]. Tracked files under `docs/prepub/` say "the owner", because the public author name on every surface is Rishabb Shankar and these files become public with the merge.
+
+## D9. Round 2 reads `round2_clean`, a copy without `tools/prepub/` (2026-11-11)
+P8.1 says the copy sits at `$HOME/gdn-prepub/round2/` with `docs/prepub/` removed. `rm` is denied, so I left the folder out at extraction: `git archive prepub-audit | tar -x -C <dir> --exclude 'docs/prepub'`. That first copy still held `tools/prepub/`, whose `revert_check.py` lists finding IDs. So the reviewers read a second copy, `~/gdn-prepub/round2_clean/`, extracted with `--exclude 'tools/prepub'` as well. `docs/prepub/ERRATA.md` is copied in, because the README links to it and a reader can open it. The copy has no `.git`.
+
+## D10. Gate failures caused by honest fixes (R11) (2026-11-11)
+The full gate on the final tree prints `42 assertions, 4 failing, 2 warning` (`BASELINE.md`, After). The baseline printed `1 failing` (`N4`), which now passes. Each of the four failures is a check that every printed number is one the gate itself computes, or that `site/data.json` holds only the keys the gate knows. The audit added true figures the gate has no rule for. I did not weaken a sentence to pass, and the gate was not edited.
+
+| Gate line | Numbers it names | Where they come from | Finding |
+|---|---|---|---|
+| `R2` | `0.20` | one standard error of an autocorrelation at n = 26, in the README's sign-test paragraph | F050 group (STAT-12) |
+| `R2` | `117`, `6.7` | GD's January 2021 statement read as 117, and the guidance pace's average miss under that reading | F022 |
+| `R2` | `43.1` | the guidance pace for 2023Q3, set beside GD's stated plan of 27 | F058 |
+| `R2`, `K1` | `12.5`, `3.5`, `6.4` | the 2023 to 2024 split of the held-out comparison | F023 |
+| `R2`, `K1`, `N1` | `0.76`, `0.95` | deliveries per registry event behind the 2026Q3 lock, and the realised figure | F034 |
+| `K1` | `246`, `1,251` | counted events on airframes at least three years old | F033 |
+| `N1` | `$826M`, `23.4%`, `$95M`, `2.7%`, `$5.0B`, `$185M`, `3.7%` | what GD reported by segment for 2026Q3 against the note's estimates | F013 |
+| `Y1` | keys `public`, `public_since`, `reported_segments` | fields the dashboard needs to label the lock and to show GD's reported revenue | F005, F013 |
+
+The gate caps each list at eight items, so later numbers of the same kinds may be hidden behind these. Every number on those surfaces is traced by the ledger (`LEDGER.csv`, 0 flagged), which is the check that covers them now.
+
+## D11. S2 findings against preregistered rules become errata, not code changes (2026-11-11)
+P6.1 says to fix every S1 and S2. Four findings ask for a change to a preregistered rule or to a file under `.github/` (the holder rule, the scope rule, the Pages trigger, the workflow's schedule). R7 and §8 say such a finding becomes an erratum. Each has an entry in `ERRATA.md`, a disclosure on the README where a reader meets the affected figure, and a step in `GO_PUBLIC.md`. Their status in `FINDINGS.md` is `erratum`.
+
+## D12. The six stated quarter plans are scored as exploratory, and the headline stays (2026-11-11)
+The sell-side reviewer found that GD stated a delivery plan for the quarter under way on six calls, and that the preregistered guidance pace ignores them (SELL-1). I checked each quote in the cached transcripts and searched every cached call for others; there are six. The preregistered baseline is what it is, so 6.9 stays the headline figure (R7). The six plans are in `data/quarter_plans.csv`, scored in `results/exploratory/sensitivity.md` (6.02, and the registry estimate closer in 12 of 26), and stated in the README's Results beside the headline and in the interview notes. The post keeps the preregistered figure and calls the baseline a pace I derived.
+
+## D13. A script of mine emptied `tools/prepub/ledger_rules.py`; restored from the last commit (2026-11-11)
+A one-line write in a scratch script opened the file for writing before reading it and left it empty. The file had been committed in `9c0f7b8` minutes earlier. I restored it with `git show HEAD:tools/prepub/ledger_rules.py > tools/prepub/ledger_rules.py` and re-applied the one batch of rule edits made since. Nothing else was lost. The rerun ledger and the nine plants (`LEDGER_SELFTEST.md`) show the rules work as before.

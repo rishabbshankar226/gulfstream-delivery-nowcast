@@ -54,8 +54,8 @@ def about(wb, snap, chosen):
     ws.title = "About"
     lines = [
         ("General Dynamics (GD): Gulfstream delivery tracker, model workbook", BOLD),
-        ("Question: how closely do FAA registrations track the Gulfstream deliveries GD reports, and can they "
-         "estimate the count before GD reports it?", None),
+        ("Question: how closely do FAA registrations track the Gulfstream deliveries GD reports, and does an "
+         "estimate locked the day before GD reports hold up?", None),
         ("Student research project. Not investment advice. Not affiliated with General Dynamics, Gulfstream or the "
          "FAA.", None),
         ("", None),

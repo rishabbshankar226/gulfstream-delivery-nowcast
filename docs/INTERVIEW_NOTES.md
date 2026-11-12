@@ -2,7 +2,7 @@
 
 ## The 60-second version
 
-General Dynamics reports how many Gulfstream jets it delivered each quarter, and that count drives the Aerospace segment. I wanted to know how closely FAA registrations track it. I read every Gulfstream jet in the FAA's public registry, took the first sign that each one reached a customer, counted those dates in GD's fiscal quarters, and scaled the count by how many deliveries GD reported per registration over the four quarters before.
+General Dynamics reports how many Gulfstream jets it delivered each quarter. I wanted to know how closely FAA registrations track that count. I read every Gulfstream jet in the FAA's public registry, took the first sign that each one reached a customer, counted those dates in GD's fiscal quarters, and scaled the count by how many deliveries GD reported per registration over the four quarters before.
 
 I fixed the rules on 12 design quarters and committed them before scoring 26 held-out quarters. Over those 26 quarters my registry estimate was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable, and simply repeating the same quarter last year missed by less on average, 4.6. So I report it as a tracker, not as an edge.
 

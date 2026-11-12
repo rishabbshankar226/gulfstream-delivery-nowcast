@@ -38,4 +38,30 @@ The other 39 assertions passed: G0, F1 to F4, T1 to T3, M1 to M3, S1, S2, Q1, Q2
 
 ## After
 
-(P5.5 and P6.4 fill this in.)
+Measured 2026-11-11, 20:48 to 20:51 ET, at commit `7277a6d` on a clean tree (P5.5, P6.4). Logs under `.build/logs/`.
+
+| Check | Command | Result |
+|---|---|---|
+| Tests | `make test` (log `after_test.log`) | `170 passed, 14 warnings in 54.15s`, exit 0 |
+| Gate, all ten families | the R11 command with `--only faa,truth,model,segments,prereg,live,workbook,docs,site,repo --output .build/gate.json` (log `gate_after1.log`) | `42 assertions, 4 failing, 2 warning`, exit 1 |
+| Offline rebuild | `make all` then `git status --short` (log `p6_make_all3.log`, then the commits that followed) | exit 0; every rebuilt file committed with its generator |
+| Determinism | `make check-determinism` (log `determinism_after1.log`) | `identical (50 files)`, exit 0 |
+| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` | `rows 2794  flagged 0` |
+| Revert tests (R6) | `tools/prepub/revert_check.py` on a fresh clone (`REVERT_TESTS.md`) | 19 fixes checked, 19 fail reverted and pass restored |
+| Nine plants on the final tree | `tools/prepub/plant_selftest.py` (`LEDGER_SELFTEST.md`, rerun section) | 9 planted, 9 caught, 0 missed |
+
+### The gate's lines, after
+
+Passing families: `faa`, `truth`, `model`, `segments`, `prereg`, `live`, `workbook`, `repo`. The baseline's one failure, `N4` (the note's unused `os-release-date` claim), now passes.
+
+Warnings, both present in the baseline:
+
+- `WARN S3`: unparsed segment cells for 2024Q3 and 2024Q4 in the gate's own SEC parse.
+- `WARN L3`: `[('2026Q4', 'not locked yet', None)]`.
+
+Failures, all four in the `docs` and `site` families and all four caused by sentences and fields this audit added (logged in `DECISIONS.md` D10 under R11). The gate prints at most eight items per list:
+
+- `FAIL R2` (every number in Results, Error analysis and Live record is a figure the gate computed): `0.20, 117, 6.7, 43.1, 12.5, 3.5, 6.4, 0.76`.
+- `FAIL K1` (every number in the post, the bullets and the interview notes is a figure the gate computed): `12.5, 3.5, 6.4, 0.76, 0.95, 246, 1,251`.
+- `FAIL N1` (every number in the note is a figure the gate computed): `0.76, $826, 23.4%, $95, 2.7%, $5.0, $185, 3.7%`.
+- `FAIL Y1` (`site/data.json` holds what the gate computes): unexpected keys `public`, `public_since`, `reported_segments`.

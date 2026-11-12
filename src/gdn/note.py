@@ -542,7 +542,9 @@ def build(root="."):
     add('<div class="exhibit"><div class="cap">Exhibit 10. Defense backlog in years of trailing revenue, and the '
         "2026Q3 baseline</div>"
         + table(["Segment", "Backlog, 2026Q2", "Coverage, years", "2026Q3 estimate", "Operating margin"], drows)
-        + "</div>")
+        + ('<div class="src">Backlog is as of 2026Q2, the last quarter before these estimates were made. GD\'s 2026Q3 '
+           "release (accession 0000040533-26-000036, Exhibit H) reports Marine Systems backlog of $146.9B, so this "
+           "table is not current.</div>" if score else "") + "</div>")
     add("<p>For the defense segments I use my defense backlog study's best next-quarter baseline. That study "
         "tested five other defense primes; GD was left out because it stopped tagging backlog in XBRL in 2018. Pooled "
         "across those five, the next-quarter error was 9.9% for a backlog model, 7.3% for the seasonal naive and 6.5% "

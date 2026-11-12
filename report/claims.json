@@ -225,6 +225,15 @@
     "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
   },
   {
+    "id": "risk-tariffs-update",
+    "text": "In its 2026Q2 quarterly report, GD said the U.S. Supreme Court held in February 2026 that the tariffs imposed under IEEPA were unauthorized, and that tariffs as applied and tariffs yet to be refunded are not material to its results.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000032",
+    "quote": "Overall, tariffs as applied in their current form and tariffs yet to be refunded are not material to our results of operations.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
+  },
+  {
     "id": "risk-us-government-spending",
     "text": "GD says decreases in U.S. government defense and other spending, or changes in spending allocation or priorities, could reduce, delay or terminate its programs and impact its financial performance.",
     "source_type": "filing",

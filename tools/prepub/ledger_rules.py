@@ -875,6 +875,7 @@ NEW = [
     ("interview", "On {qp.n:word} calls GD also said how many aircraft it planned to deliver"),
     ("readme", "\"a few demonstrators all up about {const.demo11:int} aircraft\""),
     ("readme", "No held-out quarter had fewer than {mid.min_holdout:int} mid-cabin deliveries"),
+    ("note", "reports Marine Systems backlog of {q3.backlog.marine:usdB}, so this table is not current"),
     ("readme", "\"ought to deliver in the second quarter of next year\", meaning {const.g300_late:year}, with the G300 to follow "
                "around late {const.g300_late:year} or early {const.g300_early:year}"),
     ("note", "{used.old3:int} of the {used.n:int} counted events ({used.old3_pct:pct1}) are airframes at least "
@@ -1031,6 +1032,8 @@ def _extra_consts(F):
         "(data/raw/sources/calls/2022-01-26-fool.txt)")
     put("const.g300_late", 2027, "report/claims.json pc-g280-final-delivery (the year after the 2026-07-29 call; \"late '27\")")
     put("const.g300_early", 2028, "report/claims.json pc-g280-final-delivery (\"early '28\")")
+    put("q3.backlog.marine", 146865e6, "GD 8-K Exhibit 99.1, accession 0000040533-26-000036, Exhibit H, Third Quarter 2026, "
+        "Marine Systems total backlog 146,865 ($M); read from the cached exhibit in data/raw/sec (untracked)")
     put("const.eng_a", 4, "src/gdn/faa.py scope rule (TYPE-ENG 4) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_b", 5, "src/gdn/faa.py scope rule (TYPE-ENG 5) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_out", 2, "ACFTREF row 3980222,GULFSTREAM AEROSPACE CORP,GVIII-G700,5,2 in the FAA file of 2026-10-30")
