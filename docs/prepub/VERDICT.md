@@ -2,7 +2,7 @@
 
 **NO-GO.** Three of the 13 criteria fail (1, 2 and 12), each on something only the owner can do: decide about the email address and the home paths that the commit history would expose (F015, F016), and confirm and date the no-position sentence (F081). Every other S1 and S2 finding is fixed, refuted or an erratum. Criterion 11 holds by the reading logged before the run began and misses by its literal words, on two working files of the open quarter that the required merge of the daily workflow's commits changed; the record itself is untouched.
 
-Written 2026-11-12 at the end of the pre-publication audit, on branch `prepub-audit`. The final battery ran at commit `7a70d9e`; later commits change only files under `docs/prepub/`. Every figure below was printed by a command run after the last edit that could change it; the commands and their logs are in `BASELINE.md`.
+Written 2026-11-12 at the end of the pre-publication audit, on branch `prepub-audit`. The final battery ran at commit `4c922cd`; later commits change only files under `docs/prepub/`. Every figure below was printed by a command run after the last edit that could change it; the commands and their logs are in `BASELINE.md`.
 
 ## What remains before GO
 
@@ -24,7 +24,7 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 | 4 | Every recomputed figure in P2.2 matches at its displayed precision, or differs with an erratum | yes | `RECOMPUTE_DIFF.md`: 547 figures, 547 match. `git diff --stat 36fed31..HEAD -- results data/processed` lists only files the audit added (`segments_reported.csv`, `results/exploratory/sensitivity.*`), so the figures the recompute matched are the figures in the final tree. |
 | 5 | P2.3's lock checks all pass | yes | `LOCK_CHECK.md`: the file's sha256 `3c4cdbd0...6f23` equals the hash in the tree, at the tag, in the release notes and in `2026Q3_lock.json`; the release was published 2026-10-29T05:51:24Z (01:51 ET) and the SEC accepted GD's 8-K at 2026-10-30 08:09:27 ET; the lock commit `a44e5ac` is an ancestor of `main`. |
 | 6 | Every link in the post resolves, or resolves after a step in `GO_PUBLIC.md` that names it and its check | yes | `POST_CHECK.md`: both links return 404 while the repository is private; `GO_PUBLIC.md` steps 4 and 5 make them resolve and step 6 checks them from a logged-out browser. |
-| 7 | `make test`, the full gate (or each failing family with a logged reason under R11) and `make check-determinism` pass on the fresh clone | yes, with logged gate failures | Fresh clone at `7a70d9e` with Python 3.11 (`BASELINE.md`, Fresh clone): `make all` exit 0 with an empty `git status`; `make test` `176 passed, 14 warnings in 32.92s`; `make check-determinism` `identical (50 files)`; gate `42 assertions, 4 failing, 3 warning`. The four failing assertions (`R2`, `K1`, `N1`, `Y1`, in the `docs` and `site` families) are logged with their reasons in DECISIONS D10 and D18; the other eight families pass. A first clone with the system `python3` (3.9.6) could not install the requirements, which was a finding against the README (F099, fixed). |
+| 7 | `make test`, the full gate (or each failing family with a logged reason under R11) and `make check-determinism` pass on the fresh clone | yes, with logged gate failures | Fresh clone at `4c922cd` with Python 3.11 (`BASELINE.md`, Fresh clone): `make all` exit 0 with an empty `git status`; `make test` `178 passed, 14 warnings in 30.40s`; `make check-determinism` `identical (50 files)`; gate `42 assertions, 4 failing, 3 warning`. The four failing assertions (`R2`, `K1`, `N1`, `Y1`, in the `docs` and `site` families) are logged with their reasons in DECISIONS D10 and D18; the other eight families pass. A first clone with the system `python3` (3.9.6) could not install the requirements, which was a finding against the README (F099, fixed). |
 | 8 | `INTERVIEW_NOTES.md` and `RESUME_BULLETS.md` state the scored live record | yes | F006, F007, F083: the lock (32.0, band 21.2 to 37.2, 01:51 ET on 2026-10-29), GD's 40, the miss of 8.0 outside the band, the guidance pace's 6.2 and last year's quarter. Ledger: 0 flagged rows on either file. |
 | 9 | Round 3 found no S1 | yes | `reviews/round3.md`: S1 0, S2 4, S3 6. Its four S2 are fixed (F101 to F104), and it confirmed the lock file's hash and an empty diff on the protected paths. One of its S2, the post's unqualified "held out", it flagged as a severity call; it is graded S2 on the precedent of F027 and fixed (F104). |
 | 10 | Every row of the three source files reads verified, or carries a closed finding ID | yes | `SOURCES_DELIVERIES.csv`: 43 of 43 verified. `SOURCES_GUIDANCE.csv`: 24 verified, 3 verified elsewhere, and the one call the reviewer found missing was added (F054, fixed). `SOURCES_CLAIMS.csv`: 204 verified or verified elsewhere, 23 with a closed finding (F004, F013, F035, F036, F043, F052, F065, F066). |
@@ -40,8 +40,8 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 |---|---|---|---|---|---|
 | S1 | 19 | 0 | 3 | 2 | 24 |
 | S2 | 48 | 5 | 2 | 1 | 56 |
-| S3 | 18 | 1 | 1 | 7 | 27 |
-| All | 85 | 6 | 6 | 10 | 107 |
+| S3 | 19 | 1 | 1 | 6 | 27 |
+| All | 86 | 6 | 6 | 9 | 107 |
 
 ### Open, by severity
 

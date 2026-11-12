@@ -13,7 +13,7 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P5 | with P2 to P4 | 20:13 | 2 h | codex review, defect trace, four code fixes in a scratch clone (D5) |
 | P6 | 19:40 | 21:05 | 2 h | fix pass, merged in `e778e23`; registry and sell-side fixes after their reports |
 | P7 | with P6 | 21:10 | 1 h | post rewritten in its generator; alternates and check |
-| P8 | 20:48 (round 2 launched) | 22:13, then 2026-11-12 09:23 to 09:33 ET | 2.5 h | rounds 2 and 3, two fix rounds, fresh clone, final battery; after an overnight pause, the merge of the workflow's new commits and the battery again |
+| P8 | 20:48 (round 2 launched) | 22:13, then 2026-11-12 09:23 to 09:53 ET | 2.5 h | rounds 2 and 3, two fix rounds, fresh clone, final battery; after an overnight pause, the merge of the workflow's new commits and the battery again |
 
 ## Items
 
@@ -52,7 +52,7 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P7.3 | Post check | done | `POST_CHECK.md` |
 | P8.1 | Round 2 (three fresh reviewers) | done | `reviews/round2_*.md`: three NO-GO, 4 S1 in all, every one a sentence; fixed in `a354170` (F083 to F098) |
 | P8.2 | Round 3 (one attacker) | done | `reviews/round3.md`: S1 0, S2 4, S3 6 |
-| P8.3 | Fix rounds 2 and 3 | done | two fix rounds: `a354170` (round 2), `4ad3825` (round 3); no review round was repeated, since round 3 found no S1. One more code fix followed the advisor's last check (F108, `1e9a890`), and the whole battery was run again after it and again after the merge |
+| P8.3 | Fix rounds 2 and 3 | done | two fix rounds: `a354170` (round 2), `4ad3825` (round 3); no review round was repeated, since round 3 found no S1. One more code fix followed the advisor's last check (F108, `1e9a890`), and the whole battery was run again after it, again after the merge, and again after the continue pass (D21) |
 | P8.4 | Fresh clone check | done | `BASELINE.md`, Fresh clone: builds, `176 passed`, deterministic, empty status after `make all` |
 | P8.5 | Merge check | done | the workflow's 2026-11-12 commits merged with a real merge commit, `bbf88fd`; `git log prepub-audit..origin/main` is empty; P6.4 rerun after it |
 | P8.6 | Hash recheck and VERDICT.md | done | 59 of 61 hashes match, the two others explained by the merge (D20); `VERDICT.md`: NO-GO on criteria 1, 2 and 12 |

@@ -4,7 +4,7 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 
 - Sources: `L<n>` is a lead from the spec's §0; `ledger` is a flagged row of the first `LEDGER.csv`; an ID such as `BUYSIDE-3` points into `docs/prepub/reviews/`. Section 2 maps every reviewer finding to a row here.
 - "Old tree" line numbers are the lines the reviewers read at `9a5cb5a`, before the fix pass.
-- Test: the regression test for a code fix, with its result when the fix is reverted and when it is restored. All 20 pairs are in `REVERT_TESTS.md` (`tools/prepub/revert_check.py`): each reads FAIL reverted, PASS restored. Text written by hand has no code to revert; the ledger is its check (`LEDGER.csv`, 0 flagged rows).
+- Test: the regression test for a code fix, with its result when the fix is reverted and when it is restored. All 22 pairs are in `REVERT_TESTS.md` (`tools/prepub/revert_check.py`): each reads FAIL reverted, PASS restored. Text written by hand has no code to revert; the ledger is its check (`LEDGER.csv`, 0 flagged rows).
 - Commits are on `prepub-audit`. The fix pass was developed in a scratch clone and merged in `e778e23` (DECISIONS D5).
 
 ## 1. Findings
@@ -330,7 +330,7 @@ The first run on the real tree (`cc83c82`) flagged 25 rows. Each maps to a findi
 |---|---|---|---|---|---|
 | S1 | 19 | 0 | 3 | 2 | 24 |
 | S2 | 48 | 5 | 2 | 1 | 56 |
-| S3 | 18 | 1 | 1 | 7 | 27 |
-| All | 85 | 6 | 6 | 10 | 107 |
+| S3 | 19 | 1 | 1 | 6 | 27 |
+| All | 86 | 6 | 6 | 9 | 107 |
 
-Open S1: F015, F016. Open S2: F081. Open S3: F053, F063, F064, F068, F074, F098, F107.
+Open S1: F015, F016. Open S2: F081. Open S3: F063, F064, F068, F074, F098, F107.
