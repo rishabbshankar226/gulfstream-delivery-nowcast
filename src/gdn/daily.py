@@ -19,7 +19,7 @@ from . import faa, live, sec
 from .gitops import GitError, Ops
 from .files import csv_text
 
-LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json"]
+LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json", "data/processed/segments_reported.csv"]
 REBUILD_PATHS = ["results/estimates.json", "output/gd_gulfstream_model.xlsx",
                  "output/gd_gulfstream_model.inputs.sha256", "report/note.html", "site/data.json", "README.md",
                  "docs/LINKEDIN_POST.md", "output/GD_research_note.pdf", "site/GD_research_note.pdf",

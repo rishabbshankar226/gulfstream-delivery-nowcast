@@ -550,3 +550,40 @@ def test_a_lock_published_after_the_filing_is_not_scored(repo, monkeypatch, acce
     rc = live.run_score(at("2026-10-31T09:00"), root=repo, log=msgs.append)
     assert (repo / "results/live/2026Q3_score.json").exists() is scored and rc == (0 if scored else 1)
     assert scored or any("not before" in m for m in msgs)
+
+
+SEG_TEXT = """REVENUE AND OPERATING EARNINGS BY SEGMENT - (UNAUDITED)
+Revenue:
+Aerospace $ 3,536 $ 3,234 $ 302 9.3 %
+Marine Systems 4,960 4,096 864 21.1 %
+Combat Systems 2,386 2,252 134 6.0 %
+Technologies 3,684 3,325 359 10.8 %
+Total $ 14,566 $ 12,907 $ 1,659 12.9 %
+Operating earnings:
+Aerospace $ 513 $ 430 $ 83 19.3 %
+Marine Systems 391 291 100 34.4 %
+Combat Systems 330 335 (5) (1.5) %
+Technologies 346 327 19 5.8 %
+Corporate (53) (52) (1) (1.9) %
+Total $ 1,527 $ 1,331 $ 196 14.7 %
+Operating margin:
+Aerospace 14.5 % 13.3 %
+"""
+
+
+def test_what_gd_reported_by_segment_is_kept_for_a_scored_quarter(repo):
+    # F013. The note and the dashboard set GD's reported revenue beside the estimate made before the release.
+    assert live.reported_segments(repo) == {}
+    assert live.write_reported_segments(repo, "2026Q3", SEG_TEXT, "0000040533-26-000036", log=lambda *a: None)
+    got = live.reported_segments(repo)["2026Q3"]
+    assert got["accn"] == "0000040533-26-000036"
+    assert got["Aerospace"] == (3_536_000_000, 513_000_000) and got["Technologies"] == (3_684_000_000, 346_000_000)
+    # written twice, the quarter still has four rows
+    live.write_reported_segments(repo, "2026Q3", SEG_TEXT, "0000040533-26-000036", log=lambda *a: None)
+    assert (repo / live.REPORTED_SEG).read_text().count("2026Q3,") == 4
+
+
+def test_a_release_without_a_segment_table_is_logged_not_raised(repo):
+    msgs = []
+    assert live.write_reported_segments(repo, "2026Q3", "Other news", "0000040533-26-000036", log=msgs.append) is False
+    assert not (repo / live.REPORTED_SEG).exists() and any("no segment table" in m for m in msgs)

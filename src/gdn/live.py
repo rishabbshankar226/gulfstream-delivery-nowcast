@@ -19,6 +19,8 @@ ET = ZoneInfo("America/New_York")
 PATH_COLS = ["date", "events_large", "events_mid", "trailing_registry_large", "trailing_registry_mid",
              "nowcast_large", "nowcast_mid", "nowcast_total"]
 CABINS = ("large", "mid")
+REPORTED_SEG = "data/processed/segments_reported.csv"   # what GD reported for each scored live quarter
+REPORTED_SEG_COLS = ["quarter", "segment", "revenue_usd", "operating_earnings_usd", "accn"]
 LOCK_HOUR_ET = 19
 LAST_LOCK_MINUTES = 10          # never start a release within this many minutes of 00:00 ET on the release date
 LOCK_WINDOW_DAYS = 7
@@ -472,8 +474,55 @@ def run_score(now=None, offline=False, root=".", log=print):
             return 1
     s = score_quarter(root, q, d, f["accn"])
     write_json(live_dir(root) / f"{q}_score.json", s)
+    write_reported_segments(root, q, sec.plain(body), f["accn"], log)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))
     return 0
+
+
+# ---------- what GD reported by segment, for a scored quarter ----------
+def reported_segments(root):
+    """{quarter: {"accn": ..., segment: (revenue_usd, operating_earnings_usd)}} from the tracked file."""
+    p = Path(root) / REPORTED_SEG
+    out = {}
+    for r in (read_csv(p) if p.exists() else []):
+        d = out.setdefault(r["quarter"], {"accn": r["accn"]})
+        d[r["segment"]] = (int(r["revenue_usd"]), int(r["operating_earnings_usd"]))
+    return out
+
+
+def write_reported_segments(root, q, release_text, accn, log=print):
+    """Add quarter q's segment revenue and operating earnings, as the release prints them, to the tracked file.
+    The estimates were made before the release; the note and the dashboard set these beside them."""
+    try:
+        seg = sec.parse_segments(release_text)
+    except ValueError as e:
+        log(f"{q}: the release {accn} gives no segment table ({e}); reported segments not written")
+        return False
+    p = Path(root) / REPORTED_SEG
+    rows = [r for r in (read_csv(p) if p.exists() else []) if r["quarter"] != q]
+    for s, (rev, oe) in seg.items():
+        rows.append({"quarter": q, "segment": s, "revenue_usd": int(round(rev * 1_000_000)),
+                     "operating_earnings_usd": int(round(oe * 1_000_000)), "accn": accn})
+    rows.sort(key=lambda r: (qidx(r["quarter"]), sec.SEGMENTS.index(r["segment"])))
+    write_text(p, csv_text(REPORTED_SEG_COLS, rows))
+    return True
+
+
+def run_reported(now=None, offline=False, root=".", log=print):
+    """`python -m gdn reported`: write the reported segments of every scored quarter from its release.
+    Offline it reads only the cached exhibit under data/raw/sec."""
+    c = sec.Client(root, network=not offline)
+    rc = 0
+    for q, s in sorted(scores(root).items(), key=lambda kv: qidx(kv[0])):
+        try:
+            name, body = c.exhibit_991(s["accn"])
+        except sec.SECUnavailable as e:
+            log(f"{q}: release {s['accn']} not read ({e})")
+            rc = 1
+            continue
+        if write_reported_segments(root, q, sec.plain(body), s["accn"], log):
+            log(f"{q}: reported segments written from {s['accn']}")
+    return rc
 
 
 def run_build(now=None, offline=False, root="."):
