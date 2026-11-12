@@ -7,9 +7,9 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 
 | Phase | Start | End | Budget | Note |
 |---|---|---|---|---|
-| P0 | 2026-11-11 18:44 | | 45 min | |
-| P1 | | | 2 h | |
-| P2 to P4 | | | 3 h | |
+| P0 | 2026-11-11 18:44 | 19:02 | 45 min | on budget |
+| P1 | 2026-11-11 19:02 | 19:32 | 2 h | P1.3 mapping finished with P4.6 |
+| P2 to P4 | 2026-11-11 19:03 (subagents launched) | | 3 h | run behind P1 per D2 |
 | P5 | | | 2 h | |
 | P6 | | | 2 h | |
 | P7 | | | 1 h | |
@@ -21,25 +21,25 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 |---|---|---|---|
 | P0.1 | Branch and record hashes | done | `git status -sb` = prepub-audit, HEAD = origin/main = 36fed31, `RECORD_HASHES.txt` has 61 lines |
 | P0.2 | New CLAUDE.md | done | `head -5 CLAUDE.md` names the spec path; v1 kept at `.build/CLAUDE_v1.md` |
-| P0.3 | Baseline: tests, gate, make all, determinism | todo | |
-| P0.4 | SURFACE.md | todo | |
-| P1.0 | Tools venv | todo | |
-| P1.1 | ledger.py | todo | |
-| P1.2 | Nine plants | todo | |
-| P1.3 | Ledger on real tree | todo | |
-| P2.1 | Recompute subagent | todo | |
+| P0.3 | Baseline: tests, gate, make all, determinism | done | `BASELINE.md`: tests 6 failed 114 passed; gate 42 assertions 1 failing 2 warning; make all changed one chart; determinism identical |
+| P0.4 | SURFACE.md | done | `SURFACE.md` has a row per §3 file, the `public` readers and the rounding rules |
+| P1.0 | Tools venv | done | `~/gdn-prepub/venv` imports pypdf, openpyxl, formulas (pip exit 0) |
+| P1.1 | ledger.py | done | `tools/prepub/ledger.py` writes `LEDGER.csv` (2405 rows) |
+| P1.2 | Nine plants | done | `LEDGER_SELFTEST.md`: 9 caught, 0 missed; clean copy 0 mismatch, 0 untraced on post and README |
+| P1.3 | Ledger on real tree | in progress | 25 flagged rows on the real tree, each mapped to F002, F006 to F010 in `FINDINGS.md` |
+| P2.1 | Recompute subagent | running (subagent) | |
 | P2.2 | Recompute diff | todo | |
 | P2.3 | Lock check | todo | |
-| P3.1 | Deliveries vs exhibits | todo | |
-| P3.2 | Guidance vs transcripts | todo | |
-| P3.3 | Claims vs filings | todo | |
+| P3.1 | Deliveries vs exhibits | running (subagent) | |
+| P3.2 | Guidance vs transcripts | running (subagent) | |
+| P3.3 | Claims vs filings | running (subagent) | |
 | P3.4 | Links | todo | |
 | P3.5 | Exposure scan | todo | |
-| P4.1 | Sell-side reviewer | todo | |
-| P4.2 | Buy-side reviewer | todo | |
-| P4.3 | Statistician | todo | |
-| P4.4 | Registry engineer | todo | |
-| P4.5 | Compliance reviewer | todo | |
+| P4.1 | Sell-side reviewer | running (subagent) | |
+| P4.2 | Buy-side reviewer | report in | `docs/prepub/reviews/buyside.md` written; NO-GO; S1 6, S2 13, S3 8; to verify in P4.6 |
+| P4.3 | Statistician | running (subagent) | |
+| P4.4 | Registry engineer | running (subagent) | |
+| P4.5 | Compliance reviewer | running (subagent) | |
 | P4.6 | Merge reviews into FINDINGS | todo | |
 | P4.7 | Finance checks | todo | |
 | P5.1 | Codex branch review | todo | |
@@ -65,7 +65,19 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 
 ## Running
 
-(none)
+Subagents launched 2026-11-11 19:03 ET (briefs in `docs/prepub/briefs/`, outputs in `docs/prepub/reviews/`):
+
+- `recompute` (P2.1): running
+- `sellside` (P4.1): running
+- `buyside` (P4.2): finished 19:22 ET
+- `statistician` (P4.3): running
+- `registry` (P4.4): running
+- `compliance` (P4.5): running
+- `sources_deliveries` (P3.1): running
+- `sources_guidance` (P3.2): running
+- `sources_claims` (P3.3): running
+
+No background shell command is running.
 
 ## Cut items
 
