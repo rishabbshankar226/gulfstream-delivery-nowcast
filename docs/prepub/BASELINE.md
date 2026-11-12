@@ -83,6 +83,10 @@ Failures, all four in the `docs` and `site` families and all four caused by sent
 
 The first attempt, in `~/gdn-prepub/clone` with this Mac's `python3` (3.9.6), failed at `pip install`: `No matching distribution found for contourpy==1.3.3`. The README gave no setup step. That is finding F099, fixed (DECISIONS D14); the log is `.build/logs/clone_check1.log`.
 
+### As a public reader gets it: no raw files
+
+The clone above had `data/raw/` copied in, as P8.4 says. A reader of the public repository has only the tracked files, and the README says `make all` rebuilds from them. Checked 2026-11-12 in a third clone, `~/gdn-prepub/clone3`, at `59b05b0`, with no `data/raw/` and the project's Python (`PY=` set to the main environment): `make all` exit 0 and `git status --short` empty; `make test` prints `176 passed, 2 skipped, 14 warnings in 32.78s`, exit 0, status still empty. The two skips are `tests/test_claims.py:16` and `tests/test_model.py:125`, each with the reason "source cache absent, as in a clone". Log: `.build/logs/clone3_noraw.log`.
+
 ## Merge check (P8.5)
 
 - 2026-11-11, 21:06 and 22:09 ET: `origin/main` was still at `36fed31`; `git merge --no-commit --no-ff origin/main` on the throwaway branch `prepub-mergecheck` printed `Already up to date.`

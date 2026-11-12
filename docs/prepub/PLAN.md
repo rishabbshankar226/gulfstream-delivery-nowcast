@@ -46,14 +46,14 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P6.1 | Fix S1 and S2 | done | `FINDINGS.md` section 4; the three open S1 and S2 rows are the owner's (F015, F016, F081) |
 | P6.2 | L1 and L2 by hand | done | F006, F007 |
 | P6.3 | S3 under 15 min | done | the rest open with reasons |
-| P6.4 | Rebuild, ledger, tests, gate | done | `rows 2864  flagged 0`; `176 passed`; gate 4 failing, logged in D10 and D18 |
+| P6.4 | Rebuild, ledger, tests, gate | done | `rows 2864  flagged 0`; `178 passed`; gate 4 failing, logged in D10 and D18 |
 | P7.1 | Post rewrite in generator | done | `src/gdn/report.py` (`post`), 1,284 characters |
 | P7.2 | Two alternates | done | `POST_ALTERNATES.md` |
 | P7.3 | Post check | done | `POST_CHECK.md` |
 | P8.1 | Round 2 (three fresh reviewers) | done | `reviews/round2_*.md`: three NO-GO, 4 S1 in all, every one a sentence; fixed in `a354170` (F083 to F098) |
 | P8.2 | Round 3 (one attacker) | done | `reviews/round3.md`: S1 0, S2 4, S3 6 |
 | P8.3 | Fix rounds 2 and 3 | done | two fix rounds: `a354170` (round 2), `4ad3825` (round 3); no review round was repeated, since round 3 found no S1. One more code fix followed the advisor's last check (F108, `1e9a890`), and the whole battery was run again after it, again after the merge, and again after the continue pass (D21) |
-| P8.4 | Fresh clone check | done | `BASELINE.md`, Fresh clone: builds, `176 passed`, deterministic, empty status after `make all` |
+| P8.4 | Fresh clone check | done | `BASELINE.md`, Fresh clone: builds, `178 passed`, deterministic, empty status after `make all` |
 | P8.5 | Merge check | done | the workflow's 2026-11-12 commits merged with a real merge commit, `bbf88fd`; `git log prepub-audit..origin/main` is empty; P6.4 rerun after it |
 | P8.6 | Hash recheck and VERDICT.md | done | 59 of 61 hashes match, the two others explained by the merge (D20); `VERDICT.md`: NO-GO on criteria 1, 2 and 12 |
 | P8.7 | GO_PUBLIC.md | done | five decisions and ten steps, each with its check, and the post's text |

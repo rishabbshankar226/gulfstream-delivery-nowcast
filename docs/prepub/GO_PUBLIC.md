@@ -16,7 +16,7 @@ Read `VERDICT.md` first. If it says NO-GO, the list of what remains is there, an
 
 **D. The stored FAA subsets hold registrants' names and street addresses (F070).** They are the FAA's public file as released, and the README's Data section now says so. Decide whether you are content to republish them.
 
-**E. What goes public with the merge (F071).** `docs/INTERVIEW_NOTES.md`, `docs/RESUME_BULLETS.md` and this audit's folder `docs/prepub/` become public. The README says the audit notes are there. The remote branch `origin/codex/fix-daily-merge-and-lock-integrity` also becomes public; its two commits are merged, so you can delete it after the merge with `git push origin --delete codex/fix-daily-merge-and-lock-integrity`.
+**E. What goes public with the merge (F071).** `docs/INTERVIEW_NOTES.md`, `docs/RESUME_BULLETS.md` and this audit's folder `docs/prepub/` become public. The README says the audit notes are there. The remote branch `origin/codex/fix-daily-merge-and-lock-integrity` also becomes public; its two commits are merged, so you can delete it after the merge with `git push origin --delete codex/fix-daily-merge-and-lock-integrity`. So does `origin/prepub-audit`, which appeared on GitHub on 2026-11-12 (the audit did not push it); delete it the same way once `main` holds the merge, or keep it.
 
 ## Part 2. Steps, in order
 
@@ -44,7 +44,7 @@ git switch main && git pull --ff-only
 git merge --no-ff prepub-audit
 ```
 
-When the audit ended, `origin/main` was still at `36fed31`, the commit `prepub-audit` was cut from, so the merge was clean. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs and their stamps). For each one take either side, then rebuild them all from the merged data and code:
+When the audit ended, `prepub-audit` already held every commit of `origin/main` (`8c7692f`, the workflow's 2026-11-12 run, merged in `bbf88fd`), so the merge was clean. Merge the local branch: `origin/prepub-audit` on GitHub sits at `f14a400`, behind the local branch, and a pull request from it would leave out the last commits (the chart legends, the preview image and the final records). Run `git log --oneline origin/prepub-audit..prepub-audit` to see them, and push the branch again first if you want to merge on GitHub. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs and their stamps). For each one take either side, then rebuild them all from the merged data and code:
 
 ```
 git checkout --theirs -- <each conflicted file>
@@ -55,7 +55,7 @@ git add <the same files> && git commit
 Never resolve a conflict in `predictions/`, `results/live/`, `data/snapshots/` or `docs/PREREGISTRATION.md` by hand: the audit did not touch them, so `main`'s side is the only side.
 
 - Use the project's environment: Python 3.11 with `requirements.lock` installed (the README's Reproduce section). The system `python3` on this Mac is 3.9.6 and cannot install the pinned requirements.
-- Check: `make test` ends with no failure (178 tests passed when the audit ended). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
+- Check: `make test` ends with no failure (178 tests passed when the audit ended; a clone without the untracked `data/raw/` folder prints 176 passed and 2 skipped). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
 
 ### 3. Set the public flag
 
