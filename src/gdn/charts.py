@@ -47,13 +47,13 @@ def _fig():
     return fig, fig.add_axes([0.075, 0.15, 0.9, 0.66])
 
 
-def _finish(fig, ax, title, ylabel, snap, xlabel="Fiscal quarter"):
+def _finish(fig, ax, title, ylabel, snap, xlabel="Fiscal quarter", source=None):
     fig.text(0.075, 0.935, title, fontsize=22, fontweight="bold", va="center")
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
     ax.yaxis.grid(True, color=GRID, lw=1)
     ax.set_axisbelow(True)
-    fig.text(0.075, 0.025, SOURCE.format(snap=snap), fontsize=13, color=MUTED)
+    fig.text(0.075, 0.025, source or SOURCE.format(snap=snap), fontsize=13, color=MUTED)
 
 
 def _quarter_axis(ax, qs):
@@ -207,22 +207,59 @@ def nowcast_path(root, snap):
     right = max(dates[-1], dt.date.fromisoformat(rel) if rel else dates[-1]) + dt.timedelta(days=2)
     if rel:
         ax.axvline(dt.date.fromisoformat(rel), color=AXIS, lw=1.4, ls=(0, (2, 2)))
-        ax.text(dt.date.fromisoformat(rel), 2, f" GD reports {rel}", fontsize=15, color=MUTED, ha="right")
+        said = "GD reported" if (lv / f"{q}_score.json").exists() else "GD reports"
+        ax.text(dt.date.fromisoformat(rel), 2, f" {said} {rel}", fontsize=15, color=MUTED, ha="right")
     ax.set_xlim(left, right)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=4))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
     top = max([x + above for x in tot] + ([pace["total"]] if pace else []))
     ax.set_ylim(0, top * 1.2)
     ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), frameon=False, ncol=3)
+    # This chart plots one point per daily snapshot, so its source line names those, not the backtest snapshot.
+    source = (f"Source: GD earnings releases (SEC); FAA registry snapshots {rows[0]['date']} to "
+              f"{rows[-1]['date']}; GD earnings calls; author's calculations. Rishabb Shankar, rshankar.dev")
     _finish(fig, ax, f"The {q} estimate by registry snapshot date", "Estimated deliveries (aircraft)", snap,
-            "Snapshot date")
+            "Snapshot date", source=source)
     _save(fig, root, "nowcast_path.png")
 
 
-def run(root="."):
-    snap = read_json(Path(root) / "data/snapshots/MANIFEST.json")["backtest"]
+CHARTS = ("track_record.png", "coverage.png", "signed_errors.png", "nowcast_path.png")
+STAMP = "output/charts/inputs.sha256"
+
+
+def input_digest(root):
+    """One line per input the four charts read, so the daily job redraws them only when one changes (a lock, a
+    score, a new path row for the featured quarter) and a PNG is not rewritten for nothing."""
+    from .files import sha256
+    root = Path(root)
+    lv = root / "results/live"
+    files = [root / "results/design.csv", root / "results/holdout.csv", root / "results/metrics.json",
+             root / "data/processed/gd_deliveries.csv", root / "data/processed/registry_quarterly.csv",
+             root / "data/guidance.csv", root / "config/calendar.json", root / "data/snapshots/MANIFEST.json"]
+    paths = sorted(lv.glob("*_path.csv"), key=lambda x: qidx(x.name[:6]))
+    if paths:
+        q = featured_path(paths).name.split("_")[0]
+        files += [lv / f"{q}_path.csv", lv / f"{q}_latest.json", lv / f"{q}_lock.json", lv / f"{q}_score.json",
+                  root / "predictions" / f"{q}.json"]
+    files += sorted(lv.glob("*_score.json"))
+    lines = [f"{sha256(p.read_bytes())}  {p.relative_to(root)}" for p in dict.fromkeys(files) if p.exists()]
+    lines.append(f"{sha256(Path(__file__).read_bytes())}  src/gdn/charts.py")
+    return "\n".join(lines) + "\n"
+
+
+def run(root=".", force=False):
+    from .files import write_text
+    root = Path(root)
+    digest = input_digest(root)
+    stamp = root / STAMP
+    if not force and stamp.exists() and stamp.read_text() == digest and \
+            all((root / "output/charts" / n).exists() for n in CHARTS):
+        print("chart inputs unchanged; kept")
+        return 0
+    snap = read_json(root / "data/snapshots/MANIFEST.json")["backtest"]
     track_record(root, snap)
     coverage(root, snap)
     signed_errors(root, snap)
     nowcast_path(root, snap)
+    write_text(stamp, digest)
     return 0

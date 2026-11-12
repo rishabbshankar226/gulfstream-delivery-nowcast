@@ -69,6 +69,7 @@ class Ops:
             self.git("add", "--", p)
 
     def finish_merge(self):
+        self.refuse_markers()
         self.git("commit", "--no-edit")
 
     def abort_merge(self):
@@ -88,14 +89,16 @@ class Ops:
 
     def refuse_markers(self):
         """Raise when a staged text file still holds merge conflict markers."""
-        staged = self.git("diff", "--cached", "--name-only", "--diff-filter=AM").stdout.split()
+        staged = self.git("diff", "--cached", "--name-only", "--diff-filter=AM", "-z").stdout.split("\0")
         bad = []
         for f in staged:
-            p = self.root / f
-            if p.suffix in (".json", ".csv", ".md", ".html", ".txt", ".py", ".sha256") and p.exists():
-                text = p.read_text(errors="replace")
-                if any(ln.startswith(("<<<<<<< ", ">>>>>>> ")) for ln in text.splitlines()):
-                    bad.append(f)
+            if not f:
+                continue
+            # Read the index, which is what commit writes, rather than potentially newer working text.
+            blob = subprocess.run(["git", "show", f":{f}"], cwd=self.root, capture_output=True, check=True).stdout
+            if b"\0" not in blob and any(re.match(rb"^(?:<{7,}|>{7,})(?: |$)", ln)
+                                         for ln in blob.splitlines()):
+                bad.append(f)
         if bad:
             raise GitError(f"conflict markers in {bad}; not committing")
 
@@ -150,6 +153,13 @@ class Ops:
 
     def tag_commit(self, tag):
         return self.git("rev-list", "-n", "1", tag).stdout.strip()
+
+    def file_at_ref(self, ref, path):
+        """Exact bytes of a repository-relative path at a commit or tag."""
+        r = subprocess.run(["git", "show", f"{ref}:{path}"], cwd=self.root, capture_output=True)
+        if r.returncode != 0:
+            raise GitError(f"cannot read {path} at {ref}: {r.stderr.decode('utf-8', errors='replace').strip()[:400]}")
+        return r.stdout
 
 
 def warn(msg):

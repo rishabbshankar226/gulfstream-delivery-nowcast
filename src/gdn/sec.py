@@ -96,7 +96,9 @@ class Client:
         for pg in pages:
             for i, accn in enumerate(pg["accessionNumber"]):
                 out[accn] = {"form": pg["form"][i], "accn": accn, "filed": pg["filingDate"][i],
-                             "report": pg["reportDate"][i], "items": pg.get("items", [""] * len(pg["form"]))[i] or ""}
+                             "report": pg["reportDate"][i], "items": pg.get("items", [""] * len(pg["form"]))[i] or "",
+                             # UTC, e.g. 2026-10-30T12:09:27.000Z for an 8-K EDGAR shows as accepted 08:09:27 ET
+                             "accepted": pg.get("acceptanceDateTime", [""] * len(pg["form"]))[i] or ""}
         return sorted(out.values(), key=lambda r: (r["filed"], r["accn"]))
 
     def index(self, accn):

@@ -36,24 +36,6 @@
     "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
   },
   {
-    "id": "os-aero-margin-learning",
-    "text": "GD expects Aerospace margin to be strongest in the fourth quarter, citing progress down the learning curve on all of its airplanes and favorable mix.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "the fourth quarter being the strongest from a margin standpoint. And that is, as Phebe mentioned, the fact that we're coming down the learning curve on all of the airplanes, but also due to favorable mix.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
-    "id": "os-aero-margin-q2",
-    "text": "GD said Aerospace's second-quarter operating margin fell from the first quarter, though margins in every line of business improved, on a slightly disadvantageous mix and modestly higher G&A and R&D.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "the second-quarter overall operating margins are down sequentially despite the fact that operating margins by line of business all improved. This is attributable to a slightly disadvantageous mix plus a modest increase in both G&A and R&D.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
     "id": "os-btb",
     "text": "For the quarter, GD's book-to-bill ratio, orders divided by revenue, was 1.5-to-1 for Aerospace, 1.4-to-1 for the defense segments and 1.4-to-1 company-wide.",
     "source_type": "filing",
@@ -81,47 +63,11 @@
     "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
   },
   {
-    "id": "os-marine-drivers",
-    "text": "GD said Marine Systems margin improvement is a function of throughput, deckplate improvements and an improving supply chain, and it expects that to continue at a slow, steady drumbeat.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "the improvement in margin is a function of throughput and improvements on the deckplates and with the supply chain improving. And we can expect that, that will continue a slow, steady drumbeat as we continue to focus on executing.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
-    "id": "os-marine-outlook",
-    "text": "GD expects 2026 Marine Systems revenue of about $18 billion with an operating margin of about 7.4%.",
-    "source_type": "filing",
-    "url_or_accn": "0000040533-26-000032",
-    "quote": "We expect the Marine Systems segment’s 2026 revenue to be approximately $18 billion with operating margin of approximately 7.4%.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
-  },
-  {
-    "id": "os-release-date",
-    "text": "GD said it expected to hold its third-quarter 2026 earnings call on Friday, October 30.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "we expect to hold our Q3 earnings call on Friday, October 30, at 9:00 a.m.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
     "id": "os-rev",
     "text": "GD expects Aerospace revenue of around $13.8 billion for 2026.",
     "source_type": "call",
     "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
     "quote": "For 2026, we now expect Aerospace revenue of around $13.8 billion.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
-  },
-  {
-    "id": "os-upside",
-    "text": "GD sees some potential upside to its outlook of about 160 Gulfstream deliveries from large-cabin aircraft, and some risk on G280 deliveries.",
-    "source_type": "call",
-    "url_or_accn": "https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/",
-    "quote": "Gulfstream will still deliver about 160 airplanes. There is some potential upside delivering large-cabin aircraft and some risk on the 280 deliveries for obvious reasons.",
     "retrieved_on": "2026-10-19",
     "sha256": "f47f5aa286e5e8179c8404a3cbc31dce4006c279ae0e6c351f25ae89351b0d7a"
   },
@@ -133,15 +79,6 @@
     "quote": "The G280, a joint effort between Gulfstream and Israel Aerospace Industries (IAI), offers the most comfortable cabin and the longest range at the fastest speed in its class.",
     "retrieved_on": "2026-10-19",
     "sha256": "9fb9b558f719a050fd7116dff1763d77f120fa9e5aa3c32a2403ea242b1fb110"
-  },
-  {
-    "id": "pc-g280-israel-supplier",
-    "text": "GD reported delays at its Israel-based supplier of mid-cabin airframes, caused by conflicts in the Middle East.",
-    "source_type": "filing",
-    "url_or_accn": "0000040533-26-000032",
-    "quote": "we have experienced some delays including at our Israel-based supplier of mid-cabin airframes caused by conflicts in the Middle East.",
-    "retrieved_on": "2026-10-19",
-    "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
   },
   {
     "id": "pc-g280-mid-cabin",

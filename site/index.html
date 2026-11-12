@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>How closely do FAA registrations track Gulfstream deliveries?</title>
 <meta name="description" content="A test of whether FAA aircraft registrations can estimate the Gulfstream deliveries General Dynamics reports, with each quarter's estimate locked on GitHub before the release.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="How closely do FAA registrations track Gulfstream deliveries?">
+<meta property="og:description" content="A student project: FAA aircraft registrations against the Gulfstream deliveries General Dynamics reports, tested on past quarters and locked before each release.">
+<meta property="og:url" content="https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f5f4f1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)">
@@ -18,7 +22,7 @@
 
 <header class="hero">
   <div class="wrap">
-    <p class="eyebrow">General Dynamics · Gulfstream</p>
+    <p class="eyebrow">Student research · not affiliated with General Dynamics or Gulfstream</p>
     <h1>How closely do FAA registrations track Gulfstream deliveries?</h1>
     <p class="lead" id="lead" aria-live="polite">Loading the results.</p>
     <p class="framing" id="framing"></p>
@@ -39,7 +43,7 @@
     <div class="live">
       <div class="live-main">
         <p class="status" id="live-status"></p>
-        <p class="big"><span id="live-figure" class="fig"></span> <span class="unit">deliveries, estimated</span></p>
+        <p class="big"><span id="live-figure" class="fig"></span> <span class="unit" id="live-unit">deliveries, estimated</span></p>
         <p class="band" id="live-band"></p>
       </div>
       <dl class="facts" id="live-facts"></dl>
@@ -67,7 +71,7 @@
     <h2 id="h-tested">How it was tested</h2>
     <ul class="plain" id="tests"></ul>
     <h3>When the registry has not finished posting</h3>
-    <p class="sub">A crude stand-in for a live quarter: each test quarter's own registrations are cut a set number of days before the quarter ends, while the four quarters before it stay whole.</p>
+    <p class="sub">Each test quarter's own registrations are cut a set number of days before the quarter ends, while the four quarters before it stay whole, so the count falls and nothing rescales it. It shows how fast the miss grows when a quarter's registrations post late. It is not a model of a live lock, which is made weeks after the quarter ends.</p>
     <div class="scroll" tabindex="0" role="region" aria-label="Table of the average miss with registrations cut early"><table id="t-trunc"></table></div>
   </section>
 
@@ -97,13 +101,13 @@
       <li>The quarters from 2017Q1 to 2019Q4 set the rule; the 26 quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace (its full-year delivery outlook less the deliveries already reported, spread by each quarter's usual share of the year) and two simple rules of thumb.</li>
       <li>Each live quarter's estimate is locked on GitHub the day before GD reports, and kept whether it hits or misses.</li>
     </ol>
-    <p class="sub"><a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#limitations">What this method cannot see</a>, and why the test on past quarters flatters it.</p>
+    <p class="sub"><a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#limitations">What this method cannot see</a>, and why the test on past quarters is not a test of a live estimate.</p>
   </section>
 </main>
 
 <footer class="foot">
   <div class="wrap">
-    <p>Built by Rishabb Shankar from GD's SEC filings and the FAA aircraft registry. Student research project. Not investment advice.</p>
+    <p>Built by Rishabb Shankar from GD's SEC filings and the FAA aircraft registry. Student research project. Not investment advice. Not affiliated with General Dynamics, Gulfstream or the FAA.</p>
   </div>
 </footer>
 

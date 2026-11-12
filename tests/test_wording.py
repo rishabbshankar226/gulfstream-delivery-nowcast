@@ -99,5 +99,10 @@ def test_exports_sources_and_claims():
     absent(README, "Many G280s", "Gulfstream test registration")
     absent(NOTE, "Many G280s", "daily snapshots since.", "whipped")
     present(NOTE, "GD Form 10-K for 2025")
-    assert 'data-claim="os-release-date"' in (ROOT / NOTE).read_text()
+    # F019: the release-date claim is cited only while the release is ahead. Once the quarter is scored the note
+    # does not print it, and report/claims.json must not keep a claim the note does not cite.
+    scored = (ROOT / "results/live/2026Q3_score.json").exists()
+    cited = 'data-claim="os-release-date"' in (ROOT / NOTE).read_text()
+    kept = '"os-release-date"' in (ROOT / "report/claims.json").read_text()
+    assert cited == (not scored) and kept == cited
     absent(BULLETS, "Locked each")

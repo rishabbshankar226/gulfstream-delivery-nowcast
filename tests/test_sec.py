@@ -105,3 +105,16 @@ def test_a_dropped_connection_is_sec_unavailable(tmp_path, monkeypatch):
     with pytest.raises(sec.SECUnavailable):
         c._fetch("https://www.sec.gov/x")
     assert c.failed
+
+
+def test_filings_carry_the_acceptance_time(tmp_path):
+    # F018 reads SEC's acceptance time of the results 8-K; the submissions file gives it in UTC.
+    import json
+    raw = tmp_path / "data/raw/sec/submissions"
+    raw.mkdir(parents=True)
+    (raw / f"CIK{sec.CIK}.json").write_text(json.dumps({"filings": {"recent": {
+        "accessionNumber": ["0000040533-26-000036"], "form": ["8-K"], "filingDate": ["2026-10-30"],
+        "reportDate": ["2026-10-30"], "items": ["2.02,9.01"],
+        "acceptanceDateTime": ["2026-10-30T12:09:27.000Z"]}, "files": []}}))
+    f = sec.Client(tmp_path, network=False).filings()
+    assert f[0]["accepted"] == "2026-10-30T12:09:27.000Z"

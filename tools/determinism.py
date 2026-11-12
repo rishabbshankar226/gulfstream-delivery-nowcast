@@ -27,6 +27,7 @@ def digest():
 
 def make_all():
     (ROOT / "output/gd_gulfstream_model.inputs.sha256").unlink(missing_ok=True)
+    (ROOT / "output/charts/inputs.sha256").unlink(missing_ok=True)      # so the charts are redrawn, not skipped
     py = os.environ.get("PY", str(ROOT / ".venv/bin/python"))
     r = subprocess.run(["make", "all", f"PY={py}"], cwd=ROOT, capture_output=True, text=True)
     if r.returncode:
