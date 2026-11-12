@@ -205,3 +205,14 @@ def test_a_manifest_merge_accepts_the_same_zip_downloaded_at_two_times():
     theirs = {"backtest": "2026-10-19", "snapshots": {"2026-10-28": dict(e, downloaded_utc="2026-10-28T06:20:00Z")}}
     merged = json.loads(daily.merge_manifests(json.dumps(ours), json.dumps(theirs)))
     assert merged["snapshots"]["2026-10-28"]["downloaded_utc"] == "2026-10-28T06:20:00Z"
+
+
+def test_the_daily_rebuild_redraws_the_charts(monkeypatch, tmp_path):
+    # F001. The charts carry the locked estimate and GD's count; before this fix only `make all` drew them, so the
+    # tracked chart stayed at its 2026-10-19 state through the lock and the score.
+    calls = []
+    monkeypatch.setattr(daily, "_stage", lambda mod, fn, **kw: calls.append((mod, fn)))
+    daily.rebuild(tmp_path, pdf=False)
+    assert ("charts", "run") in calls
+    assert calls.index(("charts", "run")) < calls.index(("note", "run"))     # the note embeds two of them
+    assert "output/charts" in daily.REBUILD_PATHS

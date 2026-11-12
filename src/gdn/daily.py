@@ -20,7 +20,7 @@ from .gitops import GitError, Ops
 from .files import csv_text
 
 LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json", "data/processed/segments_reported.csv"]
-REBUILD_PATHS = ["results/estimates.json", "output/gd_gulfstream_model.xlsx",
+REBUILD_PATHS = ["results/estimates.json", "output/charts", "output/gd_gulfstream_model.xlsx",
                  "output/gd_gulfstream_model.inputs.sha256", "report/note.html", "site/data.json", "README.md",
                  "docs/LINKEDIN_POST.md", "output/GD_research_note.pdf", "site/GD_research_note.pdf",
                  "output/GD_research_note.inputs.sha256"]
@@ -43,6 +43,8 @@ def _stage(mod, fn, **kw):
 def rebuild(root, pdf=True):
     _stage("estimates", "run", root=root)
     _stage("workbook", "run", root=root)
+    # The charts show the lock and GD's count for the live quarter, so they are redrawn whenever those change (F001).
+    _stage("charts", "run", root=root)
     _stage("note", "run", root=root)
     if pdf and sys.platform == "darwin" and not os.environ.get("CI"):
         _stage("note", "run_pdf", root=root)
