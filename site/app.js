@@ -162,7 +162,7 @@
     }
     if (L.score) {
       fact("GD reported", String(L.score.reported.total) + " deliveries");
-      if (scoredLock) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries (" + pct(L.score.ape_pct) + "), " + band);
+      if (scoredLock) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries (" + Math.round(L.score.ape_pct) + "%), " + band);
     }
     var note = L.lock ? "Locked as a " + lockWords(L) + ", on " + etTime(L.lock.published_at) + "; the file's sha256 is in the release notes." :
       L.score ? "Not locked: the quarter missed its lock window, so this is the build estimate, shown beside GD's count." :
@@ -380,7 +380,7 @@
     var g = h.guidance;
     ul.appendChild(el("li", null, "GD stated a numeric delivery outlook covering " + g.sourced + " of the " + h.n +
       " test quarters; the other " + g.fallback_quarters.length + " (" + g.fallback_quarters.join(", ") +
-      ") fall back to the same quarter last year."));
+      ") fall back to the same quarter last year. The guidance pace is my construction from GD's full-year outlook, not a figure GD publishes; the README gives two other readings of GD's calls and what each does to this comparison."));
     var band = h.band;
     ul.appendChild(el("li", null, "The band of past misses held GD's count in " + band.hits + " of " + band.n +
       " test quarters (" + pct(band.coverage_pct) + ", against a nominal 80%; 95% interval " + pct(band.cp95_pct[0]) + " to " + pct(band.cp95_pct[1]) + ")."));
@@ -391,7 +391,7 @@
       "Recent quarters where the registry counted unusually few jets per GD delivery: " + cr.flags.join(", ") + "." :
       "The preregistered check looks for quarters from 2025Q3 to 2026Q2 where the registry counted unusually few jets per GD delivery; none is flagged.") +
       (below ? " The drift runs the other way: GD delivered " + recent.map(function (x) { return x.toFixed(2); }).join(", ") +
-        " jets per registry event in the last three quarters, against an average of " + cr.mean.toFixed(2) +
+        " jets per registry event in the last three held-out quarters, against an average of " + cr.mean.toFixed(2) +
         ", so the registry is counting more registrations per delivery than usual." : "")));
     var tr = h.truncation_mae;
     table("t-trunc", "Average miss when each test quarter's registrations are cut early, against " + f1(h.mae.guidance) +
@@ -437,7 +437,7 @@
       "count does not measure. The growth row instead scales " +
       yq + "'s Aerospace revenue by the last four quarters' growth.");
     var ya = q3("Aerospace");
-    table("t-sens", "Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
+    table("t-sens", "Made before the release: Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
       usdB(ya) + " in the year-ago quarter", ["Deliveries", "Aerospace revenue", "Change on the year-ago quarter"],
       e.sensitivity.map(function (s) {
         return { cls: s.deliveries_change === 0 ? "emph" : null, cells: [f1(s.deliveries), usdB(s.aerospace_revenue_usd), usdM(s.aerospace_revenue_usd - ya)] };

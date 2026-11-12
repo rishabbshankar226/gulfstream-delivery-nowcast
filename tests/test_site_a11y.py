@@ -225,7 +225,7 @@ def test_a_scored_lock_states_its_miss_and_its_band_in_the_past_tense(browser, b
     assert status.startswith("2026Q3") and "missed by 8.0" in status and "outside the band" in status
     facts = page.inner_text("#live-facts")
     assert "GD reported on" in facts and "GD reports\n" not in facts and "so far" not in facts
-    assert "8.0 deliveries (20.1%), outside the band" in facts and "(missed by 6.2)" in facts
+    assert "8.0 deliveries (20%), outside the band" in facts and "(missed by 6.2)" in facts
     assert "2026-07-06 to 2026-10-04" in facts          # the window opens the day after 2026Q2's fiscal end
     assert "locked estimate" in page.inner_text("#live-unit")
     assert "made while the repository was private" in page.inner_text("#live-note")

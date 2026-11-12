@@ -85,8 +85,9 @@ def test_the_design_choice_sentence_counts_the_quarters_where_the_definitions_di
 
 def test_the_lock_timing_sentence_reads_the_lock_and_the_later_snapshots():
     # F034. The truncation table is not a model of a live lock: the sentence gives the lock's own facts.
-    p = json.loads((ROOT / "predictions/2026Q3.json").read_text())
-    s = json.loads((ROOT / "results/live/2026Q3_score.json").read_text())
+    q = report.locked_scores(ROOT)[-1][0]          # the latest scored lock, whichever quarter that is
+    p = json.loads((ROOT / f"predictions/{q}.json").read_text())
+    s = json.loads((ROOT / f"results/live/{q}_score.json").read_text())
     at_lock = p["events"]["large"] + p["events"]["mid"]
     days = (live.dt.date.fromisoformat(p["snapshot"]) - live.dt.date.fromisoformat(p["window_end"])).days
     scale = (p["trailing"]["reported"]["large"] + p["trailing"]["reported"]["mid"]) / \
@@ -151,7 +152,7 @@ def test_the_note_sets_gd_reported_revenue_beside_each_estimate(clone):
     miss = est["aerospace_from_nowcast_usd"] - seg["Aerospace"][0]
     assert f"-${abs(miss) / 1e6:,.0f}M" in html
     assert "What the street watches on the print" not in html          # a preview has no place after the print
-    assert "I wrote this note before GD reported 2026Q3" in html
+    assert "I made the estimates in this note before GD reported 2026Q3" in html
     # without the reported file the exhibit goes back to the change on the year
     (clone / "data/processed/segments_reported.csv").unlink()
     note.build(clone)

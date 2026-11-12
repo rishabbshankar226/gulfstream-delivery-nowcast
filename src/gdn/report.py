@@ -118,8 +118,9 @@ def live_summary(root):
         yago = next((c for c in cmp_ if c[0] == "the same quarter last year"), None)
         line = (f"**Live record so far: {head}.** For {q} I locked an estimate of {f1(p['nowcast']['total'])} "
                 f"Gulfstream deliveries (band {f1(p['band'][0])} to {f1(p['band'][1])}) the day before GD reported. GD "
-                f"reported {s['reported']['total']}, so the lock missed by {f1(s['ae_total'])} ({pct1(s['ape_pct'])}), "
-                f"{'inside' if s['inside_band'] else 'outside'} the band.")
+                f"reported {s['reported']['total']}, so the lock missed by {f1(s['ae_total'])} ({s['ape_pct']:.0f}%), "
+                f"{'inside' if s['inside_band'] else 'outside'} the band, whose nominal level is 80% and which held "
+                f"{m['holdout']['band']['hits']} of {m['holdout']['band']['n']} held-out quarters.")
         if pace and yago:
             line += (f" GD's guidance pace missed by {pace[2]} and the same quarter last year ({yago[1]}) by {yago[2]}.")
     elif scores:
@@ -135,7 +136,7 @@ def live_summary(root):
     if h["mae"][low] < h["mae"]["ratio"]:
         back += f" Simply repeating {BASE[low]} missed by least."
     if not any(t["holm_reject"] for t in h["tests"].values()):
-        back += " No test finds the registry estimate better than a baseline."
+        back += " None of the three preregistered sign tests finds the registry estimate better than a baseline."
     back += " The backtest reads a registry copy that had months or years to fill in."
     return line + "\n\n" + back
 
@@ -217,11 +218,62 @@ def quarter_plans(root, sens):
     words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine"}
     n = len(plans)
     return (f" A second one: my pace reads only GD's full-year outlook, and on {words.get(n, n)} calls held inside a "
-            "held-out quarter GD also said how many aircraft it planned to deliver in that quarter. On "
+            "held-out quarter GD also gave a number for that quarter's deliveries. On "
             f"{src['call_date']} it said \"{src['quote'].rstrip('.')}\", when my pace for {q} says {f1(pace[q])}. With "
             "GD's stated plans in place of my pace in those quarters, the baseline misses by "
             f"{f1(c['mae']['guidance'])} on average, not {f1(pace_mae(sens))}, and the registry estimate is closer in "
-            f"{t['wins']} of {c['n']} quarters.")
+            f"{t['wins']} of {c['n']} quarters." + both_readings(sens))
+
+
+def both_readings(sens):
+    b = {x["key"]: x for x in sens["variants"]}.get("quarter_plans_and_2021_as_117")
+    if not b:
+        return ""
+    t = b["ratio_vs_guidance"]
+    return (f" With both readings together the baseline misses by {f1(b['mae']['guidance'])}, against "
+            f"{f1(b['mae']['ratio'])} for the registry estimate, which is then closer in {t['wins']} of {b['n']} quarters.")
+
+
+def readings_footnote(root):
+    """One sentence for the note and the dashboard: the two other readings of GD's calls and what each does."""
+    p = Path(root) / "results/exploratory/sensitivity.json"
+    if not p.exists():
+        return ""
+    sens = read_json(p)
+    v = {x["key"]: x for x in sens["variants"]}
+    a, c = v.get("outlook_2021_as_117"), v.get("quarter_plans")
+    if not a or not c:
+        return ""
+    return (" GD's January 2021 call gave the year as \"10 fewer aircraft\" than 2020; read as 117, the guidance pace "
+            f"misses by {f1(a['mae']['guidance'])} on average, and with the plans GD stated for single quarters in its "
+            f"place, by {f1(c['mae']['guidance'])}, not {f1(pace_mae(sens))} (results/exploratory/sensitivity.md).")
+
+
+def lock_old_events(root, p, years=3):
+    """How many of the lock's own-quarter events sit on airframes at least `years` old by the registry's year."""
+    import gzip
+    import io
+    import csv as _csv
+    t = Path(root) / f"data/snapshots/daily/{p['snapshot']}.serials.csv.gz"
+    if not t.exists():
+        return None
+    e = p.get("definition", "E1").lower()
+    rows = list(_csv.DictReader(io.StringIO(gzip.decompress(t.read_bytes()).decode())))
+    ev = [r for r in rows if r.get(e) and p["window_start"] < r[e] <= p["window_end"]]
+    return sum(1 for r in ev if r["year_mfr"] and int(r[e][:4]) - int(r["year_mfr"]) >= years), len(ev)
+
+
+def even_split(root, q, score):
+    """What an even split of the jets GD's outlook left would have said for q, beside the pace's own split."""
+    Y, calls, cal = model.load_reported(root), model.load_guidance(root), Calendar.load(root)
+    g = model.outlook_for(q, calls, cal)
+    k = int(q[5])
+    if g is None or k == 4 or score.get("guidance_pace") is None:
+        return ""
+    ytd = sum(Y[f"{q[:4]}Q{j}"]["total"] for j in range(1, k))
+    left = g - ytd
+    return (f" My pace split the {left:g} jets GD's outlook left for the rest of the year by the last three years' "
+            f"pattern and said {f1(score['guidance_pace'])}; an even split would have said {f1(left / (5 - k))}.")
 
 
 def pace_mae(sens):
@@ -258,9 +310,8 @@ def lock_timing(root):
         (p["trailing"]["registry"]["large"] + p["trailing"]["registry"]["mid"])
     real = s["reported"]["total"] / at_lock
     return (f"That table is not a model of a live lock. The {q} lock read a snapshot taken {days} days after the "
-            f"quarter ended, when the quarter's count stood at {at_lock}, {since}. Its miss came from the scale, not "
-            f"from late postings: the four quarters before gave {f2(scale)} deliveries per registry event, and the "
-            f"quarter itself came in at {f2(real)}.")
+            f"quarter ended, when the quarter's count stood at {at_lock}, {since}. The four quarters before gave {f2(scale)} "
+            f"deliveries per registry event, and the quarter itself came in at {f2(real)}.")
 
 
 def definition_choice(root, m):
@@ -361,7 +412,7 @@ def error_analysis(root):
                                                                              "last")]
     cr = h["coverage_ratio"]
     recent = [cr["by_quarter"][q] for q in ("2025Q4", "2026Q1", "2026Q2") if q in cr["by_quarter"]]
-    drift = (f" The drift runs the other way: the last three quarters sit at {', '.join(f2(x) for x in recent)} "
+    drift = (f" The drift runs the other way: the last three held-out quarters sit at {', '.join(f2(x) for x in recent)} "
              f"against the {f2(cr['mean'])} mean, so the registry is counting more events per delivery than usual, "
              "which the ratio's trailing scale absorbs only with a lag."
              if len(recent) == 3 and all(x < cr["mean"] for x in recent) else "")
@@ -416,12 +467,18 @@ def live_record(root):
                     f"{t.strftime('%Y-%m-%d')}, sha256 `{lock['sha256']}`.")
             if score and score.get("locked"):
                 line += (f" GD reported {score['reported']['total']}{' on ' + rel if rel else ''}: the lock missed by "
-                         f"{f1(score['ae_total'])} ({pct1(score['ape_pct'])}), "
+                         f"{f1(score['ae_total'])} ({score['ape_pct']:.0f}%), "
                          f"{'inside' if score['inside_band'] else 'outside'} the band.")
                 cmp_ = comparators(root, q, score, p)
                 if cmp_:
                     line += (" Other misses for the quarter: "
                              + ", ".join(f"{lab} ({val}) by {miss}" for lab, val, miss in cmp_) + ".")
+                    old = lock_old_events(root, p)
+                    if old:
+                        line += (f" Of the {old[1]} events in the raw count, {old[0]} were airframes at least three "
+                                 "years old by the registry's year of manufacture, so the raw count is not a count of "
+                                 "new jets.")
+                    line += even_split(root, q, score)
             elif rel:
                 line += f" GD reports on {rel}."
         elif score:
@@ -483,8 +540,8 @@ def post(root):
     h = m["holdout"]
     scores = live.scores(root)
     ls = locked_scores(root)
-    what = ("I built a tracker that scales FAA aircraft registrations into an estimate of the Gulfstream jets General "
-            "Dynamics (GD) reports each quarter, and locks it on GitHub the day before GD reports.")
+    what = ("My tracker scales FAA registrations into an estimate of the Gulfstream jets General "
+            "Dynamics (GD) reports each quarter, locked on GitHub the day before GD reports.")
     lines = []
     if ls:
         q, s, p, lock = ls[-1]
@@ -503,8 +560,7 @@ def post(root):
                          f"average, {hits} of {len(ls)} inside the band. The latest, {q}: I said "
                          f"{f1(s['nowcast']['total'])}, General Dynamics reported {s['reported']['total']}.")
         lines += [what, ""]
-        detail = (f"The {q} miss was {f1(s['ae_total'])} jets ({pct1(s['ape_pct'])}), {band} my band of past "
-                  "misses.")
+        detail = f"The {q} miss was {f1(s['ae_total'])}, {band} my 80% band of past misses."
         if pace and yago:
             detail += (f" A pace I derived from GD's own full-year outlook missed by {pace[2]}, and last year's same "
                        f"quarter ({yago[1]}) by {yago[2]}.")
@@ -519,10 +575,11 @@ def post(root):
         lines += ["How closely do FAA aircraft registrations track the Gulfstream deliveries General Dynamics reports?",
                   what, ""]
     one = (" One quarter is one data point." if len(ls) == 1 else "")
-    lines += ["The backtest, on quarters held out from setting the rules: "
-              + headline(m) + low_line(m) + " That test reads a registry copy that had years to fill in, so only "
-              "locked quarters show whether it counts jets in time." + one, "",
-              f"Dashboard: {DASH}", f"Code and data: {REPO}", "",
+    lines += ["Backtest, held out from setting the rules: "
+              + headline(m) + low_line(m) + " (Registry count: my scaled estimate; the pace: mine.) It reads a "
+              "registry copy that had months or years to fill in, so only locked quarters show whether it counts jets "
+              "in time." + one, "",
+              f"Dashboard: {DASH}", f"Code: {REPO}", "",
               DISCLAIMER, "",
               "#EquityResearch #Aerospace"]
     return "\n".join(lines) + "\n"

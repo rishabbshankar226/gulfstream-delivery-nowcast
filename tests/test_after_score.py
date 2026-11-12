@@ -73,7 +73,7 @@ def test_a_locked_and_scored_quarter_keeps_its_text(scored):
     post = report.post(root)
     assert post.startswith(f"My first locked estimate of Gulfstream deliveries landed inside its band: I said "
                            f"{latest:.1f} for 2026Q3, General Dynamics reported 35.")
-    assert f"The 2026Q3 miss was {miss} jets" in post and "inside my band" in post
+    assert f"The 2026Q3 miss was {miss}, inside my 80% band" in post
     note.build(root)
     t = plain((root / "report/note.html").read_text())
     assert "at 19:20 ET on 2026-10-29" in t and "GD reported 35" in t and f"missed by {miss}" in t
@@ -132,7 +132,7 @@ def test_the_post_is_short_and_carries_its_disclaimer(scored):
         assert len(p) <= report.POST_MAX, len(p)
         assert report.DISCLAIMER in p and "not investment advice" in p
         assert "held out from setting the rules" in p and "missed by less on average" in p
-        assert "had years to fill in" in p and "#GeneralDynamics" not in p and "$GD" not in p
+        assert "had months or years to fill in" in p and "#GeneralDynamics" not in p and "$GD" not in p
 
 
 def test_the_readme_summary_block_is_rewritten_between_its_markers(scored):

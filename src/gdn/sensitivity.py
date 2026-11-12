@@ -121,7 +121,8 @@ def run(root="."):
                   + "; a range is taken at its midpoint). The quotes and links are in `data/quarter_plans.csv`. The "
                   "preregistered guidance pace reads only full-year outlooks, so it does not use them. In the rows "
                   "above that name these plans, the baseline is the plan itself in those quarters and the guidance "
-                  "pace in the rest."]
+                  "pace in the rest. On three other calls inside the window (2021-04-28, 2025-10-24, 2026-04-29) GD "
+                  "described the quarter in words with no delivery number; those are not used."]
     write_text(root / "results/exploratory/sensitivity.md", "\n".join(lines) + "\n")
     print("wrote results/exploratory/sensitivity.json and .md")
     return 0

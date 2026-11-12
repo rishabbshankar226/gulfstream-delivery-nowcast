@@ -103,18 +103,18 @@ The pages workflow runs on a push that touches `site/**` or by hand. The daily j
 
 ### 8. Post
 
-Paste this text. It is `docs/LINKEDIN_POST.md` as the generator writes it, 1,284 characters. If step 2 or 3 rebuilt the post, paste the file as it stands then, and check `wc -m docs/LINKEDIN_POST.md` is under 1,300.
+Paste this text. It is `docs/LINKEDIN_POST.md` as the generator writes it, 1,280 characters. If step 2 or 3 rebuilt the post, paste the file as it stands then, and check `wc -m docs/LINKEDIN_POST.md` is under 1,300.
 
 ```
 My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40.
-I built a tracker that scales FAA aircraft registrations into an estimate of the Gulfstream jets General Dynamics (GD) reports each quarter, and locks it on GitHub the day before GD reports.
+My tracker scales FAA registrations into an estimate of the Gulfstream jets General Dynamics (GD) reports each quarter, locked on GitHub the day before GD reports.
 
-The 2026Q3 miss was 8.0 jets (20.1%), outside my band of past misses. A pace I derived from GD's own full-year outlook missed by 6.2, and last year's same quarter (39) by 1. The repository was private then; the timestamp is GitHub's.
+The 2026Q3 miss was 8.0, outside my 80% band of past misses. A pace I derived from GD's own full-year outlook missed by 6.2, and last year's same quarter (39) by 1. The repository was private then; the timestamp is GitHub's.
 
-The backtest, on quarters held out from setting the rules: Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Simply repeating the same quarter last year missed by less on average, 4.6. That test reads a registry copy that had years to fill in, so only locked quarters show whether it counts jets in time. One quarter is one data point.
+Backtest, held out from setting the rules: Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Simply repeating the same quarter last year missed by less on average, 4.6. (Registry count: my scaled estimate; the pace: mine.) It reads a registry copy that had months or years to fill in, so only locked quarters show whether it counts jets in time. One quarter is one data point.
 
 Dashboard: https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/
-Code and data: https://github.com/rishabbshankar226/gulfstream-delivery-nowcast
+Code: https://github.com/rishabbshankar226/gulfstream-delivery-nowcast
 
 Student project, not investment advice. I am not affiliated with General Dynamics or Gulfstream.
 
@@ -144,6 +144,6 @@ Retake `output/charts/dashboard.png` from the live dashboard, commit both by pat
 
 - When GD announces its fourth-quarter release date, add it to `config/calendar.json` under `releases` as `"2026Q4": "YYYY-MM-DD"`. Without it no lock is made (`ERRATA.md` E4). Check: the README's Live record no longer says "No release date is set".
 - Add 2027Q1's fiscal quarter end under `fiscal_ends` from GD's filings.
-- Add the 2026-10-30 call to `data/guidance.csv` (F054). On that call GD said "We do not plan to update segment guidance." so the outlook field stays blank; take the speaker and the link from the transcript. Check: `make all` changes no held-out figure.
+- The 2026-10-30 call is in `data/guidance.csv` with a blank outlook (GD said "We do not plan to update segment guidance."), so the 2026Q4 pace still rests on the 160 of 2026-07-29. Add each later call the same way, with its quote, speaker and link. Check: `make all` changes no held-out figure.
 - Decide C above.
 - On the release date's eve, check by noon ET that the release `lock-2026Q4` exists (`gh release view lock-2026Q4`). The workflow's runs land four to seven hours after their cron time (`ERRATA.md` E2). If there is no lock, run `make daily` on the Mac before midnight ET.

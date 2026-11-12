@@ -12,7 +12,7 @@ from pathlib import Path
 from . import claims as claims_mod
 from . import live, model
 from .estimates import DEFENSE, LABEL, SEGMENTS, basis_path
-from .report import comparators, lock_words
+from .report import comparators, lock_words, readings_footnote
 from .fiscal import Calendar, qrange, shift
 from .files import read_csv, read_json, sha256, write_text
 
@@ -106,7 +106,7 @@ def drift_line(h):
     cr = h["coverage_ratio"]
     recent = [cr["by_quarter"][q] for q in ("2025Q4", "2026Q1", "2026Q2") if q in cr["by_quarter"]]
     if len(recent) == 3 and all(x < cr["mean"] for x in recent):
-        return (f" The drift runs the other way: the last three quarters sit at {', '.join(f2(x) for x in recent)} "
+        return (f" The drift runs the other way: the last three held-out quarters sit at {', '.join(f2(x) for x in recent)} "
                 f"against a mean of {f2(cr['mean'])}, so the registry is counting more events per delivery than "
                 "usual, which the ratio's trailing scale absorbs only with a lag.")
     return ""
@@ -307,7 +307,7 @@ def build(root="."):
                       f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}, as a "
                       f"{lock_words(cfg, lock['published_at'])}, at {t} ET on {d}. GD reported "
                       f"{score['reported']['total']}{' on ' + rel if rel else ''}: the lock missed by "
-                      f"{f1(score['ae_total'])} ({pct(score['ape_pct'])}), {band} the band.")
+                      f"{f1(score['ae_total'])} ({score['ape_pct']:.0f}%), {band} the band.")
         cmp_ = comparators(root, q, score, pred)
         if cmp_:
             live_point += (" Other misses for the quarter: "
@@ -339,9 +339,11 @@ def build(root="."):
             f"revenue, which a delivery count does not measure. This is {esc(LABEL)}.</li>")
     add("</ol></div>")
     if score:
-        add('<div class="callout"><p>I wrote this note before GD reported ' + esc(q) + (f" on {rel}" if rel else "")
-            + ". The key points above and Exhibit 8 now carry what GD reported. The sections marked \"before the "
-              "release\" stand as they were written then, so each estimate can be read against the result.</p></div>")
+        add('<div class="callout"><p>I made the estimates in this note before GD reported ' + esc(q)
+            + (f" on {rel}" if rel else "")
+            + ". The key points above, the locked-quarter paragraph and Exhibit 8 now carry what GD reported, and I "
+              "have revised other wording since. The estimates in the sections marked \"before the release\" and in "
+              "Exhibit 9, Exhibit 10 and Exhibit 11 are unchanged, so each can be read against the result.</p></div>")
     add(f'<div class="disclaimer"><p>{esc(DISCLAIMER)}</p><p id="disclosure">{esc(disclosure(root))}</p></div>')
 
     # 2. Business overview
@@ -435,8 +437,8 @@ def build(root="."):
     tr = h["truncation_mae"]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 5. Average miss by year, aircraft</div>'
         + table(["Year", "Ratio", "Raw", "Guidance", "Seasonal", "Last"], yr_rows)
-        + '<div class="src">No 2021 call stated a full-year number, so guidance in 2021 is the same quarter last '
-          "year.</div>"
+        + '<div class="src">No 2021 call gave a full-year figure that the preregistered rule reads, so guidance in '
+          "2021 is the same quarter last year." + esc(readings_footnote(root)) + "</div>"
         + '</div><div class="exhibit"><div class="cap">Exhibit 6. Registry estimate\'s average miss with each '
           "quarter's events cut early</div>"
         + table(["Days cut", "Average miss"], [[d, f1(tr[d])] for d in ("0", "30", "60", "90")])
@@ -448,7 +450,7 @@ def build(root="."):
     add('<div class="exhibit"><div class="cap">Exhibit 7. The registry estimate\'s miss by quarter and the band '
         'built from earlier misses</div><img src="../output/charts/signed_errors.png" alt="Bar chart of the '
         'registry estimate minus GD\'s count by quarter, with the past-miss band"></div>')
-    add(f"<h3>The live quarter: {q}</h3>")
+    add(f"<h3>The {'locked' if scored_lock else 'live'} quarter: {q}</h3>")
     ev, tr_ = pred["events"], pred["trailing"]
     body = (f"By the {pred['snapshot']} registry snapshot, {ev['large']} large-cabin and {ev['mid']} mid-cabin "
             f"airframes had a delivery event in {q}'s window (after {pred['window_start']}, through {pred['window_end']}). Over "
@@ -473,7 +475,7 @@ def build(root="."):
     if scored_lock:
         band = "inside" if score["inside_band"] else "outside"
         body += (f" GD then reported {score['reported']['total']}: the lock missed by {f1(score['ae_total'])} "
-                 f"({pct(score['ape_pct'])}), {band} the band.")
+                 f"({score['ape_pct']:.0f}%), {band} the band.")
         if score.get("guidance_pace") is not None:
             body += (f" GD's guidance pace for the quarter had been {f1(score['guidance_pace'])}, a miss of "
                      f"{f1(score['guidance_ae'])}.")
@@ -485,7 +487,7 @@ def build(root="."):
         body += f" GD then reported {score['reported']['total']}."
         if score.get("guidance_pace") is not None:
             body += f" GD's guidance pace for the quarter had been {f1(score['guidance_pace'])}."
-    add(f"<p>{esc(body)} The band comes from errors measured on a registry file that had years to fill in, so "
+    add(f"<p>{esc(body)} The band comes from errors measured on a registry file that had months or years to fill in, so "
         "at a live lock it is likely too narrow.</p>")
 
     # 5. Backlog, book-to-bill, estimates
@@ -530,7 +532,8 @@ def build(root="."):
              for x in est["sensitivity"]]
     out_bits = [C.say(c) for c in ("os-del", "os-rev", "os-margin") if C.has(c)]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 9. Aerospace revenue for each delivery '
-        "count: deliveries times trailing revenue per delivery, a mechanical figure</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
+        "count: deliveries times trailing revenue per delivery, a mechanical figure"
+        + (", made before the release" if score else "") + "</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
         + ("<h3>GD's outlook for 2026, before the release</h3><p>As of GD's 2026-07-29 call: " if score else
            "<h3>GD's own outlook for 2026</h3><p>") + " ".join(out_bits)
         + "</p></div></div>")
@@ -540,7 +543,7 @@ def build(root="."):
     drows = [[esc(s), bn(S[s]["backlog_usd"]), f2(S[s]["coverage_years"]), bn(S[s]["drift_usd"]),
               pct(S[s]["ttm_margin"] * 100)] for s in DEFENSE]
     add('<div class="exhibit"><div class="cap">Exhibit 10. Defense backlog in years of trailing revenue, and the '
-        "2026Q3 baseline</div>"
+        "2026Q3 baseline" + (", made before the release" if score else "") + "</div>"
         + table(["Segment", "Backlog, 2026Q2", "Coverage, years", "2026Q3 estimate", "Operating margin"], drows)
         + ('<div class="src">Backlog is as of 2026Q2, the last quarter before these estimates were made. GD\'s 2026Q3 '
            "release (accession 0000040533-26-000036, Exhibit H) reports Marine Systems backlog of $146.9B, so this "
@@ -551,7 +554,8 @@ def build(root="."):
         "for the seasonal naive with drift; four quarters out it was 9.4% for backlog, 5.8% for trailing revenue and "
         "6.0% for trailing revenue with drift. So the 2026Q3 defense figures above are the seasonal naive with drift, "
         "and backlog appears as coverage beside them. Applying that study to GD is an assumption: it did not test GD. "
-        f'The study is at <a href="{STUDY_URL}">{STUDY_URL}</a>.</p>')
+        f'The study is at <a href="{STUDY_URL}">{STUDY_URL}</a>; these percentages are from its published data file '
+        "as of 2026-10-13.</p>")
 
     # 7. What the street watches: a preview of the print, so it is dropped once GD has reported
     if not score:
@@ -592,7 +596,9 @@ def build(root="."):
                  "Backlog", "Coverage, years"], seg_rows)
         + table(["Derived", "Value"], derived)
         + '<div class="src">The rows "from the estimate" are mechanical: the delivery estimate times trailing '
-          'Aerospace revenue per delivery, services included. From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
+          'Aerospace revenue per delivery, services included. '
+        + ("The 2026Q3 figures here are the estimates made before the release; Exhibit 8 has what GD reported. "
+           if score else "") + 'From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
           "typed inputs.</div></div>")
 
     # 11. Sources
@@ -618,7 +624,8 @@ def build(root="."):
     # a Mac can print, stays in step with it (F008).
     add(f"<li>FAA Releasable Aircraft database, ReleasableAircraft.zip (ACFTREF, MASTER and DEREG), snapshot "
         f"{snap} for the backtest" + (f", and snapshot {pred['snapshot']} for the {q} lock" if lock else "") + ".</li>")
-    add("<li>GD earnings calls from 2020-01-29 to 2026-07-29, for the guidance outlooks in data/guidance.csv.</li>")
+    cd = sorted(r["call_date"] for r in read_csv(root / "data/guidance.csv"))
+    add(f"<li>GD earnings calls from {cd[0]} to {cd[-1]}, for the guidance outlooks in data/guidance.csv.</li>")
     add(f'<li>Repository: <a href="{REPO_URL}">{REPO_URL}</a></li></ol>')
     add("</body></html>")
     text = "\n".join(parts) + "\n"
@@ -653,7 +660,7 @@ def limitations(root):
         "so the registry never sees that delivery. Since 2022 the registry's yearly mid-cabin count has stayed within "
         "a few jets of GD's, so G280 exports do not look like a large gap now.",
         "Processing: registry processing can lag by months. The backtest reads events by their stamped date in a "
-        "file that had years to fill in, while a live estimate sees only what has posted.",
+        "file that had months or years to fill in, while a live estimate sees only what has posted.",
         "Military: military and special-mission airframes may never reach the civil registry.",
         "Handover: GD counts a delivery at its own handover, which a registration or cancellation date only "
         "approximates, so an event can land in the next or previous quarter.",

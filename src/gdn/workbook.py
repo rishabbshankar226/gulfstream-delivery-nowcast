@@ -61,13 +61,14 @@ def about(wb, snap, chosen):
         ("", None),
         ("Method", BOLD),
         (f"1. Each Gulfstream airframe in the FAA registry snapshot of {snap} gets a delivery date ({chosen}): the "
-         "earlier of a customer's registration and an export cancellation, within 365 days of first airworthiness.", None),
+         "earlier of a customer's registration and an export cancellation, no later than 365 days after first airworthiness.", None),
         ("2. Registry events are counted in GD's fiscal quarter windows, by cabin (large, mid).", None),
         ("3. Ratio estimate = this quarter's events x reported deliveries over the last four quarters / registry "
          "events over the same four quarters, by cabin.", None),
         ("4. Design window 2017Q1 to 2019Q4 chose the event definition; the 26 quarters 2020Q1 to 2026Q2 are held "
          "out and scored against seasonal, last-quarter and GD guidance baselines. The guidance pace is a typed "
-         "input: GD's full-year outlook less deliveries already reported, spread over the remaining quarters.", None),
+         "input and my construction, not a figure GD publishes: GD's full-year outlook less deliveries already "
+         "reported, spread over the remaining quarters.", None),
         ("5. Segment estimates: the delivery estimate x trailing Aerospace revenue per delivery, services included: "
          "a mechanical estimate; defense segments use the seasonal naive with drift, a rule from a study of other "
          "contractors, so applying it to GD is an assumption.", None),
@@ -138,6 +139,8 @@ def summary(wb):
     put(ws, "C6", "=AVERAGE(Quarters!T18:T43)", F_AIR)
     put(ws, "A8", "MAE is the average miss in aircraft. The lowest holdout figure in column C is the baseline that "
                   "missed by least. Guidance has no design-window figure.")
+    put(ws, "A9", "Read rows 2 to 6 before anything else: a baseline with a lower holdout figure than MAE ratio beat the "
+                  "registry estimate. The Live sheet holds each locked quarter, what GD reported and the miss.")
     ws.freeze_panes = "B2"
     widths(ws, [16, 12, 12])
 
@@ -245,7 +248,8 @@ def sensitivity(wb):
         put(ws, f"B{r}", f"=Live!$B$11+A{r}", F_AIR)
         put(ws, f"C{r}", f"=B{r}*Segments!$B$13", F_USD)
     put(ws, "A12", "Aerospace revenue here is mechanical: deliveries x trailing Aerospace revenue per delivery, "
-                   "services included.")
+                   "services included. These are estimates made before the quarter's release; the Live sheet holds "
+                   "what GD reported for a scored quarter.")
     ws.freeze_panes = "B2"
     widths(ws, [18, 12, 18])
 

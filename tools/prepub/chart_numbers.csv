@@ -7,7 +7,7 @@ output/charts/dashboard.png,33,dashboard screenshot: GD delivers about 33 a quar
 output/charts/dashboard.png,2026-10-19,dashboard screenshot: registry copy date,snap.backtest,date,read from the image
 output/charts/dashboard.png,Scored,dashboard screenshot: live quarter status for 2026Q3,status.2026Q3,str,the image reads SCORED: MISSED BY 8.0 OUTSIDE THE BAND
 output/charts/dashboard.png,8.0,dashboard screenshot: status line and facts row miss of the locked estimate,live.2026Q3.score.ae_total,f1,read from the image
-output/charts/dashboard.png,20.1,dashboard screenshot: miss of the locked estimate in percent,live.2026Q3.score.ape_pct,f1,read from the image
+output/charts/dashboard.png,20,dashboard screenshot: miss of the locked estimate in percent,live.2026Q3.score.ape_pct,f0,read from the image (retaken 2026-11-11 after the wording changes)
 output/charts/dashboard.png,32.0,dashboard screenshot: locked estimate for 2026Q3,live.2026Q3.pred.nowcast.total,f1,read from the image
 output/charts/dashboard.png,21.2,dashboard screenshot: band of past misses low,live.2026Q3.pred.band.0,f1,read from the image
 output/charts/dashboard.png,37.2,dashboard screenshot: band of past misses high,live.2026Q3.pred.band.1,f1,read from the image

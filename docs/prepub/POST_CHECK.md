@@ -4,19 +4,19 @@ Measured 2026-11-11 on `docs/LINKEDIN_POST.md` as `src/gdn/report.py` writes it 
 
 ## Length
 
-`len(open("docs/LINKEDIN_POST.md").read())` prints `1284` with the final newline, `1283` without. LinkedIn's limit is 3,000.
+`len(open("docs/LINKEDIN_POST.md").read())` prints `1280` with the final newline, `1279` without. LinkedIn's limit is 3,000.
 
 ## What the feed shows before "see more"
 
 First 210 characters (the desktop feed's cut):
 
-> My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40. / I built a tracker that scales FAA aircraft registrations into an estimate of the Gulfstream jets G
+> My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40. / My tracker scales FAA registrations into an estimate of the Gulfstream jets General Dynamics (GD) 
 
 First 140 characters (the mobile feed's cut):
 
-> My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40. / I built a tracker that scale
+> My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40. / My tracker scales FAA regist
 
-Both cuts carry the live result in full (32.0 against 40). The desktop cut also starts the sentence that says what the project is. " / " marks a line break.
+Both cuts carry the live result in full (32.0 against 40) and start the sentence that says what the project is. " / " marks a line break.
 
 ## Links
 
@@ -31,11 +31,12 @@ From `LINKS.csv`, rerun on the final tree:
 
 | Rule | Result |
 |---|---|
-| Under 1,300 characters | 1284 |
-| First two lines carry the live result and what the project is | line 1: the miss, 32.0 against 40; line 2: what the tracker does and that it locks the day before GD reports |
+| Under 1,300 characters | 1280 |
+| First two lines carry the live result and what the project is | line 1: the miss, 32.0 against 40; line 2: what the tracker does and that it is locked the day before GD reports |
 | Plain first person | yes |
 | Names the baseline that beat the model | "Simply repeating the same quarter last year missed by less on average, 4.6", and "last year's same quarter (39) by 1" for the live quarter |
-| Says the backtest reads a finished registry | "That test reads a registry copy that had years to fill in, so only locked quarters show whether it counts jets in time." |
+| Says what its two names mean | "(Registry count: my scaled estimate; the pace: mine.)", because the preregistered headline sentence says "registry count" and "GD's guidance pace" |
+| Says the backtest reads a finished registry | "That test reads a registry copy that had months or years to fill in, so only locked quarters show whether it counts jets in time." |
 | One disclaimer line | "Student project, not investment advice. I am not affiliated with General Dynamics or Gulfstream." |
 | No hashtag names a ticker | `#EquityResearch #Aerospace` |
 | Every figure traced | ledger, surface `post`: 12 rows, 0 flagged |

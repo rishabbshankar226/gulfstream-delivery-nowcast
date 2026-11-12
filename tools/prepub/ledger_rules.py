@@ -464,6 +464,16 @@ def load_facts(root):
         put("qp.far.plan", float(far["plan"]), f"data/quarter_plans.csv ({far['quarter']}, the plan furthest from the pace)")
         put("qp.far.call", far["call_date"], "data/quarter_plans.csv")
         put("qp.far.pace", F[f"bt.{far['quarter']}.guidance.total"], f"results/holdout.csv ({far['quarter']}, guidance, total)")
+    for q_ in [k[5:11] for k in list(F) if k.startswith("live.") and k.endswith(".score.guidance_pace")]:
+        yr, kq, end = q_[:4], int(q_[5]), F.get(f"live.{q_}.pred.window_end")
+        outs = [float(r["outlook"]) for r in sorted(_csv(root / "data/guidance.csv"), key=lambda r: r["call_date"])
+                if r["year"] == yr and r["outlook"].strip() and end and r["call_date"] <= end]
+        if outs and kq < 4:
+            left = outs[-1] - sum(F[f"gd.{yr}Q{j}.total"] for j in range(1, kq))
+            put(f"even.{q_}.left", left, "data/guidance.csv outlook less data/processed/gd_deliveries.csv year to date")
+            put(f"even.{q_}.even", left / (5 - kq), "the same, divided by the quarters left in the year")
+    put("guid.last_outlook", max(r["call_date"] for r in _csv(root / "data/guidance.csv") if r["outlook"].strip()),
+        "data/guidance.csv (the latest call that stated an outlook)")
     put("mid.min_holdout", min(F[f"gd.{q}.mid"] for q in hq),
         "data/processed/gd_deliveries.csv (fewest mid-cabin deliveries in a held-out quarter)")
     # what GD reported by segment for a scored quarter
@@ -626,12 +636,12 @@ TEMPLATES = [
     T("readme,note,interview,dashboard", "Registry events per delivery averaged {evper.mean:f2} from 2017Q1 to 2025Q2"),
     T("readme,note,interview,dashboard", "Registry events per reported delivery averaged {evper.mean:f2} from 2017Q1 to 2025Q2"),
     T("readme,note", "above the mean plus {const.sd_mult:word} standard deviations"),
-    T("readme", "the last {const.recent_n:word} quarters sit at {cov.2025Q4:f2}, {cov.2026Q1:f2}, {cov.2026Q2:f2} against the "
+    T("readme", "the last {const.recent_n:word} held-out quarters sit at {cov.2025Q4:f2}, {cov.2026Q1:f2}, {cov.2026Q2:f2} against the "
                 "{m.holdout.coverage_ratio.mean:f2} mean"),
-    T("note", "the last {const.recent_n:word} quarters sit at {cov.2025Q4:f2}, {cov.2026Q1:f2}, {cov.2026Q2:f2} against a "
+    T("note", "the last {const.recent_n:word} held-out quarters sit at {cov.2025Q4:f2}, {cov.2026Q1:f2}, {cov.2026Q2:f2} against a "
               "mean of {m.holdout.coverage_ratio.mean:f2}"),
     T("dashboard", "GD delivered {cov.2025Q4:f2}, {cov.2026Q1:f2}, {cov.2026Q2:f2} jets per registry event in the last "
-                   "{const.recent_n:word} quarters, against an average of {m.holdout.coverage_ratio.mean:f2}"),
+                   "{const.recent_n:word} held-out quarters, against an average of {m.holdout.coverage_ratio.mean:f2}"),
     T("readme,asof", "with its {const.lags:word} lags left whole"),
     T("readme,asof", "and its {const.lags:word} lags all from that capture"),
     T("asof", "and its {const.lags:word} lag quarters from the same archived copy"),
@@ -809,7 +819,7 @@ TEMPLATES = [
     T("dashboard", "The delivery estimate of {live.2026Q3.pred.nowcast.total:f1} sits below the {gd.2025Q3.total:int} "
                    "deliveries of 2025Q3, and each delivery carries about {est.revenue_per_delivery_usd:usdM} of Aerospace "
                    "revenue, so the delivery-based figure falls. That {est.revenue_per_delivery_usd:usdM} includes services"),
-    T("dashboard", "the {m.holdout.n:int} quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace (its full-year "
+    T("dashboard", "the {m.holdout.n:int} quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace (my construction, not a figure GD publishes: its full-year "
                    "delivery outlook less the deliveries already reported, spread by each quarter's usual share of the year) "
                    "and {const.n_simple:word} simple rules of thumb"),
     T("dashboard", "Chart of the 2026Q3 estimate by registry snapshot date: latest {live.2026Q3.pred.nowcast.total:f1} "
@@ -836,7 +846,7 @@ LOCK_LINE = ("locked at {live.Q.pred.nowcast.total:f1} (band {live.Q.pred.band.0
              "{live.Q.pred.snapshot:date} snapshot, as a timestamped GitHub release, made while the repository was private "
              "(lock-2026Q3) at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}, sha256 "
              "{live.Q.lock.sha256:hash}. GD reported {live.Q.score.reported.total:int} on {cal.release.Q:date}: the lock "
-             "missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct1}), outside the band")
+             "missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct0}), outside the band")
 OTHERS = ("Other misses for the quarter: GD's guidance pace ({live.Q.score.guidance_pace:f1}) by "
           "{live.Q.score.guidance_ae:f1}, the raw registry count ({cmp.Q.raw:int}) by {cmp.Q.raw_miss:int}, the same quarter "
           "last year ({cmp.Q.yago:int}) by {cmp.Q.yago_miss:int}, last quarter ({cmp.Q.last:int}) by {cmp.Q.last_miss:int}")
@@ -848,7 +858,7 @@ NEW = [
     # post
     ("post", "My first locked estimate of Gulfstream deliveries missed: I said {live.Q.score.nowcast.total:f1} for 2026Q3, "
              "General Dynamics reported {live.Q.score.reported.total:int}"),
-    ("post", "The 2026Q3 miss was {live.Q.score.ae_total:f1} jets ({live.Q.score.ape_pct:pct1}), outside my band of past misses. "
+    ("post", "The 2026Q3 miss was {live.Q.score.ae_total:f1}, outside my {const.band_nominal_pct:pct0} band of past misses. "
              "A pace I derived from GD's own full-year outlook missed by {live.Q.score.guidance_ae:f1}, and last year's same "
              "quarter ({cmp.Q.yago:int}) by {cmp.Q.yago_miss:int}"),
     ("post", "{const.one:word} quarter is one data point"),
@@ -858,7 +868,9 @@ NEW = [
     ("readme", "Live record so far: {const.one:word} locked quarter, a miss outside its band. For 2026Q3 I locked an estimate "
                "of {live.Q.pred.nowcast.total:f1} Gulfstream deliveries (band {live.Q.pred.band.0:f1} to "
                "{live.Q.pred.band.1:f1}) the day before GD reported. GD reported {live.Q.score.reported.total:int}, so the "
-               "lock missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct1}), outside the band. GD's guidance pace "
+               "lock missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct0}), outside the band, whose nominal level is "
+               "{const.band_nominal_pct:pct0} and which held {m.holdout.band.hits:int} of {m.holdout.band.n:int} held-out "
+               "quarters. GD's guidance pace "
                "missed by {live.Q.score.guidance_ae:f1} and the same quarter last year ({cmp.Q.yago:int}) by "
                "{cmp.Q.yago_miss:int}"),
     ("readme", "Backtest, {m.holdout.n:int} held-out quarters: the registry estimate missed by {m.holdout.mae.ratio:f1} jets a "
@@ -867,12 +879,12 @@ NEW = [
     ("readme", "GD's reported Gulfstream deliveries by quarter against the {const.n_models:word} estimates"),
     # README results and error analysis
     ("readme", "GD gave the year only as a change from 2020, \"{const.ten:int} fewer aircraft\""),
-    ("readme", "on {qp.n:word} calls held inside a held-out quarter GD also said"),
+    ("readme", "on {qp.n:word} calls held inside a held-out quarter GD also gave a number"),
     ("readme", "On {qp.far.call:date} it said \"We now expect to deliver {qp.far.plan:int} aircraft in the third quarter, with a "
                "rapid increase in the fourth quarter deliveries\", when my pace for 2023Q3 says {qp.far.pace:f1}"),
     ("readme,interview", "the baseline misses by {sv.quarter_plans.mae.guidance:f1} on average, not {m.holdout.mae.guidance:f1}, "
                          "and the registry estimate is closer in {sv.quarter_plans.wins:int} of {sv.quarter_plans.of:int} quarters"),
-    ("interview", "On {qp.n:word} calls GD also said how many aircraft it planned to deliver"),
+    ("interview", "On {qp.n:word} calls GD also gave a number for the quarter then under way"),
     ("readme", "\"a few demonstrators all up about {const.demo11:int} aircraft\""),
     ("readme", "No held-out quarter had fewer than {mid.min_holdout:int} mid-cabin deliveries"),
     ("note", "reports Marine Systems backlog of {q3.backlog.marine:usdB}, so this table is not current"),
@@ -888,8 +900,8 @@ NEW = [
                "of {sv.outlook_2021_as_117.of:int} quarters"),
     ("readme,interview", SPLIT),
     ("readme", "The 2026Q3 lock read a snapshot taken {lockt.Q.days:int} days after the quarter ended, when the quarter's count "
-               "stood at {lockt.Q.count:int}, and it is the same in every daily snapshot since, to {lockt.Q.newest:date}. Its "
-               "miss came from the scale, not from late postings: the {const.lags:word} quarters before gave "
+               "stood at {lockt.Q.count:int}, and it is the same in every daily snapshot since, to {lockt.Q.newest:date}. The "
+               "{const.lags:word} quarters before gave "
                "{lockt.Q.scale:f2} deliveries per registry event, and the quarter itself came in at {lockt.Q.real:f2}"),
     ("readme", LOCK_LINE), ("readme,note", OTHERS),
     ("readme", "With {m.holdout.n:int} quarters one standard error of an autocorrelation is about {const.ac_se:f2}, so only "
@@ -934,12 +946,33 @@ NEW = [
              "band of {live.Q.pred.band.0:f1} to {live.Q.pred.band.1:f1}, as a timestamped GitHub release, made while the "
              "repository was private, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}. GD reported "
              "{live.Q.score.reported.total:int} on {cal.release.Q:date}: the lock missed by {live.Q.score.ae_total:f1} "
-             "({live.Q.score.ape_pct:pct1}), outside the band"),
+             "({live.Q.score.ape_pct:pct0}), outside the band"),
     ("note", "At trailing Aerospace revenue per delivery of {est.revenue_per_delivery_usd:usdM}, the locked estimate implied "
              "{est.aerospace_from_nowcast_usd:usdB} of Aerospace revenue for 2026Q3, and scaling last year's quarter by "
              "trailing growth gave {est.segments.Aerospace.drift_usd:usdB}. GD reported {rseg.Q.Aerospace.rev:usdB}, against "
              "{seg.Aerospace.2025Q3.rev:usdB} a year earlier. The {est.revenue_per_delivery_usd:usdM} includes services"),
-    ("note", "I wrote this note before GD reported 2026Q3 on {cal.release.Q:date}"),
+    ("note", "I made the estimates in this note before GD reported 2026Q3 on {cal.release.Q:date}"),
+    ("note", "gave the year as \"{const.ten:int} fewer aircraft\" than 2020; read as {const.alt2021:int}, the guidance pace misses by {sv.outlook_2021_as_117.mae.guidance:f1} on average, "
+             "and with the plans GD stated for single quarters in its place, by {sv.quarter_plans.mae.guidance:f1}, not "
+             "{m.holdout.mae.guidance:f1}"),
+    ("note", "these percentages are from its published data file as of {const.study_asof:date}"),
+    ("readme", "Of the {used.lock.Q.n:int} events in the raw count, {used.lock.Q.old3:int} were airframes at least "
+               "{const.old_years:word} years old by the registry's year of manufacture"),
+    ("readme", "My pace split the {even.Q.left:int} jets GD's outlook left for the rest of the year by the last "
+               "{const.pace_years:word} years' pattern and said {live.Q.score.guidance_pace:f1}; an even split would have "
+               "said {even.Q.even:f1}"),
+    ("readme", "The job now refuses {const.three_guards:word} things the preregistered text does not mention"),
+    ("readme", "None of the {const.n_baselines:word} preregistered sign tests finds the registry estimate better than a "
+               "baseline"),
+    ("readme", "With both readings together the baseline misses by {sv.quarter_plans_and_2021_as_117.mae.guidance:f1}, "
+               "against {m.holdout.mae.ratio:f1} for the registry estimate, which is then closer in "
+               "{sv.quarter_plans_and_2021_as_117.wins:int} of {sv.quarter_plans_and_2021_as_117.of:int} quarters"),
+    ("readme", "quote {const.two_calls:word} of the transcripts, so they were written with those calls in hand, and exactly "
+               "{m.holdout.guidance.sourced:int} quarters meet the threshold of {const.guid_threshold:int} for naming"),
+    ("readme", "{const.two_readings:word} readings of GD's calls that I tried afterwards"),
+    ("readme", "Phase {const.phase2:int}). That check is in the build notes"),
+    ("sensitivity", "On {const.qp_words:word} other calls inside the window"),
+    ("dashboard", "the README gives {const.two_readings:word} other readings of GD's calls"),
     ("note", "By the {live.Q.pred.snapshot:date} registry snapshot, {live.Q.pred.events.large:int} large-cabin and "
              "{live.Q.pred.events.mid:int} mid-cabin airframes had a delivery event in 2026Q3's window (after "
              "{live.Q.pred.window_start:date}, through {live.Q.pred.window_end:date}). Over the {const.lags:word} quarters "
@@ -951,13 +984,13 @@ NEW = [
              "{live.Q.pred.band.1:f1}. I locked this estimate as a timestamped GitHub release, made while the repository "
              "was private, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}. GD then reported "
              "{live.Q.score.reported.total:int}: the lock missed by {live.Q.score.ae_total:f1} "
-             "({live.Q.score.ape_pct:pct1}), outside the band. GD's guidance pace for the quarter had been "
+             "({live.Q.score.ape_pct:pct0}), outside the band. GD's guidance pace for the quarter had been "
              "{live.Q.score.guidance_pace:f1}, a miss of {live.Q.score.guidance_ae:f1}. The raw count of {cmp.Q.raw:int} "
              "events missed by {cmp.Q.raw_miss:int}; the estimate came out lower because the {const.lags:word} quarters "
              "before gave a scale of {lockt.Q.scale:f2} deliveries per event"),
     ("note", "GD reported {rseg.oe_total:usdB} of operating earnings for the {const.n_segments:word} segments"),
     ("note", "snapshot {snap.backtest:date} for the backtest, and snapshot {live.Q.pred.snapshot:date} for the 2026Q3 lock"),
-    ("note", "As of GD's {guid.last:date} call"),
+    ("note", "As of GD's {guid.last_outlook:date} call"),
     # interview and resume
     ("interview", "Over those {m.holdout.n:int} quarters my registry estimate was off by {m.holdout.mae.ratio:f1} jets a quarter "
                   "on average, against {m.holdout.mae.guidance:f1} for GD's guidance pace. The difference is not statistically "
@@ -972,14 +1005,17 @@ NEW = [
     ("interview", "The GitHub workflow locked {live.Q.pred.nowcast.total:f1} deliveries, with a band of {live.Q.pred.band.0:f1} "
                   "to {live.Q.pred.band.1:f1}, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}, while the "
                   "repository was still private. GD reported {live.Q.score.reported.total:int} the next day. The lock missed "
-                  "by {live.Q.score.ae_total:f1}, or {live.Q.score.ape_pct:pct1}, outside the band. GD's guidance pace was "
+                  "by {live.Q.score.ae_total:f1}, or {live.Q.score.ape_pct:pct0}, outside the band. GD's guidance pace was "
                   "{live.Q.score.guidance_pace:f1}, a miss of {live.Q.score.guidance_ae:f1}, and the raw registry count for "
-                  "the quarter was {cmp.Q.raw:int}, a miss of {cmp.Q.raw_miss:int}. So the registry had the quarter's jets in "
-                  "time: the count had settled at {lockt.Q.count:int} by the lock. What missed was my scaling, which took "
-                  "{lockt.Q.scale:f2} deliveries per registry event from the {const.lags:word} quarters before when the "
-                  "quarter came in at {lockt.Q.real:f2}. {const.one:word} quarter is one data point"),
+                  "the quarter was {cmp.Q.raw:int}, a miss of {cmp.Q.raw_miss:int}. That count has not changed in the daily snapshots "
+                  "since the lock, but {used.lock.Q.old3:int} of those {used.lock.Q.n:int} events were airframes at least "
+                  "{const.old_years:word} years old by the registry's year of manufacture, so the raw count is not a count "
+                  "of {used.lock.Q.n:int} new jets. My scaling took {lockt.Q.scale:f2} deliveries per registry event from "
+                  "the {const.lags:word} quarters before, and the quarter came in at {lockt.Q.real:f2}. {const.one:word} "
+                  "quarter is one data point"),
     ("interview", "scaling FAA registrations missed by {m.holdout.mae.ratio:f1} jets a quarter, repeating the same quarter last "
-                  "year missed by {m.holdout.mae.seasonal:f1}, and no test separates my estimate from any baseline. Then the "
+                  "year missed by {m.holdout.mae.seasonal:f1}, and none of the {const.n_baselines:word} preregistered sign tests "
+                  "separates my estimate from any baseline. Then the "
                   "first live lock missed by {live.Q.score.ae_total:f1}, outside its band"),
     ("interview", "than tune a rule until it wins on {m.holdout.n:int} quarters"),
     ("interview", "From {const.two_years:word} years. In 2023 and 2024 the guidance pace missed by "
@@ -1013,7 +1049,7 @@ NEW = [
                   "{rseg.Q.Aerospace.rev:usdB} of Aerospace revenue. That {est.revenue_per_delivery_usd:usdM} includes services"),
     ("dashboard", "while the {const.lags:word} quarters before it stay whole, so the count falls"),
     # workbook About
-    ("workbook", "within {const.bound_days:int} days of first airworthiness"),
+    ("workbook", "no later than {const.bound_days:int} days after first airworthiness"),
 ]
 TEMPLATES += [T(surf, tpl.replace(".Q.", f".{Q}.").replace(".Q:", f".{Q}:")) for surf, tpl in NEW]
 
@@ -1034,6 +1070,14 @@ def _extra_consts(F):
     put("const.g300_early", 2028, "report/claims.json pc-g280-final-delivery (\"early '28\")")
     put("q3.backlog.marine", 146865e6, "GD 8-K Exhibit 99.1, accession 0000040533-26-000036, Exhibit H, Third Quarter 2026, "
         "Marine Systems total backlog 146,865 ($M); read from the cached exhibit in data/raw/sec (untracked)")
+    put("const.study_asof", "2026-10-13", "the defense study's data.json, field as_of, fetched 2026-11-11")
+    put("const.pace_years", 3, "docs/PREREGISTRATION.md section 3.4: the guidance pace's shares pool the three years before")
+    put("const.three_guards", 3, "docs/prepub/ERRATA.md E9 (three guards in src/gdn/live.py)")
+    put("const.qp_words", 3, "data/guidance.csv: blank-outlook rows of 2021-04-28, 2025-10-24 and 2026-04-29 describe a quarter in words")
+    put("const.two_calls", 2, "docs/PREREGISTRATION.md section 3.4 quotes the 2023-07-26 and 2025-07-23 calls")
+    put("const.guid_threshold", 22, "docs/PREREGISTRATION.md headline rule: at least 22 holdout quarters with a numeric outlook")
+    put("const.phase2", 2, "docs/build/DECISIONS.md heading 'Phase 2 to 3' (the stop named there)")
+    put("const.two_readings", 2, "results/exploratory/sensitivity.json: outlook_2021_as_117 and quarter_plans")
     put("const.eng_a", 4, "src/gdn/faa.py scope rule (TYPE-ENG 4) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_b", 5, "src/gdn/faa.py scope rule (TYPE-ENG 5) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_out", 2, "ACFTREF row 3980222,GULFSTREAM AEROSPACE CORP,GVIII-G700,5,2 in the FAA file of 2026-10-30")
@@ -1209,7 +1253,7 @@ SPECIAL_CELLS = {
                                           "{live.2026Q3.score.guidance_ae:f1})",
     ("live-facts", "same quarter last year"): "{cmp.2026Q3.yago:int} deliveries (missed by {cmp.2026Q3.yago_miss:int})",
     ("live-facts", "miss of the locked estimate"): "{live.2026Q3.score.ae_total:f1} deliveries "
-                                                   "({live.2026Q3.score.ape_pct:pct1}), outside the band",
+                                                   "({live.2026Q3.score.ape_pct:pct0}), outside the band",
     ("live-facts", "gd's typical quarter"): "about {typical:whole} deliveries since {const.since2020:year}",
 }
 TILE = re.compile(r"^(Registry estimate|Raw registry count|GD's guidance pace|Same quarter last year|Last quarter)"
@@ -1512,7 +1556,7 @@ def live_ok(F):
         (r"that locks each estimate as a timestamped GitHub release before GD reports and scores it from GD's SEC filing; "
          r"the first lock, QQ, said # and GD reported #: a miss of #, outside its band", "Q3LS_out"),
         (r"My first locked estimate of Gulfstream deliveries missed: I said # for QQ, General Dynamics reported #", "first_miss"),
-        (r"The QQ miss was # jets \(#\), outside my band of past misses", "Q3LS_out"),
+        (r"The QQ miss was #, outside my # band of past misses", "Q3LS_out"),
         (r"Live record so far: one locked quarter, a miss outside its band", "first_miss"),
         (r"For QQ I locked an estimate of # Gulfstream deliveries \(band # to #\) the day before GD reported", "Q3LS"),
         (r"GD reported #, so the lock missed by # \(#\), outside the band", "Q3LS_out"),
@@ -1547,7 +1591,18 @@ def live_ok(F):
          r"private", "Q3_bot_private"),
         (r"GD reported # the next day", "Q3LS"),
         (r"The lock missed by #, or #, outside the band", "Q3LS_out"),
-        (r"So the registry had the quarter's jets in time: the count had settled at # by the lock", "Q3LS"),
+        (r"That count has not changed in the daily snapshots since the lock, but # of those # events were airframes at "
+         r"least (three|#) years old", "Q3LS"),
+        (r"The job now refuses (three|#) things the preregistered text does not mention: a lock from a registry subset "
+         r"dated on or before the quarter's end, a score for a lock published at or after", G),
+        (r"reports each quarter, locked on GitHub the day before GD reports", G),
+        (r"^The latest locked quarter$", G),
+        (r"The (live|locked) quarter: QQ", "Q3LS"),
+        (r"I made the estimates in this note before GD reported QQ on D", "Q3LS"),
+        (r"the locked-quarter paragraph and Exhibit # now carry what GD reported", "Q3LS"),
+        (r"Exhibit # has what GD reported", "Q3LS"),
+        (r"the Live sheet holds what GD reported for a scored quarter", G),
+        (r"The Live sheet holds each locked quarter, what GD reported and the miss", G),
         (r"Then the first live lock missed by #, outside its band", "first_miss"),
         (r"and the first lock fell outside it", "first_miss"),
         (r"docs/prepub/ERRATA\.md records the gap and the amendment to decide before the next lock", G),
