@@ -103,3 +103,7 @@ Measured 2026-11-12, 13:59 to about 14:10 ET, on a clean tree at the frozen comm
 | Determinism | `make check-determinism` | `identical (50 files)` |
 | Record | `shasum -a 256 -c docs/prepub/RECORD_HASHES.txt` | 59 of 61 OK. The two that fail are `results/live/2026Q4_latest.json` and `results/live/2026Q4_path.csv`, as in D20. `predictions/2026Q3.json` hashes to `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`. |
 | Ledger | `tools/prepub/ledger.py --root . --out <scratch>/LEDGER_round4.csv` | `rows 2864  flagged 0`; `cmp` with the committed `docs/prepub/LEDGER.csv` finds no difference. |
+
+### Round 4, after the register and verdict
+
+At `f88b7c8`, a clean tree that differs from `4388294` only under `docs/prepub/`: the full gate (`--output .build/gate_round4_final.json`) printed `42 assertions, 4 failing, 3 warning`, with the same `R2`, `K1`, `N1`, `Y1` lists and the same `T3`, `S3`, `L3` warnings as before launch. `shasum -a 256 predictions/2026Q3.json` printed `3c4cdbd0...6f23`. `git diff --stat 4388294..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` printed nothing.
