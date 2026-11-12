@@ -68,13 +68,13 @@ The real tree also carries a stale PDF (lead L13). The clean copy does not show 
 - `docs/build/` is handled as one row: dated build logs, which need a notice saying so.
 - The staleness check covers sentences about a lock or a score. Other stale claims (who runs the daily job, what a site blocks) are found by reading, in P4 and P5.
 
-## Rerun on the final tree (P6.4)
+## Rerun on the final tree (P6.4, P8.6)
 
-Run 2026-11-11, about 20:50 ET, after the fix pass, because the ledger's rules grew with every rewritten sentence and a looser rule could have stopped catching a plant.
+Run 2026-11-11, about 22:00 ET, at commit `3e8c0f9`, after the last fix from round 3. The ledger's rules grew with every rewritten sentence, and a looser rule could have stopped catching a plant, so the nine plants were run again on the tree that ships. (An earlier rerun at `7277a6d`, after the first fix pass, also caught nine of nine.)
 
-- Copies: `git archive prepub-audit | tar -x -C <dir>` at commit `7277a6d` into `~/gdn-prepub/plant3/` (clean) and `~/gdn-prepub/plant4/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link.
+- Copies: `git archive prepub-audit | tar -x -C <dir>` into `~/gdn-prepub/plantA3/` (clean) and `~/gdn-prepub/plantB3/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link.
 - Plants: `tools/prepub/plant_selftest.py plant <planted copy>`, then `make pdf` in the planted copy for plant 7.
-- Ledgers: `tools/prepub/ledger.py --root <copy> --out <copy>/LEDGER_*.csv`. Clean: `rows 2796  flagged 2`. Planted: `rows 2798  flagged 38`.
+- Ledgers: `tools/prepub/ledger.py --root <copy> --out <copy>/LEDGER_*.csv`. Clean: `rows 2866  flagged 2`. Planted: `rows 2868  flagged 38`.
 - Compare: `tools/prepub/plant_selftest.py compare <clean csv> <planted csv>`.
 
 | # | Plant | Caught | By (surface, place, status, shown, expected) |
@@ -91,4 +91,4 @@ Run 2026-11-11, about 20:50 ET, after the fix pass, because the ledger's rules g
 
 9 planted, 9 caught, 0 missed.
 
-The clean copy's two flagged rows are both `stale` rows on sentences that say the workflow made the lock while the repository was private (`README.md:121`, `docs/INTERVIEW_NOTES.md:29`). The ledger admits those sentences only when `git log` shows the lock commit's author, and an archive copy has no history. On the real tree, which has the history, the same run prints `rows 2794  flagged 0`. On the clean copy the post, the dashboard, the note, the PDF and the workbook have zero flagged rows.
+The clean copy's two flagged rows are both `stale` rows on sentences that say the workflow made the lock while the repository was private (one in `README.md`, one in `docs/INTERVIEW_NOTES.md`). The ledger admits those sentences only when `git log` shows the lock commit's author, and an archive copy has no history. On the real tree, which has the history, the same run prints `rows 2864  flagged 0`. On the clean copy the post, the dashboard, the note, the PDF and the workbook have zero flagged rows.

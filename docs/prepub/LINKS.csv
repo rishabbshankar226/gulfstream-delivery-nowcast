@@ -10,15 +10,18 @@ README.md,results/exploratory/sensitivity.md,markdown link,in-repo relative,reso
 README.md,results/error_analysis.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/releases/tag/lock-2026Q3,markdown link,own repository or Pages,status 404,will resolve once the repository is public (tag exists locally; the release is confirmed by gh release view),
 README.md,docs/PREREGISTRATION.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/prepub/ERRATA.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,markdown link,external,resolves,same,Does backlog predict revenue? Five defense primes
 README.md,results/exploratory/asof.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,results/exploratory/sensitivity.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,data/snapshots/,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,data/processed/gd_deliveries.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/processed/gd_deliveries.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,data/guidance.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,data/quarter_plans.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,data/processed/segments_reported.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,report/claims.json,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/build/DECISIONS.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,docs/prepub/ERRATA.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,docs/build/AIRFRAME_AUDIT.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
 README.md,.github/workflows/nowcast.yml,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
@@ -115,7 +118,7 @@ data/guidance.csv:9,https://www.fool.com/earnings/call-transcripts/2021/10/28/ge
 data/guidance.csv:10,https://www.fool.com/earnings/call-transcripts/2022/01/26/general-dynamics-gd-q4-2021-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2021 Earnings Call Transcript | The Motley Fool
 data/guidance.csv:11,https://www.fool.com/earnings/call-transcripts/2022/04/27/general-dynamics-gd-q1-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q1 2022 Earnings Call Transcript | The Motley Fool
 data/guidance.csv:12,https://www.fool.com/earnings/call-transcripts/2022/07/27/general-dynamics-gd-q2-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2022 Earnings Call Transcript | The Motley Fool
-data/guidance.csv:13,https://www.fool.com/earnings/call-transcripts/2022/10/26/general-dynamics-gd-q3-2022-earnings-call-transcri/,csv url,external,resolves,same,Arrow up
+data/guidance.csv:13,https://www.fool.com/earnings/call-transcripts/2022/10/26/general-dynamics-gd-q3-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2022 Earnings Call Transcript | The Motley Fool
 data/guidance.csv:14,https://www.fool.com/earnings/call-transcripts/2023/01/25/general-dynamics-gd-q4-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2022 Earnings Call Transcript | The Motley Fool
 data/guidance.csv:15,https://marketbeat.com/earnings/transcripts/89656,csv url,external,fails: status 403,same,
 data/guidance.csv:16,https://www.fool.com/earnings/call-transcripts/2023/07/26/general-dynamics-gd-q2-2023-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2023 Earnings Call Transcript | The Motley Fool
@@ -131,6 +134,7 @@ data/guidance.csv:25,https://www.marketbeat.com/earnings/reports/2025-10-24-gene
 data/guidance.csv:26,https://www.fool.com/earnings/call-transcripts/2026/01/28/general-dynamics-gd-q4-2025-earnings-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q4 2025 Earnings Transcript | The Motley Fool
 data/guidance.csv:27,https://www.fool.com/earnings/call-transcripts/2026/04/29/general-dynamics-gd-q1-2026-earnings-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q1 2026 Earnings Transcript | The Motley Fool
 data/guidance.csv:28,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:29,https://www.fool.com/earnings/call-transcripts/2026/10/30/general-dynamics-gd-q3-2026-earnings-call-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q3 2026 Earnings Call Transcript | The Motley Fool
 docs/build/AIRFRAME_AUDIT.csv:2,https://flightaware.com/resources/registration/N898S,csv url,external,resolves,same,N898S (2018 GULFSTREAM AEROSPACE CORP GVI (G650ER) owned by TVPX AIRCRAFT SOLUTIONS INC TRUSTEE) Aircraft Registration -
 docs/build/AIRFRAME_AUDIT.csv:3,https://flightaware.com/resources/registration/N38NG,csv url,external,resolves,same,N38NG (2015 GULFSTREAM AEROSPACE GV-SP (G550) owned by NORTHROP GRUMMAN SYSTEMS CORP) Aircraft Registration - FlightAwar
 docs/build/AIRFRAME_AUDIT.csv:4,https://www.airport-data.com/aircraft/N533SF.html,csv url,external,resolves,same,"Aircraft Data N533SF, 2018 Gulfstream Aerospace G500, c/n 72017"
