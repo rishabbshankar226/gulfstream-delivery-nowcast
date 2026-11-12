@@ -339,7 +339,8 @@
     var all = names.reduce(function (s, n) { return s + p[n]; }, 0);
     text($("pipe-sub"), "Jets registered to Gulfstream itself with no delivery event yet, at the " + data.pipeline_snapshot +
       " snapshot: " + all + " in all. They include aircraft in flight test, in completion and taken back for resale, " +
-      "and registrations Gulfstream holds for jets with no airworthiness date yet, so this is not a count of jets awaiting delivery.");
+      "and registrations Gulfstream holds for jets with no airworthiness date yet, so this is not a count of jets awaiting delivery. " +
+      "It leaves out the G700s the FAA files under a type code my scope rule does not keep.");
     $("pipe-box").style.height = Math.max(220, names.length * 30 + 90) + "px";
     var opts = baseOptions("Aircraft", "Aircraft on Gulfstream's own registration");
     opts.indexAxis = "y";

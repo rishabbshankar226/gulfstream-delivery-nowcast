@@ -388,6 +388,41 @@ def load_facts(root):
     put("used.old3", len(old), "data/processed/serials.csv (event year minus year_mfr at least 3)")
     put("used.old3_pct", len(old) / len(ev) * 100, "data/processed/serials.csv")
     put("used.noyear", sum(1 for r in ev if not r["year_mfr"]), "data/processed/serials.csv (events with no year_mfr)")
+    put("nobound.all", len(sr), "data/processed/serials.csv (airframes)")
+    put("nobound.airframes", sum(1 for r in sr if not r["bound"]), "data/processed/serials.csv (airframes with no bound)")
+    put("nobound.events", sum(1 for r in ev if not r["bound"]),
+        "data/processed/serials.csv (chosen-definition events on airframes with no bound)")
+    # registrations by GULFSTREAM LEASING LLC that the holder rule counts as customer deliveries
+    mp = root / "data/snapshots" / F["snap.backtest"] / "MASTER.txt.gz"
+    if mp.exists():
+        rows = list(csv.reader(gzip.decompress(mp.read_bytes()).decode("utf-8", "replace").splitlines()))
+        hd = [re.sub(r"[^A-Z0-9]", "", h.upper()) for h in rows[0]]
+        ix = {k: hd.index(k) for k in ("SERIALNUMBER", "NAME", "CERTISSUEDATE")}
+        byser = {}
+        for r in ev:
+            byser.setdefault(r["serial"], []).append(r)
+        hit = []
+        for r in rows[1:]:
+            if len(r) > max(ix.values()) and r[ix["NAME"]].strip().upper().startswith("GULFSTREAM LEASING"):
+                d = r[ix["CERTISSUEDATE"]].strip()
+                iso = f"{d[:4]}-{d[4:6]}-{d[6:8]}"
+                hit += [x for x in byser.get(r[ix["SERIALNUMBER"]].strip(), []) if x[e] == iso]
+        put("leasing.events", len(hit), f"data/snapshots/{F['snap.backtest']}/MASTER.txt.gz joined to data/processed/serials.csv "
+            "(GULFSTREAM LEASING LLC certificates counted as events)")
+    # G700s the FAA files under a type code the scope rule drops; only the raw zip holds them
+    import zipfile
+    zp = root / "data/raw/faa/ReleasableAircraft-2026-10-30.zip"
+    if zp.exists():
+        with zipfile.ZipFile(zp) as z:
+            nm = {n.upper(): n for n in z.namelist()}
+            ml = z.read(nm["MASTER.TXT"]).decode("utf-8", "replace").splitlines()
+        mh = [re.sub(r"[^A-Z0-9]", "", h.upper()) for h in ml[0].split(",")]
+        ci = mh.index("MFRMDLCODE")
+        put("scope.g700_out", sum(1 for ln in ml[1:] if ln.split(",")[ci].strip() == "3980222"),
+            "data/raw/faa/ReleasableAircraft-2026-10-30.zip MASTER rows under ACFTREF code 3980222 (the raw zip is not tracked)")
+    else:
+        put("scope.g700_out", 17, "docs/prepub/ERRATA.md E5 (counted from the FAA file of 2026-10-30; the raw zip is absent here)")
+    put("scope.g700_date", "2026-10-30", "the FAA file the count was taken from (docs/prepub/ERRATA.md E5)")
     mid_names = ("GULFSTREAM 200", "GULFSTREAM 100", "GALAXY", "ASTRA", "G150", "G200", "G100")
     put("cabin.misfiled", sum(1 for r in sr if r["cabin"] == "large" and any(k in r["model"].upper() for k in mid_names)),
         "data/processed/serials.csv (mid-cabin model names filed as large)")
@@ -836,7 +871,13 @@ NEW = [
     ("readme", "It held GD's count in {m.holdout.band.hits:int} of the {m.holdout.band.n:int} held-out quarters against a "
                "nominal {const.band_nominal_pct:pct0}"),
     # README method, data, limitations
-    ("readme", "Either date must fall within {const.bound_days:int} days of the airframe's first airworthiness date"),
+    ("readme", "Either date must fall no later than {const.bound_days:int} days after the airframe's first airworthiness date"),
+    ("readme", "And {nobound.airframes:int} of the {nobound.all:int} airframes have no airworthiness date and no year, so no "
+               "bound applies to them: they supply {nobound.events:int} of the {used.n:int} counted events"),
+    ("readme", "whose {leasing.events:word} registrations in 2020Q4 and 2025Q4 count as deliveries"),
+    ("readme", "The scope rule keeps engine-type codes {const.eng_a:int} and {const.eng_b:int}"),
+    ("readme", "under engine-type code {const.eng_out:int}, so the {scope.g700_out:int} G700s registered to "
+               "Gulfstream under it on {scope.g700_date:date} are outside the count"),
     ("readme", "the rules were committed {const.prereg_gap_min:word} minutes before the held-out scores"),
     ("readme", "GD restated its 2016 delivery counts when it adopted ASC 606 on {const.asc606_date:date} (the "
                "{const.y2016:year} releases had printed green and outfitted counts), so {const.y2016:year} comes from the "
@@ -852,7 +893,8 @@ NEW = [
                "{used.lock.Q.n:int} events were airframes at least {const.old_years:word} years old by that field. "
                "{used.double:word} airframes are also counted twice, under {const.two_prefix:word} maker-code prefixes: a G150 "
                "in 2016Q2 and again in 2018Q2, and a G280 first registered to a customer in {const.g280_first_reg:year} that "
-               "counts again in 2026Q2. The cabin rule files {cabin.misfiled:int} airframes of older mid-cabin types as large"),
+               "counts again in 2026Q2"),
+    ("readme", "The cabin rule files {cabin.misfiled:int} airframes of older mid-cabin types as large"),
     ("readme", "every daily commit since {const.ci_only_since:date} has come from the workflow"),
     ("readme", "runs it {const.cron_runs_word:word} a day and can lock"),
     ("readme", "A GitHub workflow runs the daily job twice a day"),
@@ -915,7 +957,7 @@ NEW = [
                   "{sv.only_2023_2024.mae.ratio:f1}. In the other {sv.without_2023_2024.n:int} held-out quarters the guidance "
                   "pace missed by {sv.without_2023_2024.mae.guidance:f1} and my estimate by {sv.without_2023_2024.mae.ratio:f1}"),
     ("interview", "I counted ({used.old3_pct:pct1}) are airframes at least {const.old_years:word} years old"),
-    ("interview", "The date must fall within {const.bound_days:int} days of the jet's first airworthiness date"),
+    ("interview", "The date must fall no later than {const.bound_days:int} days after the jet's first airworthiness date"),
     ("interview", "the earlier of {const.two_dates:word} dates"),
     ("interview", "the gap drifted from about {const.two_x:word} deliveries per event in {const.y2016:year} to {cov.2026Q2:f2} in "
                   "2026Q2. So I scale this quarter's count by the last {const.lags:word} quarters' ratio"),
@@ -956,6 +998,9 @@ def _extra_consts(F):
     put("const.two_x", 2, "threshold named in the sentence (deliveries per registry event above 2)")
     put("const.old_years", 3, "the age cut used for the used-jet count (event year minus year_mfr at least 3)")
     put("const.two_prefix", 2, "data/processed/serials.csv (each double-counted serial sits under two mfr_code prefixes)")
+    put("const.eng_a", 4, "src/gdn/faa.py scope rule (TYPE-ENG 4) and docs/PREREGISTRATION.md section 3 rule 1")
+    put("const.eng_b", 5, "src/gdn/faa.py scope rule (TYPE-ENG 5) and docs/PREREGISTRATION.md section 3 rule 1")
+    put("const.eng_out", 2, "ACFTREF row 3980222,GULFSTREAM AEROSPACE CORP,GVIII-G700,5,2 in the FAA file of 2026-10-30")
     put("const.two_years", 2, "results/exploratory/sensitivity.json (the variant names 2023 and 2024)")
     put("const.two_dates", 2, "src/gdn/events.py:57 (customer certificate, export cancellation)")
     rc = [F[f"cov.{q}"] for q in ("2025Q4", "2026Q1", "2026Q2")]
@@ -1469,6 +1514,7 @@ def live_ok(F):
         (r"So the registry had the quarter's jets in time: the count had settled at # by the lock", "Q3LS"),
         (r"Then the first live lock missed by #, outside its band", "first_miss"),
         (r"and the first lock fell outside it", "first_miss"),
+        (r"docs/prepub/ERRATA\.md records the gap and the amendment to decide before the next lock", G),
         (r"The past-miss band comes from misses measured on one finished registry file, so it may not fit a live lock", G),
         (r"why the test on past quarters is not a test of a live estimate", G),
         (r"The guidance pace has been closer in each of the last (three|four|five|six|seven|eight|#) quarters, the locked "

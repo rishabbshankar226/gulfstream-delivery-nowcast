@@ -41,7 +41,7 @@ NUM_RE = re.compile(r"(?<![\w.$,])(?P<sign>[-−+])?(?P<cur>\$)?(?P<num>\d{1,3}(
                     r"(?P<unit>%|B\b|M\b)?(?![\w]|\.\d|,\d{3})")
 WORD_RE = re.compile(r"(?<![\w-])(" + "|".join(WORDS) + r")(?![\w-])", re.I)
 ONE_OK = re.compile(r"one (locked quarter|quarter (shows|will show|is one data point)|snapshot|decimal|source\b|lock per"
-                    r"|standard error above|airframe in \d{4}Q)", re.I)
+                    r"|standard error above|airframe in \d{4}Q|G700 type code)", re.I)
 
 MASKS = [
     ("url", re.compile(r"https?://[^\s)>\]\"']+")),

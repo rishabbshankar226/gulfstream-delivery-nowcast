@@ -10,7 +10,7 @@ The test that matters is live. On the day before each earnings release, the pipe
 
 ## How the registry count works
 
-The FAA publishes a zip of every US-registered aircraft, current and cancelled. I keep the Gulfstream jet types, including the G280, which the registry files under its Israeli builder, IAI. For each airframe I take the earlier of two dates: a customer's registration certificate, or the cancellation of Gulfstream's own registration because the jet was exported. The date must fall within 365 days of the jet's first airworthiness date, which keeps out renewals and most used jets, though not all. Counting those dates by quarter gives a number that tracks GD's count, though not one for one, and the gap drifted from about two deliveries per event in 2016 to 0.72 in 2026Q2. So I scale this quarter's count by the last four quarters' ratio, which follows the drift.
+The FAA publishes a zip of every US-registered aircraft, current and cancelled. I keep the Gulfstream jet types, including the G280, which the registry files under its Israeli builder, IAI. For each airframe I take the earlier of two dates: a customer's registration certificate, or the cancellation of Gulfstream's own registration because the jet was exported. The date must fall no later than 365 days after the jet's first airworthiness date, which keeps out renewals and most used jets, though not all. Counting those dates by quarter gives a number that tracks GD's count, though not one for one, and the gap drifted from about two deliveries per event in 2016 to 0.72 in 2026Q2. So I scale this quarter's count by the last four quarters' ratio, which follows the drift.
 
 ## Questions I expect
 

@@ -370,7 +370,7 @@ def build(root="."):
     add("<p>I read every Gulfstream jet in the FAA's aircraft registry, including the G280, which the registry "
         "files under its builder, IAI. For each airframe I take the first sign that it reached a customer: a "
         "customer's registration certificate or the cancellation of Gulfstream's own registration for export, "
-        "whichever comes first, within a year of the jet's first airworthiness date. I count those events in each "
+        "whichever comes first, no later than a year after the jet's first airworthiness date. I count those events in each "
         "of GD's fiscal quarters, by cabin, and scale the count by how many deliveries GD reported per registry "
         "event over the four quarters before. That scaled count is the estimate. A design window from 2017Q1 to "
         f"2019Q4 chose the event definition ({chosen}) before I scored the 26 quarters from 2020Q1 to 2026Q2. "
