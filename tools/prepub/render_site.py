@@ -58,7 +58,7 @@ class _Quiet(http.server.SimpleHTTPRequestHandler):
         pass
 
 
-def render(root):
+def render(root, shot=None):
     site = Path(root) / "site"
     server = http.server.ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(_Quiet, directory=str(site)))
     threading.Thread(target=server.serve_forever, daemon=True).start()
@@ -75,6 +75,8 @@ def render(root):
             first = page.evaluate("""() => Array.from(document.querySelectorAll('header *, main *')).filter(e =>
                 e.children.length === 0 && e.textContent.trim() && e.getBoundingClientRect().top < 900 &&
                 e.getBoundingClientRect().height > 0).map(e => e.textContent.replace(/\\s+/g, ' ').trim())""")
+            if shot:
+                page.screenshot(path=str(shot), clip={"x": 0, "y": 0, "width": 1280, "height": 900})
             b.close()
     finally:
         server.shutdown()
@@ -82,6 +84,7 @@ def render(root):
 
 
 if __name__ == "__main__":
-    out = render(sys.argv[1])
+    # an optional third argument is a PNG path: the first screen at 1280 x 900, light scheme
+    out = render(sys.argv[1], sys.argv[3] if len(sys.argv) > 3 else None)
     Path(sys.argv[2]).write_text(json.dumps(out, indent=1, ensure_ascii=False) + "\n")
     print(f"{len(out['items'])} items, {len(out['first_screen'])} first-screen blocks, {len(out['errors'])} page errors")

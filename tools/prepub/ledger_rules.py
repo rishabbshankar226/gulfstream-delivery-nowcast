@@ -28,6 +28,7 @@ NAME2MODEL = {
 
 TEXT_SURFACES = [
     ("post", "docs/LINKEDIN_POST.md"),
+    ("sensitivity", "results/exploratory/sensitivity.md"),
     ("readme", "README.md"),
     ("note", "report/note.html"),
     ("interview", "docs/INTERVIEW_NOTES.md"),
@@ -201,7 +202,15 @@ def load_facts(root):
     for q, d in cal.get("releases", {}).items():
         put(f"cal.release.{q}", d, "config/calendar.json")
         put(f"cal.eve.{q}", (dt.date.fromisoformat(d) - dt.timedelta(days=1)).isoformat(), "config/calendar.json (release - 1 day)")
-    F["@public"] = bool(cal.get("public"))
+    # a lock counts as public only from the day the owner records the repository went public
+    F["@public"] = bool(cal.get("public")) and bool(cal.get("public_since")) and \
+        any(F.get(f"live.{q}.lock.published_at", "9")[:10] >= cal["public_since"] for q in state)
+    F["@lock_author"] = {}
+    import subprocess
+    for pp in sorted((root / "predictions").glob("*.json")):
+        r = subprocess.run(["git", "-C", str(root), "log", "--diff-filter=A", "--format=%an", "--", f"predictions/{pp.name}"],
+                           capture_output=True, text=True)
+        F["@lock_author"][pp.name[:6]] = (r.stdout.strip().split("\n")[-1] if r.stdout.strip() else "")
     man = json.loads((root / "data/snapshots/MANIFEST.json").read_text())
     put("snap.backtest", man["backtest"], "data/snapshots/MANIFEST.json")
     daily = sorted(p.name.split(".")[0] for p in (root / "data/snapshots/daily").glob("*.serials.csv.gz"))
@@ -336,6 +345,120 @@ def load_facts(root):
         put("audit.year_min", int(min(dated)), "docs/build/AIRFRAME_AUDIT.csv (rows with a source date)")
         put("audit.year_max", int(max(dated)), "docs/build/AIRFRAME_AUDIT.csv (rows with a source date)")
 
+    # each locked and scored quarter: the other four misses, and how long after the quarter's end the lock was made
+    for q, stt in F["@state"].items():
+        if not (stt["locked"] and stt["scored"]):
+            continue
+        P, actual = f"live.{q}.pred", F[f"live.{q}.score.reported.total"]
+        raw = F[f"{P}.events.large"] + F[f"{P}.events.mid"]
+        put(f"cmp.{q}.raw", raw, f"predictions/{q}.json events large + mid")
+        put(f"cmp.{q}.raw_miss", abs(raw - actual), f"predictions/{q}.json events against score.json reported")
+        for name, k in (("yago", -4), ("last", -1)):
+            prev = qlab(qidx(q) + k)
+            val = F.get(f"gd.{prev}.total", F.get(f"live.{prev}.score.reported.total"))
+            if val is not None:
+                put(f"cmp.{q}.{name}", val, f"GD's reported total for {prev}")
+                put(f"cmp.{q}.{name}_miss", abs(val - actual), f"GD's reported total for {prev} against {q}")
+        days = (dt.date.fromisoformat(F[f"{P}.snapshot"]) - dt.date.fromisoformat(F[f"{P}.window_end"])).days
+        put(f"lockt.{q}.days", days, f"predictions/{q}.json snapshot minus window_end")
+        put(f"live.{q}.pred.window_open", (dt.date.fromisoformat(F[f"{P}.window_start"]) + dt.timedelta(days=1)).isoformat(),
+            f"predictions/{q}.json window_start plus one day (the window excludes its start date)")
+        put(f"lockt.{q}.count", raw, f"predictions/{q}.json events large + mid")
+        put(f"lockt.{q}.scale", (F[f"{P}.trailing.reported.large"] + F[f"{P}.trailing.reported.mid"])
+            / (F[f"{P}.trailing.registry.large"] + F[f"{P}.trailing.registry.mid"]),
+            f"predictions/{q}.json trailing reported over trailing registry")
+        put(f"lockt.{q}.real", actual / raw, f"score.json reported over predictions/{q}.json events")
+        # used jets in the lock: events three or more years old by the registry's year of manufacture
+        tp = root / f"data/snapshots/daily/{F[f'{P}.snapshot']}.serials.csv.gz"
+        if tp.exists():
+            lr = list(csv.DictReader(io.StringIO(gzip.decompress(tp.read_bytes()).decode())))
+            ev = [r for r in lr if r["e1"] and F[f"{P}.window_start"] < r["e1"] <= F[f"{P}.window_end"]]
+            put(f"used.lock.{q}.n", len(ev), f"data/snapshots/daily/{tp.name} (E1 events in the window)")
+            put(f"used.lock.{q}.old3", sum(1 for r in ev if r["year_mfr"] and int(r["e1"][:4]) - int(r["year_mfr"]) >= 3),
+                f"data/snapshots/daily/{tp.name} (event year minus year_mfr at least 3)")
+        if daily:
+            later = [d for d in daily if d > F[f"{P}.snapshot"]]
+            put(f"lockt.{q}.newest", daily[-1], "data/snapshots/daily (newest table)")
+    # used jets in the backtest count, by the registry's own year of manufacture
+    sr = _csv(root / "data/processed/serials.csv")
+    lo, hi = reg[min(reg)]["window_start"], reg[max(reg)]["window_end"]
+    ev = [r for r in sr if r[e] and lo < r[e] <= hi]
+    old = [r for r in ev if r["year_mfr"] and int(r[e][:4]) - int(r["year_mfr"]) >= 3]
+    put("used.n", len(ev), "data/processed/serials.csv (chosen-definition events, 2016Q1 to 2026Q2)")
+    put("used.old3", len(old), "data/processed/serials.csv (event year minus year_mfr at least 3)")
+    put("used.old3_pct", len(old) / len(ev) * 100, "data/processed/serials.csv")
+    put("used.noyear", sum(1 for r in ev if not r["year_mfr"]), "data/processed/serials.csv (events with no year_mfr)")
+    mid_names = ("GULFSTREAM 200", "GULFSTREAM 100", "GALAXY", "ASTRA", "G150", "G200", "G100")
+    put("cabin.misfiled", sum(1 for r in sr if r["cabin"] == "large" and any(k in r["model"].upper() for k in mid_names)),
+        "data/processed/serials.csv (mid-cabin model names filed as large)")
+    twice = {}
+    for r in ev:
+        twice.setdefault(r["serial"], []).append(r)
+    dbl = [k for k, v in twice.items() if len(v) > 1 and len({x["mfr_code"] for x in v}) > 1 and len({x["cabin"] for x in v}) == 1]
+    alt = [r["serial"] for r in ev if not r["year_mfr"] and not r["first_airworthiness"]
+           and any(o["serial"] == r["serial"] and o["mfr_code"] != r["mfr_code"] and o["cabin"] == r["cabin"]
+                   and o[e] and o[e] < r[e] for o in sr)]
+    put("used.double", len(set(dbl) | set(alt)), "data/processed/serials.csv (a serial with events under two maker-code prefixes)")
+    for y in range(2016, 2027):
+        if f"evper.{y}.total" in F:
+            put(f"delper.{y}.total", 1 / F[f"evper.{y}.total"], "gd_deliveries.csv over registry_quarterly.csv, by year")
+            put(f"delper.{y}.mid", 1 / F[f"evper.{y}.mid"], "gd_deliveries.csv over registry_quarterly.csv, by year, mid cabin")
+    # sensitivity variants (exploratory)
+    put("gdyear.2020", sum(F[f"gd.2020Q{k}.total"] for k in range(1, 5)), "data/processed/gd_deliveries.csv (2020 total)")
+    sp = root / "results/exploratory/sensitivity.json"
+    if sp.exists():
+        put("sv.alt_sourced", json.loads(sp.read_text())["sourced_quarters_with_2021_as_117"], "results/exploratory/sensitivity.json")
+        for v in json.loads(sp.read_text())["variants"]:
+            k = v["key"]
+            F.setdefault("@svlabel", {})[k] = v["label"]
+            put(f"sv.{k}.n", v["n"], "results/exploratory/sensitivity.json")
+            for mod, x in v["mae"].items():
+                put(f"sv.{k}.mae.{mod}", x, "results/exploratory/sensitivity.json")
+            put(f"sv.{k}.wins", v["ratio_vs_guidance"]["wins"], "results/exploratory/sensitivity.json")
+            put(f"sv.{k}.of", sum(v["ratio_vs_guidance"][x] for x in ("wins", "losses", "ties")), "results/exploratory/sensitivity.json")
+            put(f"sv.{k}.p", v["ratio_vs_guidance"]["p_one_sided"], "results/exploratory/sensitivity.json")
+    # what GD reported by segment for a scored quarter
+    rp = root / "data/processed/segments_reported.csv"
+    if rp.exists():
+        rs = {}
+        for r in _csv(rp):
+            rs.setdefault(r["quarter"], {})[r["segment"]] = (int(r["revenue_usd"]), int(r["operating_earnings_usd"]))
+            put(f"rseg.{r['quarter']}.{r['segment']}.rev", int(r["revenue_usd"]), "data/processed/segments_reported.csv")
+            put(f"rseg.{r['quarter']}.{r['segment']}.oe", int(r["operating_earnings_usd"]), "data/processed/segments_reported.csv")
+        tq = est["target"]
+        if tq in rs:
+            def miss(key, e_, r_):
+                put(f"estx.{key}.rep", r_, "data/processed/segments_reported.csv")
+                put(f"estx.{key}.miss", e_ - r_, "estimates.json less segments_reported.csv")
+                put(f"estx.{key}.misspct", (e_ - r_) / r_ * 100, "estimates.json over segments_reported.csv")
+            miss("aero_now", est["aerospace_from_nowcast_usd"], rs[tq]["Aerospace"][0])
+            for s_ in SEGS:
+                miss(s_, S[s_]["drift_usd"], rs[tq][s_][0])
+            miss("total", est["revenue_total_usd"], sum(rs[tq][s_][0] for s_ in SEGS))
+            put("rseg.oe_total", sum(rs[tq][s_][1] for s_ in SEGS), "data/processed/segments_reported.csv (four segments)")
+    put("const.bound_days", 365, "src/gdn/events.py:50 timedelta(days=365)")
+    put("const.ac_se", 1 / h["n"] ** 0.5, "1 / sqrt(n) with n from results/metrics.json:holdout.n")
+    dq = [qlab(i) for i in range(qidx("2017Q1"), qidx("2019Q4") + 1)]
+    differ = [q for q in dq if (reg[q]["e1_large"], reg[q]["e1_mid"]) != (reg[q]["e2_large"], reg[q]["e2_mid"])]
+    put("design.same", len(dq) - len(differ), "data/processed/registry_quarterly.csv (design quarters where E1 and E2 agree)")
+    put("design.gap", sum(abs(int(reg[q][f"e1_{c}"]) - int(reg[q][f"e2_{c}"])) for q in differ for c in ("large", "mid")),
+        "data/processed/registry_quarterly.csv (E1 against E2 events in the design quarters that differ)")
+    seq = [F[f"bt.{q}.guidance.ae"] < F[f"bt.{q}.ratio.ae"] for q in hq]
+    for q, stt in sorted(F["@state"].items(), key=lambda kv: qidx(kv[0])):
+        if stt["locked"] and stt["scored"] and F.get(f"live.{q}.score.guidance_ae") is not None:
+            seq.append(F[f"live.{q}.score.guidance_ae"] < F[f"live.{q}.score.ae_total"])
+    run = 0
+    for closer in reversed(seq):
+        if not closer:
+            break
+        run += 1
+    put("guid.run", run, "results/holdout.csv and results/live score: latest quarters in a row with guidance closer")
+    put("const.prereg_gap_min", 2, "git log: 2c62ad3 (preregistration) 11:02:12, 48c1ea0 (held-out scores) 11:04:28, 2026-10-19")
+    put("const.ci_only_since", "2026-10-31", "git log origin/main: every commit after 2026-10-30 is by github-actions[bot]")
+    put("const.alt2021", 117, "src/gdn/sensitivity.py ALT_2021 (127 less 10)")
+    put("const.ten", 10, "data/guidance.csv 2021-01-27 quote: 10 fewer aircraft")
+    put("const.g280_first_reg", 2012, "data/processed/serials.csv serial 2009 customer_cert 2012-08-01")
+
     claims = json.loads((root / "report/claims.json").read_text())
     F["@claims"] = {c["id"]: c for c in claims}
 
@@ -411,7 +534,7 @@ def T(surfaces, tpl):
     return (set(surfaces.split(",")), rx, keys, tpl)
 
 
-ALL = "post,readme,note,interview,resume,dashboard,error_analysis,asof,workbook,prereg"
+ALL = "post,readme,note,interview,resume,dashboard,error_analysis,asof,workbook,prereg,sensitivity"
 HEAD = ("Over {m.holdout.n:int} held-out quarters the registry count was off by {m.holdout.mae.ratio:f1} jets a quarter on "
         "average, against {m.holdout.mae.guidance:f1} for GD's guidance pace")
 LOW = "Simply repeating the same quarter last year missed by less on average, {m.holdout.mae.seasonal:f1}"
@@ -658,6 +781,170 @@ TEMPLATES = [
     T("prereg", "Committed on {const.prereg_date:date}"),
 ]
 
+# ---- templates for the text as rewritten in the fix pass (P6, P7) ----
+Q = "2026Q3"
+LOCK_LINE = ("locked at {live.Q.pred.nowcast.total:f1} (band {live.Q.pred.band.0:f1} to {live.Q.pred.band.1:f1}) from the "
+             "{live.Q.pred.snapshot:date} snapshot, as a timestamped GitHub release, made while the repository was private "
+             "(lock-2026Q3) at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}, sha256 "
+             "{live.Q.lock.sha256:hash}. GD reported {live.Q.score.reported.total:int} on {cal.release.Q:date}: the lock "
+             "missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct1}), outside the band")
+OTHERS = ("Other misses for the quarter: GD's guidance pace ({live.Q.score.guidance_pace:f1}) by "
+          "{live.Q.score.guidance_ae:f1}, the raw registry count ({cmp.Q.raw:int}) by {cmp.Q.raw_miss:int}, the same quarter "
+          "last year ({cmp.Q.yago:int}) by {cmp.Q.yago_miss:int}, last quarter ({cmp.Q.last:int}) by {cmp.Q.last_miss:int}")
+SPLIT = ("comes from 2023 and 2024, when the guidance pace missed by {sv.only_2023_2024.mae.guidance:f1} on average and the "
+         "registry estimate by {sv.only_2023_2024.mae.ratio:f1}. In the other {sv.without_2023_2024.n:int} held-out quarters "
+         "the guidance pace missed by {sv.without_2023_2024.mae.guidance:f1}, the same quarter last year by "
+         "{sv.without_2023_2024.mae.seasonal:f1} and the registry estimate by {sv.without_2023_2024.mae.ratio:f1}")
+NEW = [
+    # post
+    ("post", "My first locked estimate of Gulfstream deliveries missed: I said {live.Q.score.nowcast.total:f1} for 2026Q3, "
+             "General Dynamics reported {live.Q.score.reported.total:int}"),
+    ("post", "The 2026Q3 miss was {live.Q.score.ae_total:f1} jets ({live.Q.score.ape_pct:pct1}), outside my band of past misses. "
+             "A pace I derived from GD's own full-year outlook missed by {live.Q.score.guidance_ae:f1}, and last year's same "
+             "quarter ({cmp.Q.yago:int}) by {cmp.Q.yago_miss:int}"),
+    ("post", "{const.one:word} quarter is one data point"),
+    # README lead and summary
+    ("readme", "check it on {m.holdout.n:int} past quarters against a pace built from GD's own guidance and "
+               "{const.n_simple:word} simple rules"),
+    ("readme", "Live record so far: {const.one:word} locked quarter, a miss outside its band. For 2026Q3 I locked an estimate "
+               "of {live.Q.pred.nowcast.total:f1} Gulfstream deliveries (band {live.Q.pred.band.0:f1} to "
+               "{live.Q.pred.band.1:f1}) the day before GD reported. GD reported {live.Q.score.reported.total:int}, so the "
+               "lock missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct1}), outside the band. GD's guidance pace "
+               "missed by {live.Q.score.guidance_ae:f1} and the same quarter last year ({cmp.Q.yago:int}) by "
+               "{cmp.Q.yago_miss:int}"),
+    ("readme", "Backtest, {m.holdout.n:int} held-out quarters: the registry estimate missed by {m.holdout.mae.ratio:f1} jets a "
+               "quarter on average, GD's guidance pace by {m.holdout.mae.guidance:f1} and the same quarter last year by "
+               "{m.holdout.mae.seasonal:f1}"),
+    ("readme", "GD's reported Gulfstream deliveries by quarter against the {const.n_models:word} estimates"),
+    # README results and error analysis
+    ("readme", "GD gave the year only as a change from 2020, \"{const.ten:int} fewer aircraft\""),
+    ("readme", "Read as {const.alt2021:int}, the guidance pace misses by {sv.outlook_2021_as_117.mae.guidance:f1} on average, "
+               "not {sv.preregistered.mae.guidance:f1}, and the registry estimate is closer in {sv.outlook_2021_as_117.wins:int} "
+               "of {sv.outlook_2021_as_117.of:int} quarters"),
+    ("readme,interview", SPLIT),
+    ("readme", "The 2026Q3 lock read a snapshot taken {lockt.Q.days:int} days after the quarter ended, when the quarter's count "
+               "stood at {lockt.Q.count:int}, and it is the same in every daily snapshot since, to {lockt.Q.newest:date}. Its "
+               "miss came from the scale, not from late postings: the {const.lags:word} quarters before gave "
+               "{lockt.Q.scale:f2} deliveries per registry event, and the quarter itself came in at {lockt.Q.real:f2}"),
+    ("readme", LOCK_LINE), ("readme,note", OTHERS),
+    ("readme", "With {m.holdout.n:int} quarters one standard error of an autocorrelation is about {const.ac_se:f2}, so only "
+               "the one against GD's guidance pace is more than {const.one:word} standard error above zero"),
+    ("readme", "The two definitions count the same in {design.same:int} of the {m.design.n:int} design quarters and differ "
+               "by {design.gap:word} airframe in 2019Q4, so the choice decided little: under E2 the held-out miss is "
+               "{sv.definition_E2.mae.ratio:f2}, against {m.holdout.mae.ratio:f2} under E1"),
+    ("readme,interview", "has been closer in each of the last {guid.run:word} quarters"),
+    ("readme", "It held GD's count in {m.holdout.band.hits:int} of the {m.holdout.band.n:int} held-out quarters against a "
+               "nominal {const.band_nominal_pct:pct0}"),
+    # README method, data, limitations
+    ("readme", "Either date must fall within {const.bound_days:int} days of the airframe's first airworthiness date"),
+    ("readme", "the rules were committed {const.prereg_gap_min:word} minutes before the held-out scores"),
+    ("readme", "GD restated its 2016 delivery counts when it adopted ASC 606 on {const.asc606_date:date} (the "
+               "{const.y2016:year} releases had printed green and outfitted counts), so {const.y2016:year} comes from the "
+               "restated prior-year columns of the {const.y2017:year} releases"),
+    ("readme", "GD deliveries per registry event fell from {delper.2016.total:f2} in {const.y2016:year} to "
+               "{delper.2019.total:f2} in {const.y2019:year}, and sat above {const.two_x:int} for mid cabin in "
+               "{const.y2016:year} and {const.y2017:year}"),
+    ("readme", "In the last {const.recent_n:word} held-out quarters it sat at {cov.min3:f2} to {cov.max3:f2}"),
+    ("readme", "{used.old3:int} of the {used.n:int} events counted from 2016Q1 to 2026Q2"),
+    ("interview", "{used.old3:int} of the {used.n:int} events I counted"),
+    ("readme", "counted from 2016Q1 to 2026Q2 ({used.old3_pct:pct1}) are airframes at least {const.old_years:word} years old, "
+               "and {used.noyear:int} more carry no year. In the 2026Q3 lock, {used.lock.Q.old3:int} of the "
+               "{used.lock.Q.n:int} events were airframes at least {const.old_years:word} years old by that field. "
+               "{used.double:word} airframes are also counted twice, under {const.two_prefix:word} maker-code prefixes: a G150 "
+               "in 2016Q2 and again in 2018Q2, and a G280 first registered to a customer in {const.g280_first_reg:year} that "
+               "counts again in 2026Q2. The cabin rule files {cabin.misfiled:int} airframes of older mid-cabin types as large"),
+    ("readme", "every daily commit since {const.ci_only_since:date} has come from the workflow"),
+    ("readme", "runs it {const.cron_runs_word:word} a day and can lock"),
+    ("readme", "A GitHub workflow runs the daily job twice a day"),
+    # note
+    ("note", "Estimate locked from the {live.Q.pred.snapshot:date} registry snapshot; GD reported on {cal.release.Q:date}"),
+    ("note", "For 2026Q3 I locked a registry estimate of {live.Q.pred.nowcast.total:f1} Gulfstream deliveries, with a past-miss "
+             "band of {live.Q.pred.band.0:f1} to {live.Q.pred.band.1:f1}, as a timestamped GitHub release, made while the "
+             "repository was private, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}. GD reported "
+             "{live.Q.score.reported.total:int} on {cal.release.Q:date}: the lock missed by {live.Q.score.ae_total:f1} "
+             "({live.Q.score.ape_pct:pct1}), outside the band"),
+    ("note", "At trailing Aerospace revenue per delivery of {est.revenue_per_delivery_usd:usdM}, the locked estimate implied "
+             "{est.aerospace_from_nowcast_usd:usdB} of Aerospace revenue for 2026Q3, and scaling last year's quarter by "
+             "trailing growth gave {est.segments.Aerospace.drift_usd:usdB}. GD reported {rseg.Q.Aerospace.rev:usdB}, against "
+             "{seg.Aerospace.2025Q3.rev:usdB} a year earlier. The {est.revenue_per_delivery_usd:usdM} includes services"),
+    ("note", "I wrote this note before GD reported 2026Q3 on {cal.release.Q:date}"),
+    ("note", "By the {live.Q.pred.snapshot:date} registry snapshot, {live.Q.pred.events.large:int} large-cabin and "
+             "{live.Q.pred.events.mid:int} mid-cabin airframes had a delivery event in 2026Q3's window (after "
+             "{live.Q.pred.window_start:date}, through {live.Q.pred.window_end:date}). Over the {const.lags:word} quarters "
+             "before, GD reported {live.Q.pred.trailing.reported.large:int} large-cabin and "
+             "{live.Q.pred.trailing.reported.mid:int} mid-cabin deliveries against "
+             "{live.Q.pred.trailing.registry.large:int} and {live.Q.pred.trailing.registry.mid:int} registry events. "
+             "Scaled the same way, the estimate is {live.Q.pred.nowcast.total:f1} ({live.Q.pred.nowcast.large:f1} "
+             "large, {live.Q.pred.nowcast.mid:f1} mid), with a past-miss band of {live.Q.pred.band.0:f1} to "
+             "{live.Q.pred.band.1:f1}. I locked this estimate as a timestamped GitHub release, made while the repository "
+             "was private, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}. GD then reported "
+             "{live.Q.score.reported.total:int}: the lock missed by {live.Q.score.ae_total:f1} "
+             "({live.Q.score.ape_pct:pct1}), outside the band. GD's guidance pace for the quarter had been "
+             "{live.Q.score.guidance_pace:f1}, a miss of {live.Q.score.guidance_ae:f1}. The raw count of {cmp.Q.raw:int} "
+             "events missed by {cmp.Q.raw_miss:int}; the estimate came out lower because the {const.lags:word} quarters "
+             "before gave a scale of {lockt.Q.scale:f2} deliveries per event"),
+    ("note", "GD reported {rseg.oe_total:usdB} of operating earnings for the {const.n_segments:word} segments"),
+    ("note", "snapshot {snap.backtest:date} for the backtest, and snapshot {live.Q.pred.snapshot:date} for the 2026Q3 lock"),
+    ("note", "As of GD's {guid.last:date} call"),
+    # interview and resume
+    ("interview", "Over those {m.holdout.n:int} quarters my registry estimate was off by {m.holdout.mae.ratio:f1} jets a quarter "
+                  "on average, against {m.holdout.mae.guidance:f1} for GD's guidance pace. The difference is not statistically "
+                  "distinguishable, and simply repeating the same quarter last year missed by less on average, "
+                  "{m.holdout.mae.seasonal:f1}"),
+    ("interview", "I fixed the rules on {m.design.n:int} design quarters and committed them before scoring {m.holdout.n:int} "
+                  "held-out quarters"),
+    ("interview", "The first lock, for 2026Q3, said {live.Q.pred.nowcast.total:f1} with a band of {live.Q.pred.band.0:f1} to "
+                  "{live.Q.pred.band.1:f1}. GD reported {live.Q.score.reported.total:int} on {cal.release.Q:date}: a miss of "
+                  "{live.Q.score.ae_total:f1}, outside the band, and further off than GD's guidance pace (a miss of "
+                  "{live.Q.score.guidance_ae:f1}) or the same quarter last year (a miss of {cmp.Q.yago_miss:int})"),
+    ("interview", "The GitHub workflow locked {live.Q.pred.nowcast.total:f1} deliveries, with a band of {live.Q.pred.band.0:f1} "
+                  "to {live.Q.pred.band.1:f1}, at {live.Q.lock.et_time:time} ET on {live.Q.lock.et_date:date}, while the "
+                  "repository was still private. GD reported {live.Q.score.reported.total:int} the next day. The lock missed "
+                  "by {live.Q.score.ae_total:f1}, or {live.Q.score.ape_pct:pct1}, outside the band. GD's guidance pace was "
+                  "{live.Q.score.guidance_pace:f1}, a miss of {live.Q.score.guidance_ae:f1}, and the raw registry count for "
+                  "the quarter was {cmp.Q.raw:int}, a miss of {cmp.Q.raw_miss:int}. So the registry had the quarter's jets in "
+                  "time: the count had settled at {lockt.Q.count:int} by the lock. What missed was my scaling, which took "
+                  "{lockt.Q.scale:f2} deliveries per registry event from the {const.lags:word} quarters before when the "
+                  "quarter came in at {lockt.Q.real:f2}. {const.one:word} quarter is one data point"),
+    ("interview", "scaling FAA registrations missed by {m.holdout.mae.ratio:f1} jets a quarter, repeating the same quarter last "
+                  "year missed by {m.holdout.mae.seasonal:f1}, and no test separates my estimate from any baseline. Then the "
+                  "first live lock missed by {live.Q.score.ae_total:f1}, outside its band"),
+    ("interview", "than tune a rule until it wins on {m.holdout.n:int} quarters"),
+    ("interview", "From {const.two_years:word} years. In 2023 and 2024 the guidance pace missed by "
+                  "{sv.only_2023_2024.mae.guidance:f1} jets a quarter on average and my estimate by "
+                  "{sv.only_2023_2024.mae.ratio:f1}. In the other {sv.without_2023_2024.n:int} held-out quarters the guidance "
+                  "pace missed by {sv.without_2023_2024.mae.guidance:f1} and my estimate by {sv.without_2023_2024.mae.ratio:f1}"),
+    ("interview", "I counted ({used.old3_pct:pct1}) are airframes at least {const.old_years:word} years old"),
+    ("interview", "The date must fall within {const.bound_days:int} days of the jet's first airworthiness date"),
+    ("interview", "the earlier of {const.two_dates:word} dates"),
+    ("interview", "the gap drifted from about {const.two_x:word} deliveries per event in {const.y2016:year} to {cov.2026Q2:f2} in "
+                  "2026Q2. So I scale this quarter's count by the last {const.lags:word} quarters' ratio"),
+    ("interview", "{const.n_simple:word} smaller surprises"),
+    ("resume", "on {m.holdout.n:int} held-out quarters it missed by {m.holdout.mae.ratio:f1} jets a quarter vs "
+               "{m.holdout.mae.guidance:f1} for a guidance-based pace and {m.holdout.mae.seasonal:f1} for last year's same quarter"),
+    ("resume", "the first lock, 2026Q3, said {live.Q.pred.nowcast.total:f1} and GD reported "
+               "{live.Q.score.reported.total:int}: a miss of {live.Q.score.ae_total:f1}, outside its band"),
+    # sensitivity.md
+    ("sensitivity", "\"So all up, {const.ten:int} fewer aircraft\", after reporting {gdyear.2020:int} deliveries for 2020"),
+    ("sensitivity", "Read as {const.alt2021:int}, all {sv.alt_sourced:int} held-out quarters have an outlook"),
+    # dashboard
+    ("dashboard", "Over {m.holdout.n:int} held-out quarters the registry estimate was off by {m.holdout.mae.ratio:f1} jets a "
+                  "quarter on average, when GD delivers about {typical:whole}, against {m.holdout.mae.guidance:f1} for GD's "
+                  "guidance pace"),
+    ("dashboard", "Scored: missed by {live.Q.score.ae_total:f1}, outside the band"),
+    ("dashboard", "{live.Q.pred.nowcast.total:f1} deliveries, locked estimate"),
+    ("dashboard", "{path.Q.n:int} snapshots, {path.Q.first:date} to {path.Q.last:date}"),
+    ("dashboard", "made while the repository was private, on {live.Q.lock.et_date:date} at {live.Q.lock.et_time:time} ET"),
+    ("dashboard", "Before GD reported, the delivery estimate of {live.Q.pred.nowcast.total:f1} sat below the "
+                  "{gd.2025Q3.total:int} deliveries of 2025Q3, and each delivery carried about "
+                  "{est.revenue_per_delivery_usd:usdM} of Aerospace revenue, so the delivery-based figure fell. GD reported "
+                  "{rseg.Q.Aerospace.rev:usdB} of Aerospace revenue. That {est.revenue_per_delivery_usd:usdM} includes services"),
+    ("dashboard", "while the {const.lags:word} quarters before it stay whole, so the count falls"),
+    # workbook About
+    ("workbook", "within {const.bound_days:int} days of first airworthiness"),
+]
+TEMPLATES += [T(surf, tpl.replace(".Q.", f".{Q}.").replace(".Q:", f".{Q}:")) for surf, tpl in NEW]
+
 
 def _extra_consts(F):
     S = F["@src"]
@@ -666,6 +953,14 @@ def _extra_consts(F):
         F[k], S[k] = v, src
 
     put("const.one", 1, "count of locked and scored quarters in results/live (state)")
+    put("const.two_x", 2, "threshold named in the sentence (deliveries per registry event above 2)")
+    put("const.old_years", 3, "the age cut used for the used-jet count (event year minus year_mfr at least 3)")
+    put("const.two_prefix", 2, "data/processed/serials.csv (each double-counted serial sits under two mfr_code prefixes)")
+    put("const.two_years", 2, "results/exploratory/sensitivity.json (the variant names 2023 and 2024)")
+    put("const.two_dates", 2, "src/gdn/events.py:57 (customer certificate, export cancellation)")
+    rc = [F[f"cov.{q}"] for q in ("2025Q4", "2026Q1", "2026Q2")]
+    put("cov.min3", min(rc), "results/metrics.json coverage_ratio.by_quarter (lowest of the last three held-out quarters)")
+    put("cov.max3", max(rc), "results/metrics.json coverage_ratio.by_quarter (highest of the last three held-out quarters)")
     put("const.n_simple", 2, "src/gdn/model.py BASELINES minus guidance (seasonal, last)")
     put("const.n_segments", 4, "data/processed/segments.csv (distinct segments)")
     put("const.y2016", 2016, "data/processed/gd_deliveries.csv (first year)")
@@ -746,12 +1041,21 @@ def table_rule(b, F):
     if sig == "Segment | Revenue | Share of revenue | Operating margin" and row in SEGS:
         return {"revenue": (f"est.segments.{row}.ttm_revenue_usd", "usdB"), "share of revenue": (f"mix.{row}.share_pct", "pct1"),
                 "operating margin": (f"mix.{row}.margin_pct", "pct1")}.get(lcol)
+    if sig.startswith("Variant | Quarters | Registry estimate"):
+        key = next((k[3:-2] for k in F if isinstance(k, str) and k.startswith("sv.") and k.endswith(".n")
+                    and F.get("@svlabel", {}).get(k[3:-2]) == row), None)
+        if key:
+            return {"quarters": (f"sv.{key}.n", "int"), "registry estimate": (f"sv.{key}.mae.ratio", "f2"),
+                    "raw count": (f"sv.{key}.mae.raw", "f2"), "guidance pace": (f"sv.{key}.mae.guidance", "f2"),
+                    "same quarter last year": (f"sv.{key}.mae.seasonal", "f2"), "last quarter": (f"sv.{key}.mae.last", "f2"),
+                    "closer than guidance": (f"sv.{key}.wins", "svwins"), "p": (f"sv.{key}.p", "f3")}.get(lcol)
     if sig.startswith("Segment | 2025Q3 actual | 2026Q3 estimate") or b.table == "t-est":
         r = {"aerospace, from the delivery estimate": "aero_now", "aerospace, delivery estimate": "aero_now",
              "aerospace, drift baseline": "Aerospace", "aerospace, growth rule": "Aerospace",
              "total, with aerospace from the delivery estimate": "total", "total, four segments": "total"}.get(lrow, row)
         c = {"2025q3 actual": ("yago", "usdB"), "year-ago quarter": ("yago", "usdB"), "2026q3 estimate": ("est", "usdB"),
-             "estimate": ("est", "usdB"), "change": ("chg", "usdM"), "change, %": ("chgpct", "pct1")}.get(lcol)
+             "estimate": ("est", "usdB"), "change": ("chg", "usdM"), "change, %": ("chgpct", "pct1"),
+             "gd reported": ("rep", "usdB"), "estimate less reported": ("miss", "usdM"), "miss, %": ("misspct", "pct1")}.get(lcol)
         if c and f"estx.{r}.{c[0]}" in F:
             return f"estx.{r}.{c[0]}", c[1]
     if sig == "Change | Deliveries | Aerospace revenue":
@@ -814,8 +1118,17 @@ SPECIAL_CELLS = {
     ("live-facts", "registrations so far"): "{live.2026Q3.latest.events.large:int} large-cabin, "
                                             "{live.2026Q3.latest.events.mid:int} mid-cabin (snapshot "
                                             "{live.2026Q3.latest.snapshot:date})",
-    ("live-facts", "quarter window"): "{live.2026Q3.pred.window_start:date} to {live.2026Q3.pred.window_end:date}",
+    ("live-facts", "quarter window"): "{live.2026Q3.pred.window_open:date} to {live.2026Q3.pred.window_end:date}",
     ("live-facts", "gd reports"): "{cal.release.2026Q3:date}",
+    ("live-facts", "gd reported on"): "{cal.release.2026Q3:date}",
+    ("live-facts", "registrations in the quarter"): "{live.2026Q3.latest.events.large:int} large-cabin, "
+                                                    "{live.2026Q3.latest.events.mid:int} mid-cabin (snapshot "
+                                                    "{live.2026Q3.latest.snapshot:date})",
+    ("live-facts", "gd's guidance pace"): "{live.2026Q3.score.guidance_pace:f1} deliveries (missed by "
+                                          "{live.2026Q3.score.guidance_ae:f1})",
+    ("live-facts", "same quarter last year"): "{cmp.2026Q3.yago:int} deliveries (missed by {cmp.2026Q3.yago_miss:int})",
+    ("live-facts", "miss of the locked estimate"): "{live.2026Q3.score.ae_total:f1} deliveries "
+                                                   "({live.2026Q3.score.ape_pct:pct1}), outside the band",
     ("live-facts", "gd's typical quarter"): "about {typical:whole} deliveries since {const.since2020:year}",
 }
 TILE = re.compile(r"^(Registry estimate|Raw registry count|GD's guidance pace|Same quarter last year|Last quarter)"
@@ -854,6 +1167,7 @@ def _bind(text, toks, rx, keys, F, compare, js, q=None):
 def normalize(text):
     text = re.sub(r"\[`?([^\]`]*)`?\]\([^)]*\)", r"\1", text)      # markdown links: keep the text
     text = re.sub(r"`([0-9a-f]{64})`", r"\1", text)                # a bare hash in a code span
+    text = re.sub(r"<!--.*?-->", " ", text, flags=re.S)             # HTML comments (the README's block markers)
     text = text.replace("**", "").replace(" ", " ")
     return " ".join(text.split())
 
@@ -885,7 +1199,7 @@ def trace_block(b, F, tokens, compare):
             res, _ = _bind(text, toks, rx, keys, F, compare, js)
             for r in res:
                 add(*r)
-        rule = table_rule(b, F)
+        rule = None if spec else table_rule(b, F)
         if rule and rule[1] == "band":
             q = b.row
             if f"asof.{q}.band_low" in F:
@@ -893,6 +1207,12 @@ def trace_block(b, F, tokens, compare):
                 res, _ = _bind(text, toks, rx, keys, F, compare, js)
                 for r in res:
                     add(*r)
+        elif rule and rule[1] == "svwins":
+            k = rule[0][3:-5]
+            rx, keys = compile_tpl("{sv.%s.wins:int} of {sv.%s.of:int}" % (k, k))
+            res, _ = _bind(text, toks, rx, keys, F, compare, js)
+            for r in res:
+                add(*r)
         elif rule and rule[1] == "date":
             for t in toks:
                 if t.kind in ("id:date", "id:date8"):
@@ -1093,10 +1413,74 @@ def live_ok(F):
         (r"^# deliveries$|^#$", G),
         (r"The live quarter: QQ", "Q3LS"),
         (r"So I report it as a tracker, not as an edge", G),
+        # ---- sentences written in the fix pass ----
+        (r"(lock|locks) (each live estimate|it|each estimate) on GitHub the day before GD reports", G),
+        (r"so only locked quarters show whether it counts jets in time", G),
+        (r"That table is not a model of a live lock", G),
+        (r"It is not a model of a live lock, which is made weeks after the quarter ends", G),
+        (r"The commit order is all that backs the words .held out. and .preregistered. here", G),
+        (r"Only the locked quarters are out of sample in the strict sense", G),
+        (r"A lock needs GD's release date, which I add to `config/calendar.json` by hand once GD announces it; a quarter "
+         r"with no date there gets no lock", G),
+        (r"then each scored live quarter from its own release", G),
+        (r"What GD reported by segment for a scored live quarter is in data/processed/segments_reported.csv", G),
+        (r"a quarter with no fresh snapshot after its fiscal end goes without a lock", G),
+        (r"so after a lock or a score I rebuild it on the Mac with `make pdf`", G),
+        (r"I fixed the rules before I scored the held-out quarters", G),
+        (r"^What did the locked quarter show\?$", G),
+        (r"that locks each estimate as a timestamped GitHub release before GD reports and scores it from GD's SEC filing; "
+         r"the first lock, QQ, said # and GD reported #: a miss of #, outside its band", "Q3LS_out"),
+        (r"My first locked estimate of Gulfstream deliveries missed: I said # for QQ, General Dynamics reported #", "first_miss"),
+        (r"The QQ miss was # jets \(#\), outside my band of past misses", "Q3LS_out"),
+        (r"Live record so far: one locked quarter, a miss outside its band", "first_miss"),
+        (r"For QQ I locked an estimate of # Gulfstream deliveries \(band # to #\) the day before GD reported", "Q3LS"),
+        (r"GD reported #, so the lock missed by # \(#\), outside the band", "Q3LS_out"),
+        (r"The QQ lock read a snapshot taken # days after the quarter ended, when the quarter's count stood at #, and it "
+         r"is the same in every daily snapshot since, to D", "Q3LS"),
+        (r"QQ: locked at # \(band # to #\) from the D snapshot, as a timestamped GitHub release, made while the repository "
+         r"was private \(lock-QQ\) at TM ET on D, sha256 H\.?$", "Q3L_private"),
+        (r"GD reported # on D: the lock missed by # \(#\), outside the band", "Q3LS_out"),
+        (r"No release date is set in `config/calendar.json` yet, so no lock is scheduled", "Q4_no_date"),
+        (r"The QQ lock was made by the workflow while this repository was private, so nobody outside could see it before "
+         r"GD reported", "Q3_bot_private"),
+        (r"In the QQ lock, # of the # events were airframes at least three years old by that field", "Q3LS"),
+        (r"Estimate locked from the D registry snapshot; GD reported on D", "Q3LS"),
+        (r"For QQ I locked a registry estimate of # Gulfstream deliveries, with a past-miss band of # to #, as a "
+         r"timestamped GitHub release, made while the repository was private, at TM ET on D", "Q3L_private"),
+        (r"the locked estimate implied #B of Aerospace revenue for QQ", "Q3LS"),
+        (r"I wrote this note before GD reported QQ on D", "Q3LS"),
+        (r"I locked this estimate as a timestamped GitHub release, made while the repository was private, at TM ET on D",
+         "Q3L_private"),
+        (r"GD then reported #: the lock missed by # \(#\), outside the band", "Q3LS_out"),
+        (r"snapshot D for the backtest, and snapshot D for the QQ lock", "Q3LS"),
+        (r"^QQ · Scored: missed by #, outside the band$", "Q3LS_out"),
+        (r"^# deliveries, locked estimate$", "Q3LS"),
+        (r"Locked as a timestamped GitHub release, made while the repository was private, on D at TM ET; the file's sha256 "
+         r"is in the release notes", "Q3L_private"),
+        (r"^Miss of the locked estimate: # deliveries \(#\), outside the band$", "Q3LS_out"),
+        (r"The first lock, for QQ, said # with a band of # to #", "Q3LS"),
+        (r"GD reported # on D: a miss of #, outside the band, and further off than GD's guidance pace \(a miss of #\) or "
+         r"the same quarter last year \(a miss of #\)", "Q3LS_out"),
+        (r"The first lock was for QQ", "Q3LS"),
+        (r"The GitHub workflow locked # deliveries, with a band of # to #, at TM ET on D, while the repository was still "
+         r"private", "Q3_bot_private"),
+        (r"GD reported # the next day", "Q3LS"),
+        (r"The lock missed by #, or #, outside the band", "Q3LS_out"),
+        (r"So the registry had the quarter's jets in time: the count had settled at # by the lock", "Q3LS"),
+        (r"Then the first live lock missed by #, outside its band", "first_miss"),
+        (r"and the first lock fell outside it", "first_miss"),
+        (r"The past-miss band comes from misses measured on one finished registry file, so it may not fit a live lock", G),
+        (r"why the test on past quarters is not a test of a live estimate", G),
+        (r"The guidance pace has been closer in each of the last (three|four|five|six|seven|eight|#) quarters, the locked "
+         r"one included", "guid_closer_live"),
     ], {"Q3LS": locked("2026Q3") and scored("2026Q3"),
         "Q3LS_out": locked("2026Q3") and scored("2026Q3") and F.get("live.2026Q3.score.inside_band") is False,
         "Q4open": not locked("2026Q4") and not scored("2026Q4") and "2026Q4" in st,
         "one_ls": n_ls == 1,
+        "first_miss": n_ls == 1 and locked("2026Q3") and scored("2026Q3") and F.get("live.2026Q3.score.inside_band") is False,
+        "guid_closer_live": n_ls == 1 and (F.get("live.2026Q3.score.guidance_ae") or 9e9) < (F.get("live.2026Q3.score.ae_total") or 0),
+        "Q4_no_date": "2026Q4" in st and not locked("2026Q4") and not scored("2026Q4") and "cal.release.2026Q4" not in F,
+        "Q3_bot_private": locked("2026Q3") and not F["@public"] and F.get("@lock_author", {}).get("2026Q3", "").startswith("github-actions"),
         "Q3L_private": locked("2026Q3") and not F["@public"]}
 
 
@@ -1168,12 +1552,13 @@ def trace_workbook_cell(c, F, tokens, compare):
         return out
     if coord.startswith("A") or (coord[1:] == "1" and coord[0] != "A"):
         return out
-    if c.get("formula") is not None and not isinstance(v, (int, float)):
+    if c.get("formula") is not None and not isinstance(v, (int, float)) and not (sheet == "Live" and isinstance(v, str)):
         out.append(("", "", "mismatch", f"formula {c['formula'][:60]} did not compute to a number ({v!r})", str(v), label))
         return out
     if v is None:
         return out
-    if c["col"] is None or isinstance(v, str) and not re.fullmatch(r"-?\d+(\.\d+)?", v):
+    live_text = sheet == "Live" and row in ("GD's count against the band", "GD release (SEC accession)")
+    if not live_text and (c["col"] is None or isinstance(v, str) and not re.fullmatch(r"-?\d+(\.\d+)?", v)):
         if isinstance(v, str) and re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
             key = {"Fiscal end": f"gd.{row}.fiscal_end"}.get(col) or ("live.2026Q3.pred.snapshot" if row == "Snapshot" else None)
             exp = F.get(key) if key else None
@@ -1187,7 +1572,8 @@ def trace_workbook_cell(c, F, tokens, compare):
                "Ratio large": f"bt.{q}.ratio.large", "Ratio mid": f"bt.{q}.ratio.mid", "Ratio total": f"bt.{q}.ratio.total",
                "Raw total": f"bt.{q}.raw.total", "Seasonal": f"bt.{q}.seasonal.total", "Last": f"bt.{q}.last.total",
                "AE ratio": f"bt.{q}.ratio.ae", "AE raw": f"bt.{q}.raw.ae", "AE seasonal": f"bt.{q}.seasonal.ae",
-               "AE last": f"bt.{q}.last.ae"}.get(col)
+               "AE last": f"bt.{q}.last.ae", "Guidance pace": f"bt.{q}.guidance.total",
+               "AE guidance": f"bt.{q}.guidance.ae"}.get(col)
         if key:
             num(key)
     elif sheet == "Summary":
@@ -1218,7 +1604,15 @@ def trace_workbook_cell(c, F, tokens, compare):
                     "Miss, % of reported": "live.2026Q3.score.ape_pct", "Guidance pace": "live.2026Q3.score.guidance_pace",
                     "Guidance pace miss": "live.2026Q3.score.guidance_ae"}.get(row)
             if key2:
-                num(key2)
+                num(key2, 100.0 if row.startswith("Miss, %") else 1.0)     # the sheet holds the share as a fraction
+            elif row == "GD's count against the band":
+                want = "inside" if F["live.2026Q3.score.inside_band"] else "outside"
+                out.append(("results/live/2026Q3_score.json [inside_band]", want, "traced" if v == want else "mismatch",
+                            "", str(v), label))
+            elif row == "GD release (SEC accession)":
+                want = F["live.2026Q3.score.accn"]
+                out.append(("results/live/2026Q3_score.json [accn]", want, "traced" if v == want else "mismatch", "",
+                            str(v), label))
             elif not isinstance(v, str):
                 out.append(("", "", "untraced", "no label rule for this Live cell", v, label))
     elif sheet == "Segments":
@@ -1285,7 +1679,8 @@ def trace_chart_row(r, F):
 def pdf_normalize(t):
     t = t.replace("­", "").replace("−", "-")
     t = " ".join(t.split())
-    return re.sub(r"\b(8|10)-\s+([KQ])\b", r"\1-\2", t)   # a form name broken across lines
+    t = re.sub(r"\b(8|10)-\s+([KQ])\b", r"\1-\2", t)   # a form name broken across lines
+    return re.sub(r"(\d)-\s+(\d)", r"\1-\2", t)          # a date or an accession number broken across lines
 
 
 def pdf_input_hash(root):

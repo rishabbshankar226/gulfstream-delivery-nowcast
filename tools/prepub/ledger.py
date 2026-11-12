@@ -40,7 +40,8 @@ NUM = r"[-−+]?\$?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?(?:%|B\b|M\b)?"
 NUM_RE = re.compile(r"(?<![\w.$,])(?P<sign>[-−+])?(?P<cur>\$)?(?P<num>\d{1,3}(?:,\d{3})+(?:\.\d+)?|\d+(?:\.\d+)?)"
                     r"(?P<unit>%|B\b|M\b)?(?![\w]|\.\d|,\d{3})")
 WORD_RE = re.compile(r"(?<![\w-])(" + "|".join(WORDS) + r")(?![\w-])", re.I)
-ONE_OK = re.compile(r"one (locked quarter|quarter (shows|will show)|snapshot|decimal|source\b|lock per)", re.I)
+ONE_OK = re.compile(r"one (locked quarter|quarter (shows|will show|is one data point)|snapshot|decimal|source\b|lock per"
+                    r"|standard error above|airframe in \d{4}Q)", re.I)
 
 MASKS = [
     ("url", re.compile(r"https?://[^\s)>\]\"']+")),
