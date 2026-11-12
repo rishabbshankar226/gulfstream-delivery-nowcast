@@ -41,7 +41,7 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P5.1 | Codex branch review | done | DECISIONS D5; merged in `e778e23` |
 | P5.2 | Lock, score, post-score paths | done | `DEFECT_TRACE.md`; F017, F018 |
 | P5.3 | Data and model paths | done | `DEFECT_TRACE.md` |
-| P5.4 | T9 direct tests | cut | see Cut items |
+| P5.4 | T9 direct tests | done | `tests/test_daily.py` (the `run` fixture) and `tests/test_model_direct.py` (6 tests pass); DECISIONS D15 |
 | P5.5 | After-state tests, gate, determinism | done | `BASELINE.md`, After |
 | P6.1 | Fix S1 and S2 | done | `FINDINGS.md`; open rows are the owner's (F015, F016, F081) |
 | P6.2 | L1 and L2 by hand | done | F006, F007 |
@@ -50,8 +50,8 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | P7.1 | Post rewrite in generator | done | `src/gdn/report.py` (`post`), 1,284 characters |
 | P7.2 | Two alternates | done | `POST_ALTERNATES.md` |
 | P7.3 | Post check | done | `POST_CHECK.md` |
-| P8.1 | Round 2 (three fresh reviewers) | running | |
-| P8.2 | Round 3 (one attacker) | todo | |
+| P8.1 | Round 2 (three fresh reviewers) | done | `reviews/round2_*.md`: three NO-GO, 4 S1 in all, every one a sentence; fixed in `a354170` (F083 to F098) |
+| P8.2 | Round 3 (one attacker) | running | launched 21:32 ET |
 | P8.3 | Fix rounds 2 and 3 | todo | |
 | P8.4 | Fresh clone check | todo | |
 | P8.5 | Merge check | todo | |
@@ -61,13 +61,12 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 
 ## Running
 
-- `round2_finance`, `round2_statistician`, `round2_editor` (P8.1): launched 20:48 ET on the copy `~/gdn-prepub/round2_clean/` (D9). Briefs in `docs/prepub/briefs/round2_*.md`, outputs in `docs/prepub/reviews/round2_*.md`.
-
-No background shell command is running.
+- `round3` (P8.2): launched 21:32 ET, brief `docs/prepub/briefs/round3_attacker.md`, output `docs/prepub/reviews/round3.md`.
+- Background shell: the fresh clone battery in `~/gdn-prepub/clone2` (log `.build/logs/clone_check2.log`).
 
 ## Cut items
 
-- **P5.4** (direct tests for `daily.run`, `holdout_metrics`, `truncated_mae`, `coverage_drift`): cut. The run's effort went to the S1 and S2 findings the reviewers raised late (the stated quarter plans, the scope and holder gaps). What stands in for it: the recompute subagent rebuilt every figure those three model functions produce from the data files alone and matched all 547, the gate's `model` family rebuilds `metrics.json` independently and passes, and the codex merge added tests around `daily` and `gitops`.
+(none)
 
 ## Overruns
 

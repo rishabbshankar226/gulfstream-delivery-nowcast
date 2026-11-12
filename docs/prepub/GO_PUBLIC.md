@@ -53,7 +53,8 @@ git add <the same files> && git commit
 
 Never resolve a conflict in `predictions/`, `results/live/`, `data/snapshots/` or `docs/PREREGISTRATION.md` by hand: the audit did not touch them, so `main`'s side is the only side.
 
-- Check: `make test` ends `170 passed`. `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
+- Use the project's environment: Python 3.11 with `requirements.lock` installed (the README's Reproduce section). The system `python3` on this Mac is 3.9.6 and cannot install the pinned requirements.
+- Check: `make test` ends with no failure (176 tests passed when the audit ended). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
 
 ### 3. Set the public flag
 
@@ -67,6 +68,21 @@ What it changes: a lock published on or after `public_since` is called a "public
 
 - Check: `git diff --stat README.md report/note.html` prints nothing, and `git diff --stat` lists `config/calendar.json` and `site/data.json`. `grep -c "made while the repository was private" README.md` prints 1 or more. `grep -c "public lock" README.md report/note.html` prints 0 for both.
 - Commit by path, then `git push origin main`.
+
+### 3b. Run the merged daily job once, while the repository is still private
+
+The merge changes the daily job (the two outside commits, the lock and score guards, the charts stage). Its tests pass, and the job has never run end to end on GitHub in its merged form. Run it once before anyone can see the result:
+
+```
+gh workflow run nowcast.yml
+gh run list --workflow nowcast.yml -L 1
+git pull --ff-only
+shasum -a 256 predictions/2026Q3.json results/live/2026Q3_lock.json results/live/2026Q3_score.json
+grep -E "predictions/2026Q3.json|results/live/2026Q3_lock.json|results/live/2026Q3_score.json" docs/prepub/RECORD_HASHES.txt
+```
+
+- Check: the run ends `completed  success`; the three hashes printed by `shasum` equal the three lines printed by `grep`; `git log -3 --format='%an %s'` shows the workflow's daily commits and no commit that touches `predictions/`.
+- If the run fails, do not go on. Read its log (`gh run view --log-failed`), and keep the repository private until a run is green.
 
 ### 4. Make the repository public
 
