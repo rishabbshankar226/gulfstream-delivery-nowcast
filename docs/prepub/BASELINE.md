@@ -38,30 +38,51 @@ The other 39 assertions passed: G0, F1 to F4, T1 to T3, M1 to M3, S1, S2, Q1, Q2
 
 ## After
 
-Measured 2026-11-11, 20:48 to 20:51 ET, at commit `7277a6d` on a clean tree (P5.5, P6.4). Logs under `.build/logs/`.
+Measured 2026-11-11, about 21:57 to 22:03 ET, on a clean tree at commit `8d07bf5`, after the last fix from round 3 (P5.5, P6.4, P8.6). One battery, run by two scripts; logs under `.build/logs/` (`final_a.log`, `final_b.log` and the files they name). Later commits change only files under `docs/prepub/`.
 
 | Check | Command | Result |
 |---|---|---|
-| Tests | `make test` (log `after_test.log`) | `170 passed, 14 warnings in 54.15s`, exit 0 |
-| Gate, all ten families | the R11 command with `--only faa,truth,model,segments,prereg,live,workbook,docs,site,repo --output .build/gate.json` (log `gate_after1.log`) | `42 assertions, 4 failing, 2 warning`, exit 1 |
-| Offline rebuild | `make all` then `git status --short` (log `p6_make_all3.log`, then the commits that followed) | exit 0; every rebuilt file committed with its generator |
-| Determinism | `make check-determinism` (log `determinism_after1.log`) | `identical (50 files)`, exit 0 |
-| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` | `rows 2794  flagged 0` |
-| Revert tests (R6) | `tools/prepub/revert_check.py` on a fresh clone (`REVERT_TESTS.md`) | 19 fixes checked, 19 fail reverted and pass restored |
-| Nine plants on the final tree | `tools/prepub/plant_selftest.py` (`LEDGER_SELFTEST.md`, rerun section) | 9 planted, 9 caught, 0 missed |
+| Offline rebuild | `make all`, `make claims`, `python -m gdn note`, `make pdf`, then `git status --short` | exit 0; `note unchanged; PDF kept`; status empty |
+| PDF stamp | `shasum -a 256 report/note.html` against `output/GD_research_note.inputs.sha256` | equal: `5c4564833829f7e9...` |
+| Tests | `make test` | `176 passed, 14 warnings in 31.84s`, exit 0 |
+| Gate, all ten families | the R11 command, `--output .build/gate.json` | `42 assertions, 4 failing, 3 warning`, exit 1 |
+| Determinism | `make check-determinism` | `identical (50 files)`, exit 0 |
+| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` (at `3e8c0f9`; no surface changed after it) | `rows 2864  flagged 0` |
+| Revert tests (R6) | `tools/prepub/revert_check.py` on a fresh clone (`REVERT_TESTS.md`) | 19 fixes checked, 19 with FAIL when reverted and PASS when restored, 0 otherwise. |
+| Nine plants on the final tree | `tools/prepub/plant_selftest.py` (`LEDGER_SELFTEST.md`, rerun section) | 9 planted, 9 caught, 0 missed. |
+| Links | `tools/prepub/links.py` (`LINKS.csv`) | 191 links: 142 external resolve, 34 in-repo resolve, 12 point at the owner's repository or Pages site and return 404 until it is public, 3 external return 403 to an automated reader |
+| Record | every hash in `RECORD_HASHES.txt` recomputed; `git diff --stat 36fed31..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` | 61 of 61 match; the diff prints nothing |
 
 ### The gate's lines, after
 
-Passing families: `faa`, `truth`, `model`, `segments`, `prereg`, `live`, `workbook`, `repo`. The baseline's one failure, `N4` (the note's unused `os-release-date` claim), now passes.
+35 assertions pass, 4 fail, 3 warn. Passing families: `faa`, `truth`, `model`, `segments`, `prereg`, `live`, `workbook`, `repo`. The baseline's one failure, `N4`, passes.
 
-Warnings, both present in the baseline:
+Warnings:
 
-- `WARN S3`: unparsed segment cells for 2024Q3 and 2024Q4 in the gate's own SEC parse.
-- `WARN L3`: `[('2026Q4', 'not locked yet', None)]`.
+- `WARN T3`: `{'unpinned later calls': ['2026-10-30']}`. New: the 2026-10-30 call added to `data/guidance.csv` (F054) is later than the calls the gate pins.
+- `WARN S3`: unparsed segment cells for 2024Q3 and 2024Q4 in the gate's own SEC parse. In the baseline.
+- `WARN L3`: `['2026Q4', 'not locked yet', None]`. In the baseline.
 
-Failures, all four in the `docs` and `site` families and all four caused by sentences and fields this audit added (logged in `DECISIONS.md` D10 under R11). The gate prints at most eight items per list:
+Failures, all four in the `docs` and `site` families and all four caused by sentences and fields this audit added (DECISIONS D10, under R11). The gate prints at most eight items per list:
 
-- `FAIL R2` (every number in Results, Error analysis and Live record is a figure the gate computed): `0.20, 117, 6.7, 43.1, 12.5, 3.5, 6.4, 0.76`.
+- `FAIL R2` (every number in Results, Error analysis and Live record is a figure the gate computed): `0.20, 117, 6.7, 43.1, 5.7, 12.5, 3.5, 6.4`.
 - `FAIL K1` (every number in the post, the bullets and the interview notes is a figure the gate computed): `12.5, 3.5, 6.4, 0.76, 0.95, 246, 1,251`.
-- `FAIL N1` (every number in the note is a figure the gate computed): `0.76, $826, 23.4%, $95, 2.7%, $5.0, $185, 3.7%`.
+- `FAIL N1` (every number in the note is a figure the gate computed): `117, 6.7, 0.76, $826, 23.4%, $95, 2.7%, $5.0`.
 - `FAIL Y1` (`site/data.json` holds what the gate computes): unexpected keys `public`, `public_since`, `reported_segments`.
+
+## Fresh clone (P8.4)
+
+`git clone --branch prepub-audit` of this repository into `~/gdn-prepub/clone2`, `data/raw/` copied in, `origin` set to the GitHub URL, `python3.11 -m venv .venv`, `.venv/bin/python -m pip install -r requirements.lock` (exit 0). Then, after `git pull` of the final commit `8d07bf5`:
+
+| Check | Result |
+|---|---|
+| `make all`, then `git status --short` | exit 0; status empty |
+| `make test` | `176 passed, 14 warnings in 31.68s`, exit 0 |
+| `make check-determinism` | `identical (50 files)`, exit 0 |
+| Gate, all ten families, `--repo ~/gdn-prepub/clone2` | `42 assertions, 4 failing, 3 warning`: the same four failures and three warnings as the main tree, number for number |
+
+The first attempt, in `~/gdn-prepub/clone` with this Mac's `python3` (3.9.6), failed at `pip install`: `No matching distribution found for contourpy==1.3.3`. The README gave no setup step. That is finding F099, fixed (DECISIONS D14); the log is `.build/logs/clone_check1.log`.
+
+## Merge check (P8.5)
+
+`git fetch --all --prune` at 21:06 ET: `origin/main` was still at `36fed31`, the commit `prepub-audit` was cut from. On the throwaway branch `prepub-mergecheck`, `git merge --no-commit --no-ff origin/main` printed `Already up to date.` No conflict. The branch is left in place. The daily workflow will commit to `main` again; `GO_PUBLIC.md` step 2 says how to merge when it has.

@@ -13,7 +13,7 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 |---|---|---|---|---|---|---|---|
 | F001 | `output/charts/*`, `src/gdn/daily.py` (`rebuild`) | S1 | L12. `make all` on the baseline changed one file, `output/charts/nowcast_path.png` (`BASELINE.md`, Before): the daily job never redrew charts, so the chart predated the score. | `daily.rebuild` runs the charts stage and writes `output/charts/inputs.sha256`; the path chart's source line names its own snapshots. | 5657b94, 58f7aba | `tests/test_daily.py::test_the_daily_rebuild_redraws_the_charts` FAIL / PASS | fixed |
 | F002 | `README.md:5` image `output/charts/dashboard.png` | S1 | Ledger: 7 stale chart rows. The image read "2026Q3 PROVISIONAL 31.1", "Locks the evening of 2026-10-29" (BUYSIDE-1, COMPLIANCE-2, SELL-6). | The README's first image is now `output/charts/track_record.png`, which the daily job redraws (F001); `grep -n dashboard.png README.md` finds nothing. The screenshot was retaken from the scored dashboard (again after round 2); its figures are listed by hand in `tools/prepub/chart_numbers.csv` and traced. | 58f7aba, 4ea45a0, a354170 | none: an image, checked by the ledger's chart rows | fixed |
-| F003 | `tests/` | S2 | `make test` on the baseline: `6 failed, 114 passed`. The six tests asserted the pre-score state. | Tests rewritten for the scored state. Now `170 passed`. | d0247f7, ba8453f | the six tests themselves: failed at baseline, pass now | fixed |
+| F003 | `tests/` | S2 | `make test` on the baseline: `6 failed, 114 passed`. The six tests asserted the pre-score state. | Tests rewritten for the scored state. The suite now prints `176 passed`. | d0247f7, ba8453f | the six tests themselves: failed at baseline, pass now | fixed |
 | F004 | `report/claims.json`, `src/gdn/note.py` (`rel_cite`) | S2 | Gate baseline: `FAIL N4`, the note's unused claim `os-release-date`. | The release-date claim is cited only while the release is ahead and pruned after the score. `N4` passes. | d0247f7 | `tests/test_prepub_text.py::test_the_release_date_claim_is_cited_only_while_the_release_is_ahead` FAIL / PASS | fixed |
 | F005 | `config/calendar.json` `public`, `src/gdn/report.py`, `site/app.js` | S1 | P0.4: every reader of the `public` key called the lock a "public GitHub release" once the key was true. The 2026Q3 lock was made while the repository was private (COMPLIANCE-6). | A `public_since` date sits beside the key. A lock is called public only if it was published on or after that date. | 4ea45a0, ba8453f | `tests/test_after_score.py::test_a_lock_is_called_public_only_if_the_repository_was_public_that_day` FAIL / PASS | fixed |
 | F006 | `docs/INTERVIEW_NOTES.md:9`, `:27` (old tree) | S1 | L1. "The first lock is scored when GD reports", "My build estimate is 31.1 ... band of 20.4 to 36.4". Ledger: 5 stale, 9 untraced rows. | Rewritten by hand to the scored record, with the answer to "Why publish a model that lost to the same quarter last year?" (P6.2). | 462ad30, 7c2a99f | none: hand-written, ledger rows traced | fixed |
@@ -48,7 +48,7 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 | F035 | `report/note.html:55` (old tree) | S2 | "which do not fall with deliveries, so the delivery-based figure overstates the swing": a cause with no citation (sources_claims cause-6). | Clause removed. `grep -c` on the note: 0. | d0247f7 | none | fixed |
 | F036 | note: outlook section, byline, G400 sentence | S1 | sources_claims: 18 stale rows, 1 mismatch. The note previewed a print that had happened and carried "Data as of 2026-10-29" over a 2026-10-30 figure. | The byline says what the page is; the outlook is headed "before the release" and dated to the 2026-07-29 call; "What the street watches" is dropped once scored. | d0247f7, 37a72ea | covered by the F013 note test | fixed |
 | F037 | `.github/workflows/pages.yml` | S2 | Pages deploys on a push to `site/**` or a manual run. The daily job pushes with `GITHUB_TOKEN`, which starts no workflow, so the dashboard would go stale after publication (COMPLIANCE-20). | None in the tree: `.github/` is outside this run. | none | none | erratum: `ERRATA.md` E1, `GO_PUBLIC.md` steps |
-| F038 | post links, README links | S1 | L3. `LINKS.csv`: 12 of 181 links point at the owner's repository or Pages site and return 404 while it is private (BUYSIDE-5, COMPLIANCE-3, SELL-7). | None in the tree: the URLs are right. | none | none | refuted: not a defect of the tree. The links resolve after `GO_PUBLIC.md` steps 4 and 5, each with its check (criterion 6) |
+| F038 | post links, README links | S1 | L3. `LINKS.csv`: 12 of 191 links point at the owner's repository or Pages site and return 404 while it is private (BUYSIDE-5, COMPLIANCE-3, SELL-7). | None in the tree: the URLs are right. | none | none | refuted: not a defect of the tree. The links resolve after `GO_PUBLIC.md` steps 4 and 5, each with its check (criterion 6) |
 | F039 | `config/calendar.json` | S2 | L15. No 2026Q4 release date and no 2027Q1 fiscal end, so no lock can fire (REGISTRY-7). | README says a lock needs the date and that none is set. | 4ea45a0 | none | erratum: `ERRATA.md` E4, `GO_PUBLIC.md` step |
 | F040 | L16: `results/live/2026Q4_latest.json` | S1 | Lead: the part-quarter figure 13.55 (band 2.8 to 20.4) might show as an estimate. `grep` on the post, README, note and interview notes: no 13.55 and no "2.8 to 20.4". | README names the working file and says it is not an estimate (STAT-16). | 7aaa5c1 | `tests/test_after_score.py::test_an_open_quarter_shows_no_partial_estimate` (in the suite before the audit) | refuted: no surface shows it as an estimate |
 | F041 | L8: `site/data.json` path rows | S1 | Lead: 31.13 might show as the locked figure. `grep -c "31\\.1\\b"` on the post, README, note, interview notes and resume bullets: 0 each. The dashboard shows 31.1 only as a dated point on the path. | none needed | none | none | refuted: 31.1 appears only as a path point |
@@ -296,7 +296,7 @@ Round 1 reviewers read the tree at `9a5cb5a`. Round 2 reviewers (EDITOR, FINANCE
 | sources_claims SC-12 | S3 | F035 | fixed: the sentence is no longer in the note (`grep -c "mix moves revenue per jet"`: 0) |
 | sources_claims SC-13 | S3 | F077 | fixed |
 | sources_guidance SRC-G-2 | S3 | F098 | open: the preregistration's example quote prints dollars where the transcripts print "150 to 155"; the preregistration does not change (R7) |
-| sources_guidance SRC-G-3 | S3 | F098 | open: three MarketBeat links refuse automated readers (`LINKS.csv`: 3 of 144 external links, status 403); each quote was verified on another transcript |
+| sources_guidance SRC-G-3 | S3 | F098 | open: three MarketBeat links refuse automated readers (`LINKS.csv`: 3 of 145 external links, status 403); each quote was verified on another transcript |
 | sources_guidance SRC-G-5 | S3 | F098 | open: the speaker column copies each page's label, so one 2021 title is shorter than the rest |
 | R3-1 | S2 | F101 | fixed |
 | R3-2 | S2 | F102 | fixed |
@@ -323,4 +323,13 @@ The first run on the real tree (`cc83c82`) flagged 25 rows. Each maps to a findi
 
 ## 4. Counts
 
-Filled in by `VERDICT.md` from this table after rounds 2 and 3.
+`FINDINGS.md` holds 106 findings (F001 to F107; F019 is an unused number). They come from the spec's 16 leads, the first ledger, five round 1 reviewers, three source checkers, the recompute, three round 2 reviewers, one round 3 reviewer and the main thread's own checks.
+
+| Severity | Fixed | Erratum | Refuted | Open | All |
+|---|---|---|---|---|---|
+| S1 | 19 | 0 | 3 | 2 | 24 |
+| S2 | 47 | 5 | 2 | 1 | 55 |
+| S3 | 18 | 1 | 1 | 7 | 27 |
+| All | 84 | 6 | 6 | 10 | 106 |
+
+Open S1: F015, F016. Open S2: F081. Open S3: F053, F063, F064, F068, F074, F098, F107.
