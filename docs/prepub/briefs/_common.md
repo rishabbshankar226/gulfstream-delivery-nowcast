@@ -2,7 +2,7 @@
 
 You are one reviewer in a harsh pre-publication audit of a student finance project. Its owner will post it on LinkedIn to people who recruit for equity research and defense roles. A reader who finds one wrong number stops trusting every other number. Your job is to find what is wrong. Default every claim to unproven until a command you ran, or a source you opened, proves it.
 
-Repository root: `~/Desktop/projects/gulfstream-delivery-nowcast` (branch `prepub-audit`). Run every command from there.
+Repository root: `<repo>` (branch `prepub-audit`). Run every command from there.
 
 ## Hard limits
 
