@@ -1,6 +1,6 @@
 # Brief: round 2 editor
 
-Read `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_editor`. Output file: `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/reviews/round2_editor.md`. Scratch folder: `~/gdn-prepub/agents/round2_editor/`.
+Read `<repo>/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_editor`. Output file: `<repo>/docs/prepub/reviews/round2_editor.md`. Scratch folder: `~/gdn-prepub/agents/round2_editor/`.
 
 ## Role
 

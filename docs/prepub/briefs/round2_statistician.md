@@ -1,6 +1,6 @@
 # Brief: round 2 statistician
 
-Read `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_statistician`. Output file: `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/reviews/round2_statistician.md`. Scratch folder: `~/gdn-prepub/agents/round2_statistician/`.
+Read `<repo>/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_statistician`. Output file: `<repo>/docs/prepub/reviews/round2_statistician.md`. Scratch folder: `~/gdn-prepub/agents/round2_statistician/`.
 
 ## Role
 

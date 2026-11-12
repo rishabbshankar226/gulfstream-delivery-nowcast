@@ -1,6 +1,6 @@
 # Brief: round 2 finance reader
 
-Read `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_finance`. Output file: `~/Desktop/projects/gulfstream-delivery-nowcast/docs/prepub/reviews/round2_finance.md`. Scratch folder: `~/gdn-prepub/agents/round2_finance/`.
+Read `<repo>/docs/prepub/briefs/round2_common.md` first and follow it. Your name is `round2_finance`. Output file: `<repo>/docs/prepub/reviews/round2_finance.md`. Scratch folder: `~/gdn-prepub/agents/round2_finance/`.
 
 ## Role
 
