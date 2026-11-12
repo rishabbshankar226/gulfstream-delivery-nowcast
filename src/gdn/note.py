@@ -566,7 +566,9 @@ def build(root="."):
     # 8. Risks
     risks = C.prefix("risk-")
     if risks:
-        add("<h2>Risks</h2><p>Risks to the business, as GD states them; the limits of my method follow "
+        add("<h2>Risks</h2><p>The risks closest to this tracker are Gulfstream's own, and the product cycle section "
+            "cites them: the planned production break between the last G280 and the G300, and the timing of the "
+            "G400. Below are GD's general risk factors, as its filings state them; the limits of my method follow "
             "separately.</p>")
         add('<ul class="tight">' + "".join(f"<li>{C.say(cid)}</li>" for cid in risks) + "</ul>")
 

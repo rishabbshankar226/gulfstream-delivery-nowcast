@@ -193,3 +193,29 @@ def test_gd_stated_quarter_plans_are_scored_beside_the_guidance_pace(tmp_path):
     (bad / "quarter_plans.csv").write_text("quarter,call_date,plan,quote,speaker,url\n2023Q3,2023-10-25,27,q,s,u\n")
     with pytest.raises(ValueError):
         sensitivity.load_quarter_plans(tmp_path, Calendar.load(ROOT))
+
+
+def test_the_dashboard_link_preview_image_follows_the_chart(tmp_path):
+    # F053. The page a LinkedIn post links to needs an og:image that Pages serves and the daily job keeps current.
+    from gdn import charts, daily
+    (tmp_path / "output/charts").mkdir(parents=True)
+    (tmp_path / "site").mkdir()
+    (tmp_path / "output/charts/track_record.png").write_bytes(b"one")
+    charts._preview(tmp_path)
+    assert (tmp_path / "site/preview.png").read_bytes() == b"one"
+    (tmp_path / "output/charts/track_record.png").write_bytes(b"two")
+    charts._preview(tmp_path)
+    assert (tmp_path / "site/preview.png").read_bytes() == b"two"
+    page = (ROOT / "site/index.html").read_text()
+    assert ('<meta property="og:image" content="https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/'
+            'preview.png">') in page
+    assert "site/preview.png" in daily.REBUILD_PATHS
+    assert (ROOT / "site/preview.png").read_bytes() == (ROOT / "output/charts/track_record.png").read_bytes()
+
+
+def test_no_chart_legend_calls_the_pace_gds():
+    # F068, F029. The pace is my construction from GD's outlook; a legend that says "GD guidance pace" reads as GD's.
+    from gdn import charts
+    src = (ROOT / "src/gdn/charts.py").read_text()
+    assert charts.NAMES["guidance"] == "Pace built from GD's outlook"
+    assert "GD guidance pace" not in src

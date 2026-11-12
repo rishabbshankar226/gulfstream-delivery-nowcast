@@ -1985,8 +1985,8 @@ note-pdf,output/GD_research_note.pdf:p7,four,"Segment operating earnings, all fo
 note-pdf,output/GD_research_note.pdf:p7,$1.4B,"Segment operating earnings, all four segments | Value",results/estimates.json [est.operating_earnings_total_usd],,traced,bound through report/note.html
 note-pdf,output/GD_research_note.pdf:p7,2025,"GD Form 10-K for 2025, https://sec.gov/Archives/edgar/data/40533/000004053326000006 , retrieved 2026-10-19.",calendar year in the project's range,,traced,bound through report/note.html
 note-pdf,output/GD_research_note.pdf:p7,2024,"GD Form 10-K for 2024, https://sec.gov/Archives/edgar/data/40533/000004053325000008 , retrieved 2026-10-19.",calendar year in the project's range,,traced,bound through report/note.html
-note-pdf,output/GD_research_note.inputs.sha256,5c4564833829f7e9,PDF input stamp against sha256 of its inputs,sha256(report/note.html inputs),5c4564833829f7e9,traced,
-note-pdf,site/GD_research_note.pdf,8cf9549bd495983c,site copy of the PDF,output/GD_research_note.pdf,8cf9549bd495983c,traced,
+note-pdf,output/GD_research_note.inputs.sha256,e0b89a405ce56671,PDF input stamp against sha256 of its inputs,sha256(report/note.html inputs),e0b89a405ce56671,traced,
+note-pdf,site/GD_research_note.pdf,ba3441e238e89e65,site copy of the PDF,output/GD_research_note.pdf,ba3441e238e89e65,traced,
 workbook,output/gd_gulfstream_model.xlsx:About!A6,2026-10-19,1. Each Gulfstream airframe in the FAA registry snapshot of 2026-10-19 gets a delivery date (E1): the earlier of a customer's registration and an export cancell,data/snapshots/MANIFEST.json [snap.backtest],2026-10-19,traced,
 workbook,output/gd_gulfstream_model.xlsx:About!A6,365,1. Each Gulfstream airframe in the FAA registry snapshot of 2026-10-19 gets a delivery date (E1): the earlier of a customer's registration and an export cancell,src/gdn/events.py:50 timedelta(days=365) [const.bound_days],365,traced,
 workbook,output/gd_gulfstream_model.xlsx:About!A8,four,"3. Ratio estimate = this quarter's events x reported deliveries over the last four quarters / registry events over the same four quarters, by cabin.","src/gdn/model.py:44 range(1, 5) [const.lags]",4,traced,

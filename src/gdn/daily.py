@@ -22,7 +22,7 @@ from .files import csv_text
 LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json", "data/processed/segments_reported.csv"]
 REBUILD_PATHS = ["results/estimates.json", "output/charts", "output/gd_gulfstream_model.xlsx",
                  "output/gd_gulfstream_model.inputs.sha256", "report/note.html", "site/data.json", "README.md",
-                 "docs/LINKEDIN_POST.md", "output/GD_research_note.pdf", "site/GD_research_note.pdf",
+                 "docs/LINKEDIN_POST.md", "output/GD_research_note.pdf", "site/GD_research_note.pdf", "site/preview.png",
                  "output/GD_research_note.inputs.sha256"]
 LOCK_PATHS = ["predictions"]
 ALLOWED = LIVE_PATHS + REBUILD_PATHS + LOCK_PATHS

@@ -28,7 +28,7 @@ STYLE = {
     "last": dict(color=GREY_L, lw=2.2, ls=(0, (1.5, 2.5))),
 }
 NAMES = {"reported": "GD reported", "ratio": "Registry estimate (ratio)", "raw": "Raw registry count",
-         "guidance": "GD guidance pace", "seasonal": "Same quarter last year", "last": "Last quarter"}
+         "guidance": "Pace built from GD's outlook", "seasonal": "Same quarter last year", "last": "Last quarter"}
 QS = qrange("2016Q1", "2026Q2")
 SOURCE = ("Source: GD earnings releases on SEC EDGAR; FAA aircraft registry snapshot {snap}; GD earnings calls; "
           "author's calculations. Rishabb Shankar, rshankar.dev")
@@ -195,7 +195,7 @@ def nowcast_path(root, snap):
                 ms=8, capsize=6, elinewidth=1.6, ecolor=ACCENT_2, label=f"{q} estimate, with its past-miss band")
     pace = model.guidance_pace(q, live.reported_history(root), model.load_guidance(root), Calendar.load(root))
     if pace:
-        ax.axhline(pace["total"], color=GREY_D, lw=2, ls=(0, (9, 3, 2, 3)), label="GD guidance pace for the quarter")
+        ax.axhline(pace["total"], color=GREY_D, lw=2, ls=(0, (9, 3, 2, 3)), label="Pace built from GD's outlook, for the quarter")
     pred_p = Path(root) / "predictions" / f"{q}.json"
     if (lv / f"{q}_lock.json").exists() and pred_p.exists():
         pr = read_json(pred_p)
@@ -247,6 +247,17 @@ def input_digest(root):
     return "\n".join(lines) + "\n"
 
 
+PREVIEW = "site/preview.png"
+
+
+def _preview(root):
+    """The dashboard's link-preview image (og:image): a copy of the track-record chart, kept under site/ so Pages
+    serves it and redrawn whenever the chart is."""
+    src, dst = Path(root) / "output/charts/track_record.png", Path(root) / PREVIEW
+    if src.exists() and (not dst.exists() or dst.read_bytes() != src.read_bytes()):
+        dst.write_bytes(src.read_bytes())
+
+
 def run(root=".", force=False):
     from .files import write_text
     root = Path(root)
@@ -255,6 +266,7 @@ def run(root=".", force=False):
     if not force and stamp.exists() and stamp.read_text() == digest and \
             all((root / "output/charts" / n).exists() for n in CHARTS):
         print("chart inputs unchanged; kept")
+        _preview(root)
         return 0
     snap = read_json(root / "data/snapshots/MANIFEST.json")["backtest"]
     track_record(root, snap)
@@ -262,4 +274,5 @@ def run(root=".", force=False):
     signed_errors(root, snap)
     nowcast_path(root, snap)
     write_text(stamp, digest)
+    _preview(root)
     return 0
