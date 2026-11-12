@@ -75,6 +75,12 @@ def build(root="."):
         "pipeline_snapshot": pipe_snap,
         "estimates": {k: v for k, v in est.items() if k != "basis"},
         "live": lives,
+        # What GD reported by segment for each scored quarter, set beside the estimates made before the release.
+        "reported_segments": {q: {s: {"revenue_usd": v[0], "operating_earnings_usd": v[1]}
+                                  for s, v in d.items() if s != "accn"}
+                              for q, d in live.reported_segments(root).items()},
+        "public": bool(cfg.get("public")),
+        "public_since": cfg.get("public_since"),
     }
     if paths:
         data["path"] = paths
