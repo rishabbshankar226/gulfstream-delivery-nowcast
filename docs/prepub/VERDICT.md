@@ -19,7 +19,7 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 | # | Criterion | Holds | Measurement |
 |---|---|---|---|
 | 1 | Zero open S1 findings | **no** | Two: F015 and F016, both from the exposure scan (P3.5), both the owner's to decide. Of the other S1 findings, 19 are fixed and 3 refuted. |
-| 2 | Zero open S2 on the post, the README's first screen, the dashboard's first screen, the note's first page and the workbook's Summary sheet | **no** | One: F081. "I hold no position in General Dynamics" sits on `README.md` line 15 and on the note's first page and footer. It is undated and carried forward by the build, and only the owner can state it. `GO_PUBLIC.md` step 1 dates it. No other S2 is open on those five surfaces. One regrade bears on this: a round 2 reviewer's S2 (FINANCE-4) covered the dashboard, the workbook and the chart legends. The dashboard and workbook now say the pace is my construction. The legends of the README's charts still say "GD guidance pace"; I graded that part S3 (F068), because the README's first paragraph, on the same screen as its first chart, calls it "a pace built from GD's own guidance". A reader who grades the legend S2 will count criterion 2 as failing on it as well. |
+| 2 | Zero open S2 on the post, the README's first screen, the dashboard's first screen, the note's first page and the workbook's Summary sheet | **no** | One: F081. "I hold no position in General Dynamics" sits on `README.md` line 15 and on the note's first page and footer. It is undated and carried forward by the build, and only the owner can state it. `GO_PUBLIC.md` step 1 dates it. No other S2 is open on those five surfaces. A round 2 reviewer's S2 on the pace's name (FINANCE-4) covered the dashboard, the workbook and the chart legends; all three now say it is my construction, the legends as "Pace built from GD's outlook" (F068, F094). |
 | 3 | The ledger shows zero `mismatch`, `untraced` and `stale` rows on the post, README, dashboard, note and workbook, after its nine plants were caught | yes | `rows 2864  flagged 0` on the final tree, every surface. The nine plants were rerun on that tree: 9 planted, 9 caught, 0 missed (`LEDGER_SELFTEST.md`). |
 | 4 | Every recomputed figure in P2.2 matches at its displayed precision, or differs with an erratum | yes | `RECOMPUTE_DIFF.md`: 547 figures, 547 match. `git diff --stat 36fed31..HEAD -- results data/processed` lists only files the audit added (`segments_reported.csv`, `results/exploratory/sensitivity.*`), so the figures the recompute matched are the figures in the final tree. |
 | 5 | P2.3's lock checks all pass | yes | `LOCK_CHECK.md`: the file's sha256 `3c4cdbd0...6f23` equals the hash in the tree, at the tag, in the release notes and in `2026Q3_lock.json`; the release was published 2026-10-29T05:51:24Z (01:51 ET) and the SEC accepted GD's 8-K at 2026-10-30 08:09:27 ET; the lock commit `a44e5ac` is an ancestor of `main`. |
@@ -56,10 +56,9 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 
 **S3**
 
-- **F053.** No `og:image` on the dashboard.
 - **F063.** Four latent points in the registry parse and the lock path that change no figure today.
-- **F064.** The note's risks are general 10-K factors.
-- **F068.** "nowcast" survives in the repository's name and the release title, and the chart legends say "GD guidance pace" with no word that it is my construction.
+- **F064.** The note's risks section still lists eight general 10-K factors, after a sentence naming the two Gulfstream risks cited earlier in the note.
+- **F068.** "nowcast" survives in the repository's name and the release title.
 - **F074, F098.** Statistics a referee would add (an interval on the difference in average miss, a test against the winning baseline) and wording points from round 2.
 - **F076.** The G700 sentence copies GD's 10-K, which puts EASA certification before first deliveries.
 - **F107.** The transcript of GD's 2026-10-30 call, the source of the newest row in `data/guidance.csv`, is not cached with the others.
