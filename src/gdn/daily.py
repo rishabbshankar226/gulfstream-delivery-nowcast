@@ -56,8 +56,12 @@ def merge_manifests(ours, theirs):
     if a.get("backtest") and b.get("backtest") and a["backtest"] != b["backtest"]:
         raise ValueError("backtest conflict: the two machines name different immutable snapshots")
     snaps = dict(a.get("snapshots", {}))
+    def content(entry):
+        # Two machines that download the same zip record different times for it; only the bytes matter.
+        return {k: v for k, v in entry.items() if k != "downloaded_utc"}
+
     for date, entry in b.get("snapshots", {}).items():
-        if date in snaps and snaps[date] != entry:
+        if date in snaps and content(snaps[date]) != content(entry):
             raise ValueError(f"snapshot conflict for {date}: resolve its manifest and files together")
     snaps.update(b.get("snapshots", {}))
     return json.dumps({"backtest": b.get("backtest") or a.get("backtest"),

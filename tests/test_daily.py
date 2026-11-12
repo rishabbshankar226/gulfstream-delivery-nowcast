@@ -195,3 +195,13 @@ def test_daily_merges_diverged_path_history_in_real_git(tmp_path, monkeypatch):
     assert [r["date"] for r in read_csv(first / path)] == ["2026-10-27", "2026-10-28", "2026-10-29"]
     assert not a.merging() and not a.dirty_tracked() and a.ahead() == 0
     assert "2026-10-28" in a.git("show", f"origin/{a.git('branch', '--show-current').stdout.strip()}:{path}").stdout
+
+
+def test_a_manifest_merge_accepts_the_same_zip_downloaded_at_two_times():
+    # F014. Two machines that download the same file on the same date record different download times.
+    # That is not a conflict: the zip and its subset hashes agree.
+    e = {"zip_sha256": "aaa", "zip_bytes": 5, "files": {"MASTER.txt.gz": "h1"}}
+    ours = {"backtest": "2026-10-19", "snapshots": {"2026-10-28": dict(e, downloaded_utc="2026-10-28T10:43:00Z")}}
+    theirs = {"backtest": "2026-10-19", "snapshots": {"2026-10-28": dict(e, downloaded_utc="2026-10-28T06:20:00Z")}}
+    merged = json.loads(daily.merge_manifests(json.dumps(ours), json.dumps(theirs)))
+    assert merged["snapshots"]["2026-10-28"]["downloaded_utc"] == "2026-10-28T06:20:00Z"
