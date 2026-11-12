@@ -88,7 +88,7 @@ grep -E "predictions/2026Q3.json|results/live/2026Q3_lock.json|results/live/2026
 
 GitHub, the repository's Settings, General, Danger Zone, Change repository visibility, Public.
 
-- Check: in a logged-out browser window, `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast` opens and the README's first image shows the card "SCORED: MISSED BY 8.0 OUTSIDE THE BAND".
+- Check: in a logged-out browser window, `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast` opens, the README's live summary reads "one locked quarter, a miss outside its band", and its first chart (`output/charts/track_record.png`) renders.
 
 ### 5. Enable Pages and deploy
 
@@ -152,7 +152,7 @@ git switch main && git pull --ff-only
 make pdf
 ```
 
-Retake `output/charts/dashboard.png` from the live dashboard, commit both by path, push, then `gh workflow run pages`.
+Commit the PDFs and the stamp by path, push, then `gh workflow run pages`. `output/charts/dashboard.png` is a screenshot of the dashboard that no page links to any more; retake it with `tools/shoot.py` when the page changes, or delete it.
 
 - Check: `shasum -a 256 report/note.html | cut -c1-64` equals `cut -c1-64 output/GD_research_note.inputs.sha256`, and the dashboard shows the new state logged out.
 
