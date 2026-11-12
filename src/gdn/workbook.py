@@ -69,7 +69,8 @@ def about(wb, snap, chosen):
          "out and scored against seasonal, last-quarter and GD guidance baselines. The guidance pace is a typed "
          "input: GD's full-year outlook less deliveries already reported, spread over the remaining quarters.", None),
         ("5. Segment estimates: the delivery estimate x trailing Aerospace revenue per delivery, services included: "
-         "a mechanical estimate; defense segments use the seasonal naive with drift.", None),
+         "a mechanical estimate; defense segments use the seasonal naive with drift, a rule from a study of other "
+         "contractors, so applying it to GD is an assumption.", None),
         ("", None),
         ("Colour key", BOLD),
         ("Blue: typed input from a source file. Black: formula.", None),
@@ -243,6 +244,8 @@ def sensitivity(wb):
         put(ws, f"A{r}", k, F_AIR, typed=True)
         put(ws, f"B{r}", f"=Live!$B$11+A{r}", F_AIR)
         put(ws, f"C{r}", f"=B{r}*Segments!$B$13", F_USD)
+    put(ws, "A12", "Aerospace revenue here is mechanical: deliveries x trailing Aerospace revenue per delivery, "
+                   "services included.")
     ws.freeze_panes = "B2"
     widths(ws, [18, 12, 18])
 

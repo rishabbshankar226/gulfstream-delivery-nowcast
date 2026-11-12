@@ -29,7 +29,7 @@ BASE_NAMES = {"guidance": "GD's guidance pace", "seasonal": "the same quarter la
 STUDY_URL = "https://rishabbshankar226.github.io/Defense-Backlog-forecast/"
 PRODUCT_IDS = ["pc-g500-g600-entry-into-service", "pc-g700-first-deliveries", "pc-g800-certification",
                "pc-g800-first-deliveries", "pc-g650-end-of-production", "pc-g280-mid-cabin", "pc-g280-iai",
-               "pc-g400-timing-update"]
+               "pc-g300-replaces-g280", "pc-g280-final-delivery", "pc-g400-timing-update"]
 REPO_URL = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast"
 
 
@@ -528,7 +528,7 @@ def build(root="."):
              for x in est["sensitivity"]]
     out_bits = [C.say(c) for c in ("os-del", "os-rev", "os-margin") if C.has(c)]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 9. Aerospace revenue for each delivery '
-        "count</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
+        "count: deliveries times trailing revenue per delivery, a mechanical figure</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
         + ("<h3>GD's outlook for 2026, before the release</h3><p>As of GD's 2026-07-29 call: " if score else
            "<h3>GD's own outlook for 2026</h3><p>") + " ".join(out_bits)
         + "</p></div></div>")
@@ -587,7 +587,8 @@ def build(root="."):
         + table(["Segment", "Revenue, 4Q to 2026Q2", "Revenue, 4Q to 2025Q2", "Drift, 2026Q3", "Margin, 4Q",
                  "Backlog", "Coverage, years"], seg_rows)
         + table(["Derived", "Value"], derived)
-        + '<div class="src">From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
+        + '<div class="src">The rows "from the estimate" are mechanical: the delivery estimate times trailing '
+          'Aerospace revenue per delivery, services included. From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
           "typed inputs.</div></div>")
 
     # 11. Sources
@@ -626,6 +627,21 @@ def build(root="."):
     return text
 
 
+def used_share(root):
+    """How many counted events sit on airframes at least three years old by the registry's year of manufacture."""
+    root = Path(root)
+    m = read_json(root / "results/metrics.json")
+    e = m["definition"].lower()
+    reg = read_csv(root / "data/processed/registry_quarterly.csv")
+    lo, hi = min(r["window_start"] for r in reg), max(r["window_end"] for r in reg)
+    ev = [r for r in read_csv(root / "data/processed/serials.csv") if r[e] and lo < r[e] <= hi]
+    old = [r for r in ev if r["year_mfr"] and int(r[e][:4]) - int(r["year_mfr"]) >= 3]
+    if not ev:
+        return ""
+    return (f" It is not rare: by the registry's own year of manufacture, {len(old):,} of the {len(ev):,} counted events "
+            f"({len(old) / len(ev) * 100:.1f}%) are airframes at least three years old.")
+
+
 def limitations(root):
     """The seven limitations from DECISIONS.md's README list, in plain words."""
     return [
@@ -642,7 +658,10 @@ def limitations(root):
         "first owner's date.",
         "Used jets: a used jet that re-entered the US registry with a fresh airworthiness date, one with no "
         "airworthiness date or year of manufacture, or one whose maker code changed, "
-        "can read as a new delivery.",
+        "can read as a new delivery." + used_share(root),
+        "Mid-cabin gap: the mid-cabin count rests on the G280 alone, and GD has said G280 deliveries end in 2027 with a "
+        "production break before the G300 (product cycle, above). The method is untested in a quarter with few or no "
+        "mid-cabin deliveries.",
         "Band: the past-miss band comes from errors measured on a finished registry file, so it is likely too "
         "narrow at a live lock.",
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "

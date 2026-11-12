@@ -188,7 +188,8 @@ def reading_2021(root):
     p = Path(root) / "results/exploratory/sensitivity.json"
     if not p.exists():
         return ""
-    v = {x["key"]: x for x in read_json(p)["variants"]}
+    sens = read_json(p)
+    v = {x["key"]: x for x in sens["variants"]}
     a, b = v.get("outlook_2021_as_117"), v.get("preregistered")
     if not a or not b:
         return ""
@@ -196,9 +197,35 @@ def reading_2021(root):
     return (" One reading matters here. On its 2021-01-27 call GD gave the year only as a change from 2020, \"10 fewer "
             "aircraft\", and the preregistered rule reads a change only when its base figure is in the same sentence, "
             f"so it reads no number. Read as 117, the guidance pace misses by {f1(a['mae']['guidance'])} on average, "
-            f"not {f1(b['mae']['guidance'])}, and the registry estimate is closer in {t['wins']} of {a['n']} quarters. "
-            "That and the other variants I tried afterwards are in "
+            f"not {f1(b['mae']['guidance'])}, and the registry estimate is closer in {t['wins']} of {a['n']} quarters."
+            + quarter_plans(root, sens) + " These and the other variants I tried afterwards are in "
             "[results/exploratory/sensitivity.md](results/exploratory/sensitivity.md).")
+
+
+def quarter_plans(root, sens):
+    """What the guidance baseline scores when GD's own stated plan for a quarter replaces my pace. The example is
+    the quarter where the plan and my pace sit furthest apart."""
+    c = {x["key"]: x for x in sens["variants"]}.get("quarter_plans")
+    plans = sens.get("quarter_plans") or {}
+    if not c or not plans:
+        return ""
+    pace = {r["quarter"]: float(r["total"]) for r in read_csv(Path(root) / "results/holdout.csv")
+            if r["model"] == "guidance"}
+    q = max(plans, key=lambda k: abs(pace[k] - plans[k]))
+    src = next(r for r in read_csv(Path(root) / "data/quarter_plans.csv") if r["quarter"] == q)
+    t = c["ratio_vs_guidance"]
+    words = {1: "one", 2: "two", 3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight", 9: "nine"}
+    n = len(plans)
+    return (f" A second one: my pace reads only GD's full-year outlook, and on {words.get(n, n)} calls held inside a "
+            "held-out quarter GD also said how many aircraft it planned to deliver in that quarter. On "
+            f"{src['call_date']} it said \"{src['quote'].rstrip('.')}\", when my pace for {q} says {f1(pace[q])}. With "
+            "GD's stated plans in place of my pace in those quarters, the baseline misses by "
+            f"{f1(c['mae']['guidance'])} on average, not {f1(pace_mae(sens))}, and the registry estimate is closer in "
+            f"{t['wins']} of {c['n']} quarters.")
+
+
+def pace_mae(sens):
+    return {x["key"]: x for x in sens["variants"]}["preregistered"]["mae"]["guidance"]
 
 
 def lock_timing(root):
@@ -304,7 +331,7 @@ def results(root):
               f"GD stated a numeric delivery outlook covering {g['sourced']} of the 26 held-out quarters, so GD's "
               f"guidance pace is the baseline named first. The other {len(g['fallback_quarters'])} quarters "
               f"({', '.join(g['fallback_quarters'])}) fall back to the same quarter last year, because no 2021 call "
-              f"stated a full-year number. On the {g['sourced']} sourced quarters the guidance pace missed by "
+              f"gave a full-year figure that the preregistered rule reads. On the {g['sourced']} sourced quarters the guidance pace missed by "
               f"{f1(g['mae_sourced'])} aircraft on average." + reading_2021(root), "",
               f"The past-miss band, built from each quarter's earlier misses only, held GD's count in {band['hits']} "
               f"of {band['n']} held-out quarters ({f1(band['coverage_pct'])}%, against a nominal 80%; exact 95% interval "

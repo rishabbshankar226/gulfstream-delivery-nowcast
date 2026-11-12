@@ -165,3 +165,30 @@ def test_the_note_footer_carries_the_disclaimer_on_every_printed_page(clone):
     css = html[html.index("<style>"):html.index("</style>")]
     assert "@bottom-center" in css and "Not investment advice" in css and "Not affiliated with General Dynamics" in css
     assert "PAGEFOOT" not in css
+
+
+def test_gd_stated_quarter_plans_are_scored_beside_the_guidance_pace(tmp_path):
+    # F058. On six calls GD stated the quarter's own delivery plan. The preregistered pace ignores them; the
+    # exploratory file scores them, and the README gives the result beside the headline.
+    plans = {r["quarter"]: r for r in csv.DictReader((ROOT / "data/quarter_plans.csv").open())}
+    ends = {r["quarter"]: r["fiscal_end"] for r in csv.DictReader((ROOT / "data/processed/gd_deliveries.csv").open())}
+    reported = {r["quarter"]: int(r["total"]) for r in csv.DictReader((ROOT / "data/processed/gd_deliveries.csv").open())}
+    assert all(plans[q]["call_date"] <= ends[q] for q in plans)          # stated before the quarter ended
+    ae = holdout_ae()
+    swapped = [abs(float(plans[q]["plan"]) - reported[q]) if q in plans else ae[q]["guidance"] for q in ae]
+    s = sensitivity.compute(ROOT)
+    v = {x["key"]: x for x in s["variants"]}["quarter_plans"]
+    assert v["mae"]["guidance"] == pytest.approx(mean(swapped))
+    assert v["mae"]["ratio"] == pytest.approx(mean(ae[q]["ratio"] for q in ae))
+    closer = sum(1 for q, g in zip(ae, swapped) if ae[q]["ratio"] < g)
+    assert v["ratio_vs_guidance"]["wins"] == closer
+    text = report.results(ROOT)
+    assert f"the baseline misses by {mean(swapped):.1f} on average" in text
+    assert f"the registry estimate is closer in {closer} of {len(ae)} quarters" in text
+    # a plan stated after its quarter's fiscal end is refused
+    from gdn.fiscal import Calendar
+    bad = tmp_path / "data"
+    bad.mkdir()
+    (bad / "quarter_plans.csv").write_text("quarter,call_date,plan,quote,speaker,url\n2023Q3,2023-10-25,27,q,s,u\n")
+    with pytest.raises(ValueError):
+        sensitivity.load_quarter_plans(tmp_path, Calendar.load(ROOT))

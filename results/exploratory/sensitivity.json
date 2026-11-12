@@ -2,6 +2,14 @@
   "note": "Exploratory: tried after the held-out results were seen. None of it changes the headline.",
   "chosen_definition": "E1",
   "sourced_quarters_with_2021_as_117": 26,
+  "quarter_plans": {
+    "2021Q3": 32.0,
+    "2021Q4": 40.0,
+    "2022Q2": 26.0,
+    "2022Q4": 40.5,
+    "2023Q2": 26.0,
+    "2023Q3": 27.0
+  },
   "variants": [
     {
       "key": "preregistered",
@@ -169,6 +177,54 @@
         "losses": 14,
         "ties": 0,
         "p_one_sided": 0.7214014530181885
+      }
+    },
+    {
+      "key": "quarter_plans",
+      "label": "GD's stated plan for the quarter in place of the guidance pace, in the 6 quarters where a call gave one",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 6.018387110703274,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 12,
+        "losses": 14,
+        "ties": 0,
+        "p_one_sided": 0.7214014530181885
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      }
+    },
+    {
+      "key": "quarter_plans_and_2021_as_117",
+      "label": "Both: GD's stated quarter plans, and the January 2021 statement read as 117",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 5.703118279404744,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
       }
     }
   ]

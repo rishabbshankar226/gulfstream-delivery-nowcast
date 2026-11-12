@@ -452,6 +452,20 @@ def load_facts(root):
             put(f"sv.{k}.wins", v["ratio_vs_guidance"]["wins"], "results/exploratory/sensitivity.json")
             put(f"sv.{k}.of", sum(v["ratio_vs_guidance"][x] for x in ("wins", "losses", "ties")), "results/exploratory/sensitivity.json")
             put(f"sv.{k}.p", v["ratio_vs_guidance"]["p_one_sided"], "results/exploratory/sensitivity.json")
+    # GD's stated plans for single quarters (data/quarter_plans.csv) and the pace they stand in for
+    qp = root / "data/quarter_plans.csv"
+    if qp.exists():
+        pl = _csv(qp)
+        put("qp.n", len(pl), "data/quarter_plans.csv (rows)")
+        for r in pl:
+            put(f"qp.{r['quarter']}.plan", float(r["plan"]), "data/quarter_plans.csv")
+            put(f"qp.{r['quarter']}.call", r["call_date"], "data/quarter_plans.csv")
+        far = max(pl, key=lambda r: abs(F[f"bt.{r['quarter']}.guidance.total"] - float(r["plan"])))
+        put("qp.far.plan", float(far["plan"]), f"data/quarter_plans.csv ({far['quarter']}, the plan furthest from the pace)")
+        put("qp.far.call", far["call_date"], "data/quarter_plans.csv")
+        put("qp.far.pace", F[f"bt.{far['quarter']}.guidance.total"], f"results/holdout.csv ({far['quarter']}, guidance, total)")
+    put("mid.min_holdout", min(F[f"gd.{q}.mid"] for q in hq),
+        "data/processed/gd_deliveries.csv (fewest mid-cabin deliveries in a held-out quarter)")
     # what GD reported by segment for a scored quarter
     rp = root / "data/processed/segments_reported.csv"
     if rp.exists():
@@ -594,7 +608,7 @@ TEMPLATES = [
     T("dashboard", "GD stated a numeric delivery outlook covering {m.holdout.guidance.sourced:int} of the {m.holdout.n:int} "
                    "test quarters; the other {guid.n_fallback:int} ("),
     T("readme", "The other {guid.n_fallback:int} quarters ("),
-    T("readme", "because no {guid.fallback_year:year} call stated a full-year number. On the {m.holdout.guidance.sourced:int} "
+    T("readme", "because no {guid.fallback_year:year} call gave a full-year figure that the preregistered rule reads. On the {m.holdout.guidance.sourced:int} "
                 "sourced quarters the guidance pace missed by {m.holdout.guidance.mae_sourced:f1} aircraft on average"),
     T("readme,note", "held GD's count in {m.holdout.band.hits:int} of {m.holdout.band.n:int} held-out quarters "
                      "({m.holdout.band.coverage_pct:pct1}, against a nominal {const.band_nominal_pct:pct0}; exact "
@@ -853,6 +867,21 @@ NEW = [
     ("readme", "GD's reported Gulfstream deliveries by quarter against the {const.n_models:word} estimates"),
     # README results and error analysis
     ("readme", "GD gave the year only as a change from 2020, \"{const.ten:int} fewer aircraft\""),
+    ("readme", "on {qp.n:word} calls held inside a held-out quarter GD also said"),
+    ("readme", "On {qp.far.call:date} it said \"We now expect to deliver {qp.far.plan:int} aircraft in the third quarter, with a "
+               "rapid increase in the fourth quarter deliveries\", when my pace for 2023Q3 says {qp.far.pace:f1}"),
+    ("readme,interview", "the baseline misses by {sv.quarter_plans.mae.guidance:f1} on average, not {m.holdout.mae.guidance:f1}, "
+                         "and the registry estimate is closer in {sv.quarter_plans.wins:int} of {sv.quarter_plans.of:int} quarters"),
+    ("interview", "On {qp.n:word} calls GD also said how many aircraft it planned to deliver"),
+    ("readme", "\"a few demonstrators all up about {const.demo11:int} aircraft\""),
+    ("readme", "No held-out quarter had fewer than {mid.min_holdout:int} mid-cabin deliveries"),
+    ("readme", "\"ought to deliver in the second quarter of next year\", meaning {const.g300_late:year}, with the G300 to follow "
+               "around late {const.g300_late:year} or early {const.g300_early:year}"),
+    ("note", "{used.old3:int} of the {used.n:int} counted events ({used.old3_pct:pct1}) are airframes at least "
+             "{const.old_years:word} years old"),
+    ("sensitivity", "on {qp.n:int} calls held inside a held-out quarter GD said how many aircraft it planned to deliver in that "
+                    "quarter (2021Q3: {qp.2021Q3.plan:int}, 2021Q4: {qp.2021Q4.plan:int}, 2022Q2: {qp.2022Q2.plan:int}, "
+                    "2022Q4: {qp.2022Q4.plan:f1}, 2023Q2: {qp.2023Q2.plan:int}, 2023Q3: {qp.2023Q3.plan:int}"),
     ("readme", "Read as {const.alt2021:int}, the guidance pace misses by {sv.outlook_2021_as_117.mae.guidance:f1} on average, "
                "not {sv.preregistered.mae.guidance:f1}, and the registry estimate is closer in {sv.outlook_2021_as_117.wins:int} "
                "of {sv.outlook_2021_as_117.of:int} quarters"),
@@ -998,6 +1027,10 @@ def _extra_consts(F):
     put("const.two_x", 2, "threshold named in the sentence (deliveries per registry event above 2)")
     put("const.old_years", 3, "the age cut used for the used-jet count (event year minus year_mfr at least 3)")
     put("const.two_prefix", 2, "data/processed/serials.csv (each double-counted serial sits under two mfr_code prefixes)")
+    put("const.demo11", 11, "GD's 2022-01-26 call, quoted: 'a few demonstrators all up about 11 aircraft' "
+        "(data/raw/sources/calls/2022-01-26-fool.txt)")
+    put("const.g300_late", 2027, "report/claims.json pc-g280-final-delivery (the year after the 2026-07-29 call; \"late '27\")")
+    put("const.g300_early", 2028, "report/claims.json pc-g280-final-delivery (\"early '28\")")
     put("const.eng_a", 4, "src/gdn/faa.py scope rule (TYPE-ENG 4) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_b", 5, "src/gdn/faa.py scope rule (TYPE-ENG 5) and docs/PREREGISTRATION.md section 3 rule 1")
     put("const.eng_out", 2, "ACFTREF row 3980222,GULFSTREAM AEROSPACE CORP,GVIII-G700,5,2 in the FAA file of 2026-10-30")

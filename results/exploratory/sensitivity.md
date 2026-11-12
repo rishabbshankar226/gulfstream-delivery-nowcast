@@ -13,5 +13,9 @@ Average miss in aircraft. "Closer" counts the quarters where the registry estima
 | Without 2023Q1 to 2024Q1, the five quarters before G700 deliveries began | 21 | 6.04 | 7.19 | 5.42 | 4.86 | 8.52 | 9 of 21 | 0.808 |
 | Only 2023 and 2024 | 8 | 3.48 | 2.75 | 12.51 | 5.00 | 11.38 | 8 of 8 | 0.004 |
 | The other event definition, E2, in place of E1 | 26 | 5.47 | 6.27 | 6.92 | 4.62 | 8.81 | 17 of 26 | 0.084 |
+| GD's stated plan for the quarter in place of the guidance pace, in the 6 quarters where a call gave one | 26 | 5.52 | 6.19 | 6.02 | 4.62 | 8.81 | 12 of 26 | 0.721 |
+| Both: GD's stated quarter plans, and the January 2021 statement read as 117 | 26 | 5.52 | 6.19 | 5.70 | 4.62 | 8.81 | 11 of 26 | 0.837 |
 
 The January 2021 reading: on its 2021-01-27 call GD gave the year only as a change from 2020 ("So all up, 10 fewer aircraft", after reporting 127 deliveries for 2020). The preregistered rule reads a change only when its base figure is in the same sentence, so the outlook is blank and 2021 falls back to the same quarter last year. Read as 117, all 26 held-out quarters have an outlook.
+
+GD's stated quarter plans: on 6 calls held inside a held-out quarter GD said how many aircraft it planned to deliver in that quarter (2021Q3: 32, 2021Q4: 40, 2022Q2: 26, 2022Q4: 40.5, 2023Q2: 26, 2023Q3: 27; a range is taken at its midpoint). The quotes and links are in `data/quarter_plans.csv`. The preregistered guidance pace reads only full-year outlooks, so it does not use them. In the rows above that name these plans, the baseline is the plan itself in those quarters and the guidance pace in the rest.
