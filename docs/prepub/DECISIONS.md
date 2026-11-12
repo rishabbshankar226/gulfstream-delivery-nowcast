@@ -113,7 +113,7 @@ The owner asked for "a harsh audit using 11 independent auditors to determine wh
   - every brief carries the never-run list word for word;
   - cold copies carry no `.git`;
   - each informed auditor's clone or mirror has its push URL set to an invalid value.
-- **Leak check.** The earlier form of the check, `git grep -E '\bF[0-9]{3}\b'`, printed nothing, because `\b` is not ERE. The working form, `(^|[^A-Za-z0-9])F[0-9]{3}([^0-9]|$)`, finds finding numbers in code comments in `src/gdn/daily.py`, `src/gdn/note.py` and `tests/test_after_score.py`. They are public code and carry numbers, not the findings' text. They stay in the cold copy, as in D17.
+- **Leak check.** The earlier form of the check, `git grep -E '\bF[0-9]{3}\b'`, printed nothing, because `\b` is not ERE. The working form, `(^|[^A-Za-z0-9])F[0-9]{3}([^0-9]|$)`, finds finding numbers in code comments. On the tracked tree they sit in `src/gdn/daily.py`, `src/gdn/note.py` and `tests/test_after_score.py`. On the cold copy (`grep -rlIE` with the same pattern) they sit in 10 files, most of them tests, whose comments give a one-line reason beside the number. They are public code, and what a public reader sees. They stay in the cold copy, as in D17.
 - **Verdict rule, fixed before launch.**
   - The verdict is the spec's §7, its 13 criteria, re-measured at the frozen commit.
   - F015, F016 and F081 are still open with no owner decision logged, so round 4 starts NO-GO.
