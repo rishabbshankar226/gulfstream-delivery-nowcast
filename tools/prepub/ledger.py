@@ -433,7 +433,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser()
     ap.add_argument("--root", default=".")
     ap.add_argument("--out", default="docs/prepub/LEDGER.csv")
-    ap.add_argument("--venv-py", default="~/Desktop/projects/gulfstream-delivery-nowcast/.venv/bin/python")
+    ap.add_argument("--venv-py", default=str(HERE.parents[1] / ".venv/bin/python"))
     ap.add_argument("--skip", default="", help="comma list of surfaces to skip: dashboard,pdf,workbook,build")
     ap.add_argument("--charts", default=str(HERE / "chart_numbers.csv"))
     a = ap.parse_args(argv)

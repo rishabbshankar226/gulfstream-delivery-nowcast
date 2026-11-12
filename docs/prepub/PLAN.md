@@ -8,53 +8,49 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | Phase | Start | End | Budget | Note |
 |---|---|---|---|---|
 | P0 | 2026-11-11 18:44 | 19:02 | 45 min | on budget |
-| P1 | 2026-11-11 19:02 | 19:32 | 2 h | P1.3 mapping finished with P4.6 |
-| P2 to P4 | 2026-11-11 19:03 (subagents launched) | | 3 h | run behind P1 per D2 |
-| P5 | | | 2 h | |
-| P6 | | | 2 h | |
-| P7 | | | 1 h | |
-| P8 | | | 2.5 h | |
+| P1 | 19:02 | 19:32 | 2 h | P1.3 mapping finished with P4.6 |
+| P2 to P4 | 19:03 (subagents launched) | 20:35 (last reviewer in) | 3 h | reviewers ran behind P1 (D2) |
+| P5 | with P2 to P4 | 20:13 | 2 h | codex review, defect trace, four code fixes in a scratch clone (D5) |
+| P6 | 19:40 | 21:05 | 2 h | fix pass, merged in `e778e23`; registry and sell-side fixes after their reports |
+| P7 | with P6 | 21:10 | 1 h | post rewritten in its generator; alternates and check |
+| P8 | 20:48 (round 2 launched) | | 2.5 h | |
 
 ## Items
 
 | ID | Item | Status | Done test |
 |---|---|---|---|
-| P0.1 | Branch and record hashes | done | `git status -sb` = prepub-audit, HEAD = origin/main = 36fed31, `RECORD_HASHES.txt` has 61 lines |
-| P0.2 | New CLAUDE.md | done | `head -5 CLAUDE.md` names the spec path; v1 kept at `.build/CLAUDE_v1.md` |
-| P0.3 | Baseline: tests, gate, make all, determinism | done | `BASELINE.md`: tests 6 failed 114 passed; gate 42 assertions 1 failing 2 warning; make all changed one chart; determinism identical |
-| P0.4 | SURFACE.md | done | `SURFACE.md` has a row per §3 file, the `public` readers and the rounding rules |
-| P1.0 | Tools venv | done | `~/gdn-prepub/venv` imports pypdf, openpyxl, formulas (pip exit 0) |
-| P1.1 | ledger.py | done | `tools/prepub/ledger.py` writes `LEDGER.csv` (2405 rows) |
-| P1.2 | Nine plants | done | `LEDGER_SELFTEST.md`: 9 caught, 0 missed; clean copy 0 mismatch, 0 untraced on post and README |
-| P1.3 | Ledger on real tree | in progress | 25 flagged rows on the real tree, each mapped to F002, F006 to F010 in `FINDINGS.md` |
-| P2.1 | Recompute subagent | running (subagent) | |
-| P2.2 | Recompute diff | todo | |
-| P2.3 | Lock check | todo | |
-| P3.1 | Deliveries vs exhibits | running (subagent) | |
-| P3.2 | Guidance vs transcripts | running (subagent) | |
-| P3.3 | Claims vs filings | running (subagent) | |
-| P3.4 | Links | todo | |
-| P3.5 | Exposure scan | todo | |
-| P4.1 | Sell-side reviewer | running (subagent) | |
-| P4.2 | Buy-side reviewer | report in | `docs/prepub/reviews/buyside.md` written; NO-GO; S1 6, S2 13, S3 8; to verify in P4.6 |
-| P4.3 | Statistician | running (subagent) | |
-| P4.4 | Registry engineer | running (subagent) | |
-| P4.5 | Compliance reviewer | running (subagent) | |
-| P4.6 | Merge reviews into FINDINGS | todo | |
-| P4.7 | Finance checks | todo | |
-| P5.1 | Codex branch review | todo | |
-| P5.2 | Lock, score, post-score paths | todo | |
-| P5.3 | Data and model paths | todo | |
-| P5.4 | T9 direct tests (may be cut) | todo | |
-| P5.5 | After-state tests, gate, determinism | todo | |
-| P6.1 | Fix S1 and S2 | todo | |
-| P6.2 | L1 and L2 by hand | todo | |
-| P6.3 | S3 under 15 min | todo | |
-| P6.4 | Rebuild, ledger, tests, gate | todo | |
-| P7.1 | Post rewrite in generator | todo | |
-| P7.2 | Two alternates | todo | |
-| P7.3 | Post check | todo | |
-| P8.1 | Round 2 (three fresh reviewers) | todo | |
+| P0.1 | Branch and record hashes | done | `prepub-audit` cut from `origin/main` `36fed31`; `RECORD_HASHES.txt` has 61 lines |
+| P0.2 | New CLAUDE.md | done | `head -5 CLAUDE.md` names the spec path |
+| P0.3 | Baseline | done | `BASELINE.md`, Before |
+| P0.4 | SURFACE.md | done | a row per §3 file, the `public` readers, the rounding rules |
+| P1.0 | Tools venv | done | imports pypdf, openpyxl, formulas |
+| P1.1 | ledger.py | done | `LEDGER.csv`, 2,800 rows on the final tree |
+| P1.2 | Nine plants | done | `LEDGER_SELFTEST.md`: 9 caught, 0 missed; rerun on the final tree, 9 caught |
+| P1.3 | Ledger on real tree | done | 25 flagged rows mapped in `FINDINGS.md` section 3; final ledger 0 flagged |
+| P2.1 | Recompute subagent | done | `reviews/recompute.txt` |
+| P2.2 | Recompute diff | done | `RECOMPUTE_DIFF.md`: 547 figures, 547 match |
+| P2.3 | Lock check | done | `LOCK_CHECK.md`: all checks pass |
+| P3.1 | Deliveries vs exhibits | done | `SOURCES_DELIVERIES.csv`: 43 verified |
+| P3.2 | Guidance vs transcripts | done | `SOURCES_GUIDANCE.csv`: 24 verified, 3 verified elsewhere, 1 call not in the file (F054) |
+| P3.3 | Claims vs filings | done | `SOURCES_CLAIMS.csv`: 227 rows, 204 verified, 23 with a closed finding |
+| P3.4 | Links | done | `LINKS.csv`: 187 links on the final tree |
+| P3.5 | Exposure scan | done | `EXPOSURE.md`; F015 and F016 open for the owner |
+| P4.1 to P4.5 | Five reviewers | done | five files under `reviews/` |
+| P4.6 | Merge reviews into FINDINGS | done | `FINDINGS.md` section 2: every reviewer finding has a status |
+| P4.7 | Finance checks | done | `FINANCE_CHECKS.md` |
+| P5.1 | Codex branch review | done | DECISIONS D5; merged in `e778e23` |
+| P5.2 | Lock, score, post-score paths | done | `DEFECT_TRACE.md`; F017, F018 |
+| P5.3 | Data and model paths | done | `DEFECT_TRACE.md` |
+| P5.4 | T9 direct tests | cut | see Cut items |
+| P5.5 | After-state tests, gate, determinism | done | `BASELINE.md`, After |
+| P6.1 | Fix S1 and S2 | done | `FINDINGS.md`; open rows are the owner's (F015, F016, F081) |
+| P6.2 | L1 and L2 by hand | done | F006, F007 |
+| P6.3 | S3 under 15 min | done | the rest open with reasons |
+| P6.4 | Rebuild, ledger, tests, gate | done | ledger 0 flagged; 170 tests pass; gate 4 failing, logged in D10 |
+| P7.1 | Post rewrite in generator | done | `src/gdn/report.py` (`post`), 1,284 characters |
+| P7.2 | Two alternates | done | `POST_ALTERNATES.md` |
+| P7.3 | Post check | done | `POST_CHECK.md` |
+| P8.1 | Round 2 (three fresh reviewers) | running | |
 | P8.2 | Round 3 (one attacker) | todo | |
 | P8.3 | Fix rounds 2 and 3 | todo | |
 | P8.4 | Fresh clone check | todo | |
@@ -65,20 +61,14 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 
 ## Running
 
-Subagents launched 2026-11-11 19:03 ET (briefs in `docs/prepub/briefs/`, outputs in `docs/prepub/reviews/`):
-
-- `recompute` (P2.1): running
-- `sellside` (P4.1): running
-- `buyside` (P4.2): finished 19:22 ET
-- `statistician` (P4.3): running
-- `registry` (P4.4): running
-- `compliance` (P4.5): running
-- `sources_deliveries` (P3.1): running
-- `sources_guidance` (P3.2): running
-- `sources_claims` (P3.3): running
+- `round2_finance`, `round2_statistician`, `round2_editor` (P8.1): launched 20:48 ET on the copy `~/gdn-prepub/round2_clean/` (D9). Briefs in `docs/prepub/briefs/round2_*.md`, outputs in `docs/prepub/reviews/round2_*.md`.
 
 No background shell command is running.
 
 ## Cut items
 
-(none)
+- **P5.4** (direct tests for `daily.run`, `holdout_metrics`, `truncated_mae`, `coverage_drift`): cut. The run's effort went to the S1 and S2 findings the reviewers raised late (the stated quarter plans, the scope and holder gaps). What stands in for it: the recompute subagent rebuilt every figure those three model functions produce from the data files alone and matched all 547, the gate's `model` family rebuilds `metrics.json` independently and passes, and the codex merge added tests around `daily` and `gitops`.
+
+## Overruns
+
+- P2 to P4 ran to 20:35, inside the 3 hour budget. No phase is over budget so far.
