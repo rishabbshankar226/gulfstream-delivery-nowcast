@@ -556,7 +556,9 @@ def post(root):
         else:
             hits = sum(1 for _, x, _, _ in ls if x["inside_band"])
             avg = sum(x["ae_total"] for _, x, _, _ in ls) / len(ls)
-            lines.append(f"{len(ls)} locked estimates of Gulfstream deliveries so far: off by {f1(avg)} jets on "
+            # Kept short: with two or more locks and the private-lock sentence, a longer opener went over POST_MAX
+            # and report.run would have stopped the daily rebuild after the second score.
+            lines.append(f"{len(ls)} locked estimates so far: off by {f1(avg)} jets on "
                          f"average, {hits} of {len(ls)} inside the band. The latest, {q}: I said "
                          f"{f1(s['nowcast']['total'])}, General Dynamics reported {s['reported']['total']}.")
         lines += [what, ""]

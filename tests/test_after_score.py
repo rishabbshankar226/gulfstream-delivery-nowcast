@@ -122,8 +122,16 @@ def test_the_post_counts_its_locked_quarters(scored):
     s["quarter"] = "2026Q4"
     write_json(root / "results/live/2026Q4_score.json", s)
     two = report.post(root)
-    assert two.startswith("2 locked estimates of Gulfstream deliveries so far")
+    assert two.startswith("2 locked estimates")
     assert "My first locked estimate" not in two and "One quarter is one data point" not in two
+    # F108. The second lock's post must fit the cap too, in the longest state: a private lock, a two-digit average
+    # miss. Over the cap, report.run stops, and that would stop the daily rebuild after the second score.
+    s["ae_total"], s["inside_band"] = 12.3, False
+    write_json(root / "results/live/2026Q4_score.json", s)
+    for inside in (False, True):
+        s["inside_band"] = inside
+        write_json(root / "results/live/2026Q4_score.json", s)
+        assert len(report.post(root)) <= report.POST_MAX - 10, len(report.post(root))
 
 
 def test_the_post_is_short_and_carries_its_disclaimer(scored):
