@@ -123,3 +123,16 @@ def test_error_statements_are_in_their_cached_sources():
     if not checked:
         import pytest
         pytest.skip("source cache absent, as in a clone")
+
+
+def test_nearest_rank_positions_match_exact_arithmetic():
+    # STAT-10 (F048): a comment in stats.py claimed 0.1 * 30 gives position 4. It gives 3, as exact arithmetic does,
+    # for every count of past errors the band meets.
+    import math
+    from fractions import Fraction
+    from gdn import stats
+    for n in range(12, 60):
+        xs = list(range(n))
+        for p, f in ((0.1, Fraction(1, 10)), (0.9, Fraction(9, 10))):
+            assert stats.nearest_rank(xs, p) == xs[math.ceil(f * n) - 1], (n, p)
+    assert stats.nearest_rank(list(range(30)), 0.1) == 2      # position 3

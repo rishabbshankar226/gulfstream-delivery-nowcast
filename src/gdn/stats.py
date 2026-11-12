@@ -30,8 +30,8 @@ def holm(ps, alpha=0.05):
 def nearest_rank(xs, p):
     """Sorted ascending, the element at 1-based position ceil(p * n)."""
     s = sorted(xs)
-    # p is the float 0.1 or 0.9, so p * n is computed in floating point: at n = 30, 0.1 * 30 is
-    # 3.0000000000000004 and the position is 4. The gate computes it the same way.
+    # p is the float 0.1 or 0.9, so p * n is computed in floating point. For every n this project meets (12 to
+    # 39 past errors) the float product gives the same position as exact arithmetic: 0.1 * 30 is 3.0, position 3.
     return s[math.ceil(p * len(s)) - 1] if s else None
 
 
