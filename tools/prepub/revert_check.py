@@ -10,6 +10,7 @@ runs the test again. Nothing in this repository is touched.
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -48,8 +49,8 @@ CASES = [
     ("F020", "src/gdn/report.py", "        if len(ls) == 1:\n            verb =", "        if True:\n            verb =",
      "tests/test_after_score.py::test_the_post_counts_its_locked_quarters"),
     ("F022", "src/gdn/report.py",
-     '    p = Path(root) / "results/exploratory/sensitivity.json"\n    if not p.exists():\n        return ""\n    v = {x["key"]: x for x in read_json(p)["variants"]}\n    a, b =',
-     '    return ""\n    p = Path(root) / "results/exploratory/sensitivity.json"\n    v = {x["key"]: x for x in read_json(p)["variants"]}\n    a, b =',
+     '    a, b = v.get("outlook_2021_as_117"), v.get("preregistered")\n    if not a or not b:\n        return ""',
+     '    a, b = v.get("outlook_2021_as_117"), v.get("preregistered")\n    if True:\n        return ""',
      "tests/test_prepub_text.py::test_the_2021_reading_is_disclosed_with_its_effect_on_the_headline"),
     ("F023", "src/gdn/report.py", "    if not won or not rest or len(won) > len(years) / 2", "    if True or not won or not rest or len(won) > len(years) / 2",
      "tests/test_prepub_text.py::test_the_split_sentence_names_the_years_that_carry_the_lead"),
@@ -74,8 +75,11 @@ CASES = [
 
 
 def run(test):
+    # A fresh bytecode cache for every run: a revert that keeps the file's size and lands in the same second as the
+    # restore would otherwise be served from the stale .pyc, and the restored run would test the reverted code.
+    env = {"PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin", "PYTHONPYCACHEPREFIX": tempfile.mkdtemp(prefix="pyc")}
     r = subprocess.run([PY, "-m", "pytest", "-q", "--tb=no", "-p", "no:cacheprovider", test], cwd=SCRATCH,
-                       capture_output=True, text=True, env={"PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"})
+                       capture_output=True, text=True, env=env)
     last = [ln for ln in r.stdout.strip().splitlines() if ln.strip()][-1] if r.stdout.strip() else r.stderr.strip()[-120:]
     return ("PASS" if r.returncode == 0 else "FAIL"), last
 
