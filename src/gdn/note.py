@@ -378,7 +378,9 @@ def build(root="."):
         "already reported that year, spread over the remaining quarters by their usual share of the year; where no "
         "call gave a number, it falls back to the same quarter last year.</p>")
     add(f'<div class="callout"><p>{esc(FRAMING.format(snap=snap))}</p><p><strong>{esc(headline_sentence(m))}'
-        f"</strong>{esc(low_line(m))}</p></div>")
+        f"</strong>{esc(low_line(m))} In that sentence the registry count is the registry estimate, the first row "
+        "of the exhibit below, not the raw registry count in its second. GD's guidance pace is my construction from "
+        "GD's full-year outlook, not a figure GD publishes.</p></div>")
     hrows = []
     for mm in ("ratio", "raw", "guidance", "seasonal", "last"):
         hrows.append([esc(NAMES[mm]), f1(h["mae"][mm]), pct(h["mape"][mm]), f1(h["bias"][mm]),

@@ -68,6 +68,8 @@ CASES = [
      "tests/test_prepub_text.py::test_the_lock_timing_sentence_reads_the_lock_and_the_later_snapshots"),
     ("F050", "src/gdn/report.py", "    if not v or len(diff) > 2:\n        return \"\"", "    if True:\n        return \"\"",
      "tests/test_prepub_text.py::test_the_design_choice_sentence_counts_the_quarters_where_the_definitions_differ"),
+    ("F058", "src/gdn/sensitivity.py", "    if plans:\n        variants += [", "    if False:\n        variants += [",
+     "tests/test_prepub_text.py::test_gd_stated_quarter_plans_are_scored_beside_the_guidance_pace"),
 ]
 
 
