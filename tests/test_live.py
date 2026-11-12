@@ -519,3 +519,34 @@ def test_a_prediction_left_without_a_release_is_logged_as_missed(repo):
     ops = FakeOps(repo, at("2026-10-30T07:00"))
     assert live.run_lock(at("2026-10-30T07:00"), root=repo, ops=ops, log=msgs.append) == 0
     assert ops.creates == [] and any("committed but no release was made" in m for m in msgs)
+
+
+def test_no_lock_from_a_subset_that_predates_the_quarter_end(repo):
+    # F017. Every download in the lock window failed, so the newest stored subset is an old one, dated before
+    # 2026Q3 ended (2026-10-04). A lock from it would publish a partial count as the quarter's estimate.
+    man = faa.manifest(repo)
+    shutil.copytree(repo / "data/snapshots/2026-10-27", repo / "data/snapshots/2026-09-20")
+    faa.save_manifest(repo, {"backtest": "2026-09-20", "snapshots": {"2026-09-20": man["snapshots"]["2026-10-27"]}})
+    live.write_table(repo, "2026-10-28", [])
+    msgs = []
+    ops = FakeOps(repo, at("2026-10-29T19:00"))
+    rc = live.run_lock(at("2026-10-29T19:00"), root=repo, ops=ops, log=msgs.append)
+    assert rc == 1 and not ops.creates and not (repo / "predictions/2026Q3.json").exists()
+    assert any("fiscal end" in m for m in msgs)
+
+
+@pytest.mark.parametrize("accepted,scored", [("2026-10-30T12:09:27.000Z", True), ("2026-10-29T12:00:00.000Z", False)])
+def test_a_lock_published_after_the_filing_is_not_scored(repo, monkeypatch, accepted, scored):
+    # F018. The release date in config/calendar.json is typed by hand. If it is a day late, the lock is published
+    # after GD has reported. SEC's acceptance time of the 8-K is the check: such a lock is never scored as a lock.
+    from gdn import sec
+    (repo / "data/guidance.csv").write_text(
+        "call_date,year,outlook,quote,speaker,url\n2026-07-29,2026,160,about 160,CFO,u\n")
+    lock(repo, "2026-10-29T19:00")          # published at 2026-10-29T23:00:00Z
+    FakeSEC.body = (FIXTURES / "releases" / "with_sentence.htm").read_bytes()
+    monkeypatch.setattr(sec, "Client", FakeSEC)
+    monkeypatch.setattr(sec, "results_8k", lambda filings, end: {"accn": "0000040533-26-000099", "accepted": accepted})
+    msgs = []
+    rc = live.run_score(at("2026-10-31T09:00"), root=repo, log=msgs.append)
+    assert (repo / "results/live/2026Q3_score.json").exists() is scored and rc == (0 if scored else 1)
+    assert scored or any("not before" in m for m in msgs)

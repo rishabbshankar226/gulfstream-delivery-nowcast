@@ -375,6 +375,12 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             if snap is None or snap >= rel:
                 log(f"no stored subset dated before {rel}")
                 return 1
+            end = Calendar.load(root).end(q)
+            if end is None or snap <= end:
+                # Every download in the lock window failed. An older subset stops before the quarter does,
+                # so a lock from it would publish a partial count as the quarter's estimate.
+                log(f"the newest stored subset ({snap}) is not dated after {q}'s fiscal end ({end}); no lock from it")
+                return 1
             rows = events.airframes(faa.read_subset(root, snap))
             pred = predict(root, q, rows, snap, utcnow() if wall else now)
             write_json(pred_p, pred)
@@ -456,6 +462,14 @@ def run_score(now=None, offline=False, root=".", log=print):
     except ValueError as e:
         log(f"{q}: the 8-K {f['accn']} gives no delivery counts ({e}); not scored")
         return 1
+    lock_p = lock_json_path(root, q)
+    if lock_p.exists() and f.get("accepted"):
+        # The release date in config/calendar.json is typed by hand. SEC's acceptance time is the check on it.
+        published = read_json(lock_p)["published_at"]
+        if parse_now(published) >= parse_now(f["accepted"]):
+            log(f"{q}: lock-{q} was published at {published}, not before SEC accepted GD's 8-K at {f['accepted']}. "
+                "It is not a lock made before the release, so the quarter is not scored: fix the record by hand.")
+            return 1
     s = score_quarter(root, q, d, f["accn"])
     write_json(live_dir(root) / f"{q}_score.json", s)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))
