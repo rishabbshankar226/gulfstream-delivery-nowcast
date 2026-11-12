@@ -159,11 +159,28 @@ def split_sentence(root):
     inside, rest = [q for q in ae if q[:4] in won], [q for q in ae if q[:4] not in won]
     if not won or not rest or len(won) > len(years) / 2 or mean(rest, "ratio") <= mean(rest, "guidance"):
         return ""
-    return (f"The registry estimate's lower average miss than the guidance pace comes from {' and '.join(won)}, when "
-            f"the guidance pace missed by {f1(mean(inside, 'guidance'))} on average and the registry estimate by "
-            f"{f1(mean(inside, 'ratio'))}. In the other {len(rest)} held-out quarters the guidance pace missed by "
-            f"{f1(mean(rest, 'guidance'))}, the same quarter last year by {f1(mean(rest, 'seasonal'))} and the registry "
-            f"estimate by {f1(mean(rest, 'ratio'))}.")
+    out = (f"The registry estimate's lower average miss than the guidance pace comes from {' and '.join(won)}, when "
+           f"the guidance pace missed by {f1(mean(inside, 'guidance'))} on average and the registry estimate by "
+           f"{f1(mean(inside, 'ratio'))}. In the other {len(rest)} held-out quarters the guidance pace missed by "
+           f"{f1(mean(rest, 'guidance'))}, the same quarter last year by {f1(mean(rest, 'seasonal'))} and the registry "
+           f"estimate by {f1(mean(rest, 'ratio'))}.")
+    # how many of the latest quarters in a row the guidance pace was closer, scored live quarters included
+    seq = [(q, ae[q]["guidance"] < ae[q]["ratio"]) for q in sorted(ae, key=qidx)]
+    live_n = 0
+    for q, s, p, lock in locked_scores(root):
+        if s.get("guidance_ae") is not None:
+            seq.append((q, s["guidance_ae"] < s["ae_total"]))
+            live_n += 1
+    run = 0
+    for _, closer in reversed(seq):
+        if not closer:
+            break
+        run += 1
+    if run >= 3:
+        words = {3: "three", 4: "four", 5: "five", 6: "six", 7: "seven", 8: "eight"}.get(run, str(run))
+        tail = ("" if not live_n else ", the locked one included" if live_n == 1 else ", the locked ones included")
+        out += f" The guidance pace has been closer in each of the last {words} quarters{tail}."
+    return out
 
 
 def reading_2021(root):
@@ -219,6 +236,25 @@ def lock_timing(root):
             f"quarter itself came in at {f2(real)}.")
 
 
+def definition_choice(root, m):
+    """How much the design window's one choice decided: the quarters where E1 and E2 count differently, and the
+    held-out miss under the definition not chosen."""
+    N = model.load_registry(root)
+    from .fiscal import DESIGN, qrange
+    qs = qrange(*DESIGN)
+    diff = [q for q in qs if N[q]["E1"] != N[q]["E2"]]
+    gap = sum(abs(N[q]["E1"][c] - N[q]["E2"][c]) for q in diff for c in ("large", "mid"))
+    p = Path(root) / "results/exploratory/sensitivity.json"
+    other = "E2" if m["definition"] == "E1" else "E1"
+    v = {x["key"]: x for x in read_json(p)["variants"]}.get(f"definition_{other}") if p.exists() else None
+    if not v or len(diff) > 2:
+        return ""
+    words = {1: "one airframe", 2: "two airframes", 3: "three airframes"}.get(gap, f"{gap} airframes")
+    return (f" The two definitions count the same in {len(qs) - len(diff)} of the {len(qs)} design quarters and differ "
+            f"by {words} in {' and '.join(diff)}, so the choice decided little: under {other} the held-out miss is "
+            f"{f2(v['mae']['ratio'])}, against {f2(m['holdout']['mae']['ratio'])} under {m['definition']}.")
+
+
 def md_table(head, rows):
     out = ["| " + " | ".join(head) + " |", "|" + "---|" * len(head)]
     out += ["| " + " | ".join(str(c) for c in r) + " |" for r in rows]
@@ -246,7 +282,8 @@ def results(root):
         CLARIFY, "",
         "Average miss in aircraft over the 26 held-out quarters, 2020Q1 to 2026Q2:", "",
         md_table(["Model", "Average miss", "Average % miss", "Bias", "Large cabin", "Mid cabin", "Without 2020"], rows),
-        "", "Bias is the average of the estimate minus GD's count.", "",
+        "", "Bias is the average of the estimate minus GD's count. Average % miss is the mean of each quarter's miss as "
+        "a share of that quarter's deliveries.", "",
         "One-sided exact sign tests that the registry estimate's miss is smaller than each baseline's, with Holm's "
         "correction across the three:", "",
         md_table(["Baseline", "Registry closer", "Registry further", "Ties", "p", "Holm", "Relative miss",
@@ -255,9 +292,14 @@ def results(root):
         "Relative miss is the registry estimate's average miss divided by the baseline's.",
     ]
     if positive:
+        se = 1 / h["n"] ** 0.5
+        clear = [BASE[b] for b in ("guidance", "seasonal", "last") if (h["autocorr_lag1"][b] or 0) > se]
         lines += ["", f"The quarter-to-quarter differences against {' and '.join(positive)} are positively "
                       "autocorrelated, so the sign test, which treats quarters as independent, overstates how much "
-                      "evidence those quarters carry."]
+                      f"evidence those quarters carry. With {h['n']} quarters one standard error of an autocorrelation "
+                      f"is about {f2(se)}, so "
+                      + (f"only the one against {' and '.join(clear)} is more than one standard error above zero."
+                         if clear else "none of them is more than one standard error above zero.")]
     lines += ["",
               f"GD stated a numeric delivery outlook covering {g['sourced']} of the 26 held-out quarters, so GD's "
               f"guidance pace is the baseline named first. The other {len(g['fallback_quarters'])} quarters "
@@ -270,7 +312,9 @@ def results(root):
               f"The design window, 2017Q1 to 2019Q4 (12 quarters), chose **{m['definition']}**: the ratio model's "
               f"average miss was {f2(d['mae']['E1']['ratio'])} under E1 and {f2(d['mae']['E2']['ratio'])} under E2. "
               f"In that window the same quarter last year missed by {f2(d['mae']['none']['seasonal'])} and last "
-              f"quarter by {f2(d['mae']['none']['last'])}."]
+              f"quarter by {f2(d['mae']['none']['last'])}"
+              + (", so both simple rules were closer there too." if max(d["mae"]["none"].values())
+                 < d["mae"][m["definition"]]["ratio"] else ".") + definition_choice(root, m)]
     return "\n".join(lines)
 
 
@@ -307,7 +351,8 @@ def error_analysis(root):
         f"GD deliveries per registry event averaged {f2(cr['mean'])} from 2017Q1 to 2025Q2. "
         + "The preregistered flag looks for quarters from 2025Q3 to 2026Q2 above the mean plus two standard "
         "deviations, where the registry would be counting fewer events per delivery than usual"
-        + (f"; it flags {', '.join(cr['flags'])}." if cr["flags"] else "; none is.") + drift, "",
+        + (f"; it flags {', '.join(cr['flags'])}." if cr["flags"] else "; none is.")
+        + " The flag is one-sided: it cannot fire on a fall." + drift, "",
         "The truncation test cuts each held-out quarter's own registry events a set number of days before the "
         "quarter ends, with its four lags left whole. It stands in, crudely, for a registry that has not finished "
         "posting, and shows how fast the miss grows when a quarter's registrations post late:", "",
@@ -360,7 +405,9 @@ def live_record(root):
             if p["snapshot"] < p["window_end"]:
                 # The quarter is still open: its count so far is not an estimate of the quarter.
                 line = (f"- **{q}**: not locked yet. Its window runs to {p['window_end']}, so the {p['snapshot']} "
-                        "snapshot counts only part of it and no estimate is shown yet.")
+                        "snapshot counts only part of it and no estimate is shown yet. The working file "
+                        f"`results/live/{q}_latest.json` holds that part count and is not an estimate of the "
+                        "quarter.")
             else:
                 line = (f"- **{q}**: not locked yet. The latest estimate is {f1(p['nowcast']['total'])} (band "
                         f"{f1(p['band'][0])} to {f1(p['band'][1])}) from the {p['snapshot']} snapshot{pace_s}.")

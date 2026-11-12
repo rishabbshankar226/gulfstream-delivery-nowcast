@@ -18,7 +18,8 @@ from .files import read_csv, read_json, sha256, write_text
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 TITLE = "General Dynamics (GD): Gulfstream delivery tracker"
-DISCLAIMER = "Student research project. Not investment advice. No rating or price target."
+DISCLAIMER = ("Student research project. Not investment advice. No rating or price target. Not affiliated with General "
+              "Dynamics or Gulfstream.")
 FRAMING = ("The backtest reads a registry copy from {snap}, which had months or years to fill in. It shows how well "
            "the registry tracks Gulfstream deliveries after the fact. Only the locked quarters test whether it "
            "counts them in time.")

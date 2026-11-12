@@ -7,7 +7,7 @@ from pathlib import Path
 
 from .files import read_csv, read_json, write_text
 
-# quarter: [(source, where, quote)] — GD's statements about the quarter's deliveries.
+# quarter: [(source, where, quote)]: GD's statements about the quarter's deliveries.
 STATEMENTS = {
     "2020Q2": [("GD's 2020Q2 earnings release", "accession 0000040533-20-000055",
                 "The company delivered 32 aircraft during the quarter, up from 23 last quarter, despite continued "
