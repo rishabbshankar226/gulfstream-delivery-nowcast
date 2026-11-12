@@ -1,8 +1,8 @@
 # Verdict
 
-**NO-GO.** Three of the 13 criteria fail (1, 2 and 12), each on something only the owner can do: decide about the email address and the home paths that the commit history would expose (F015, F016), and confirm and date the no-position sentence (F081). Every other S1 and S2 finding is fixed, refuted or an erratum.
+**NO-GO.** Three of the 13 criteria fail (1, 2 and 12), each on something only the owner can do: decide about the email address and the home paths that the commit history would expose (F015, F016), and confirm and date the no-position sentence (F081). Every other S1 and S2 finding is fixed, refuted or an erratum. Criterion 11 holds by the reading logged before the run began and misses by its literal words, on two working files of the open quarter that the required merge of the daily workflow's commits changed; the record itself is untouched.
 
-Written 2026-11-11 at the end of the pre-publication audit, on branch `prepub-audit`. The final battery ran at commit `8d07bf5`; later commits change only files under `docs/prepub/`. Every figure below was printed by a command run after the last edit that could change it; the commands and their logs are in `BASELINE.md`.
+Written 2026-11-12 at the end of the pre-publication audit, on branch `prepub-audit`. The final battery ran at commit `7a70d9e`; later commits change only files under `docs/prepub/`. Every figure below was printed by a command run after the last edit that could change it; the commands and their logs are in `BASELINE.md`.
 
 ## What remains before GO
 
@@ -20,28 +20,28 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 |---|---|---|---|
 | 1 | Zero open S1 findings | **no** | Two: F015 and F016, both from the exposure scan (P3.5), both the owner's to decide. Of the other S1 findings, 19 are fixed and 3 refuted. |
 | 2 | Zero open S2 on the post, the README's first screen, the dashboard's first screen, the note's first page and the workbook's Summary sheet | **no** | One: F081. "I hold no position in General Dynamics" sits on `README.md` line 15 and on the note's first page and footer. It is undated and carried forward by the build, and only the owner can state it. `GO_PUBLIC.md` step 1 dates it. No other S2 is open on those five surfaces. One regrade bears on this: a round 2 reviewer's S2 (FINANCE-4) covered the dashboard, the workbook and the chart legends. The dashboard and workbook now say the pace is my construction. The legends of the README's charts still say "GD guidance pace"; I graded that part S3 (F068), because the README's first paragraph, on the same screen as its first chart, calls it "a pace built from GD's own guidance". A reader who grades the legend S2 will count criterion 2 as failing on it as well. |
-| 3 | The ledger shows zero `mismatch`, `untraced` and `stale` rows on the post, README, dashboard, note and workbook, after its nine plants were caught | yes | `rows 2864  flagged 0` on the final tree, every surface. The nine plants were rerun on that tree: 9 planted, 9 caught, 0 missed. (`LEDGER_SELFTEST.md`). |
+| 3 | The ledger shows zero `mismatch`, `untraced` and `stale` rows on the post, README, dashboard, note and workbook, after its nine plants were caught | yes | `rows 2864  flagged 0` on the final tree, every surface. The nine plants were rerun on that tree: 9 planted, 9 caught, 0 missed (`LEDGER_SELFTEST.md`). |
 | 4 | Every recomputed figure in P2.2 matches at its displayed precision, or differs with an erratum | yes | `RECOMPUTE_DIFF.md`: 547 figures, 547 match. `git diff --stat 36fed31..HEAD -- results data/processed` lists only files the audit added (`segments_reported.csv`, `results/exploratory/sensitivity.*`), so the figures the recompute matched are the figures in the final tree. |
 | 5 | P2.3's lock checks all pass | yes | `LOCK_CHECK.md`: the file's sha256 `3c4cdbd0...6f23` equals the hash in the tree, at the tag, in the release notes and in `2026Q3_lock.json`; the release was published 2026-10-29T05:51:24Z (01:51 ET) and the SEC accepted GD's 8-K at 2026-10-30 08:09:27 ET; the lock commit `a44e5ac` is an ancestor of `main`. |
 | 6 | Every link in the post resolves, or resolves after a step in `GO_PUBLIC.md` that names it and its check | yes | `POST_CHECK.md`: both links return 404 while the repository is private; `GO_PUBLIC.md` steps 4 and 5 make them resolve and step 6 checks them from a logged-out browser. |
-| 7 | `make test`, the full gate (or each failing family with a logged reason under R11) and `make check-determinism` pass on the fresh clone | yes, with logged gate failures | Fresh clone at `8d07bf5` with Python 3.11 (`BASELINE.md`, Fresh clone): `make all` exit 0 with an empty `git status`; `make test` `176 passed, 14 warnings in 31.68s`; `make check-determinism` `identical (50 files)`; gate `42 assertions, 4 failing, 3 warning`. The four failing assertions (`R2`, `K1`, `N1`, `Y1`, in the `docs` and `site` families) are logged with their reasons in DECISIONS D10 and D18; the other eight families pass. A first clone with the system `python3` (3.9.6) could not install the requirements, which was a finding against the README (F099, fixed). |
+| 7 | `make test`, the full gate (or each failing family with a logged reason under R11) and `make check-determinism` pass on the fresh clone | yes, with logged gate failures | Fresh clone at `7a70d9e` with Python 3.11 (`BASELINE.md`, Fresh clone): `make all` exit 0 with an empty `git status`; `make test` `176 passed, 14 warnings in 32.92s`; `make check-determinism` `identical (50 files)`; gate `42 assertions, 4 failing, 3 warning`. The four failing assertions (`R2`, `K1`, `N1`, `Y1`, in the `docs` and `site` families) are logged with their reasons in DECISIONS D10 and D18; the other eight families pass. A first clone with the system `python3` (3.9.6) could not install the requirements, which was a finding against the README (F099, fixed). |
 | 8 | `INTERVIEW_NOTES.md` and `RESUME_BULLETS.md` state the scored live record | yes | F006, F007, F083: the lock (32.0, band 21.2 to 37.2, 01:51 ET on 2026-10-29), GD's 40, the miss of 8.0 outside the band, the guidance pace's 6.2 and last year's quarter. Ledger: 0 flagged rows on either file. |
 | 9 | Round 3 found no S1 | yes | `reviews/round3.md`: S1 0, S2 4, S3 6. Its four S2 are fixed (F101 to F104), and it confirmed the lock file's hash and an empty diff on the protected paths. One of its S2, the post's unqualified "held out", it flagged as a severity call; it is graded S2 on the precedent of F027 and fixed (F104). |
 | 10 | Every row of the three source files reads verified, or carries a closed finding ID | yes | `SOURCES_DELIVERIES.csv`: 43 of 43 verified. `SOURCES_GUIDANCE.csv`: 24 verified, 3 verified elsewhere, and the one call the reviewer found missing was added (F054, fixed). `SOURCES_CLAIMS.csv`: 204 verified or verified elsewhere, 23 with a closed finding (F004, F013, F035, F036, F043, F052, F065, F066). |
-| 11 | Every hash in `RECORD_HASHES.txt` matches | yes | 61 of 61 hashes recomputed and equal, at `8d07bf5`. `git diff --stat 36fed31..HEAD` over `predictions/`, `results/live/`, `data/snapshots/`, `docs/PREREGISTRATION.md` and `.github/` prints nothing. |
+| 11 | Every hash in `RECORD_HASHES.txt` matches | yes by the reading logged at the start (D3); **no** by the literal words | 59 of 61 match. The two that differ are `results/live/2026Q4_latest.json` and `results/live/2026Q4_path.csv`, the open quarter's working files, changed by the daily workflow's 2026-11-12 commits that P8.5 required merging (`bbf88fd`); each equals its version in `origin/main` `8c7692f`. The criterion's words exempt only `.github/`. Everything that is the record matches: `predictions/`, the 2026Q3 lock and score, every snapshot file hashed at the start, `docs/PREREGISTRATION.md`, `.github/` (DECISIONS D20). |
 | 12 | P3.5 found nothing open | **no** | F015 and F016, the two rows criterion 1 fails on. |
 | 13 | Every required item is finished | yes | `PLAN.md`: every item done, P5.4 included (DECISIONS D15). No item is cut. |
 
 ## Findings
 
-`FINDINGS.md` holds 106 findings (F001 to F107; F019 is an unused number). They come from the spec's 16 leads, the first ledger, five round 1 reviewers, three source checkers, the recompute, three round 2 reviewers, one round 3 reviewer and the main thread's own checks.
+`FINDINGS.md` holds 107 findings (F001 to F108; F019 is an unused number). They come from the spec's 16 leads, the first ledger, five round 1 reviewers, three source checkers, the recompute, three round 2 reviewers, one round 3 reviewer and the main thread's own checks.
 
 | Severity | Fixed | Erratum | Refuted | Open | All |
 |---|---|---|---|---|---|
 | S1 | 19 | 0 | 3 | 2 | 24 |
-| S2 | 47 | 5 | 2 | 1 | 55 |
+| S2 | 48 | 5 | 2 | 1 | 56 |
 | S3 | 18 | 1 | 1 | 7 | 27 |
-| All | 84 | 6 | 6 | 10 | 106 |
+| All | 85 | 6 | 6 | 10 | 107 |
 
 ### Open, by severity
 

@@ -38,20 +38,20 @@ The other 39 assertions passed: G0, F1 to F4, T1 to T3, M1 to M3, S1, S2, Q1, Q2
 
 ## After
 
-Measured 2026-11-11, about 21:57 to 22:03 ET, on a clean tree at commit `8d07bf5`, after the last fix from round 3 (P5.5, P6.4, P8.6). One battery, run by two scripts; logs under `.build/logs/` (`final_a.log`, `final_b.log` and the files they name). Later commits change only files under `docs/prepub/`.
+Measured 2026-11-12, about 09:30 to 09:33 ET, on a clean tree at commit `7a70d9e`, after the last code fix (F108) and after the merge of the daily workflow's 2026-11-12 commits (`bbf88fd`, DECISIONS D19) (P5.5, P6.4, P8.5, P8.6). The same battery had run the evening before at `89de502`, before the merge, with the same counts on every line. One battery, run by two scripts; logs under `.build/logs/` (`final_a.log`, `final_b.log` and the files they name). Later commits change only files under `docs/prepub/`.
 
 | Check | Command | Result |
 |---|---|---|
 | Offline rebuild | `make all`, `make claims`, `python -m gdn note`, `make pdf`, then `git status --short` | exit 0; `note unchanged; PDF kept`; status empty |
 | PDF stamp | `shasum -a 256 report/note.html` against `output/GD_research_note.inputs.sha256` | equal: `5c4564833829f7e9...` |
-| Tests | `make test` | `176 passed, 14 warnings in 31.84s`, exit 0 |
+| Tests | `make test` | `176 passed, 14 warnings in 34.48s`, exit 0 |
 | Gate, all ten families | the R11 command, `--output .build/gate.json` | `42 assertions, 4 failing, 3 warning`, exit 1 |
 | Determinism | `make check-determinism` | `identical (50 files)`, exit 0 |
-| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` (at `3e8c0f9`; no surface changed after it) | `rows 2864  flagged 0` |
-| Revert tests (R6) | `tools/prepub/revert_check.py` on a fresh clone (`REVERT_TESTS.md`) | 19 fixes checked, 19 with FAIL when reverted and PASS when restored, 0 otherwise. |
+| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` (at `bbf88fd`, the merged tree; only files under `docs/prepub/` changed after it) | `rows 2864  flagged 0` |
+| Revert tests (R6) | `tools/prepub/revert_check.py` on a fresh clone (`REVERT_TESTS.md`) | 20 fixes checked, 20 with FAIL when reverted and PASS when restored, 0 otherwise. |
 | Nine plants on the final tree | `tools/prepub/plant_selftest.py` (`LEDGER_SELFTEST.md`, rerun section) | 9 planted, 9 caught, 0 missed. |
 | Links | `tools/prepub/links.py` (`LINKS.csv`) | 191 links: 142 external resolve, 34 in-repo resolve, 12 point at the owner's repository or Pages site and return 404 until it is public, 3 external return 403 to an automated reader |
-| Record | every hash in `RECORD_HASHES.txt` recomputed; `git diff --stat 36fed31..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` | 61 of 61 match; the diff prints nothing |
+| Record | every hash in `RECORD_HASHES.txt` recomputed; `git diff --stat 36fed31..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` | 59 of 61 match. The two that differ are the open quarter's working files, `results/live/2026Q4_latest.json` and `results/live/2026Q4_path.csv`, each equal to its version in `origin/main` `8c7692f` (DECISIONS D20). A diff from `36fed31` over `predictions/`, `docs/PREREGISTRATION.md`, `.github/` and the 2026Q3 lock and score files prints nothing |
 
 ### The gate's lines, after
 
@@ -72,12 +72,12 @@ Failures, all four in the `docs` and `site` families and all four caused by sent
 
 ## Fresh clone (P8.4)
 
-`git clone --branch prepub-audit` of this repository into `~/gdn-prepub/clone2`, `data/raw/` copied in, `origin` set to the GitHub URL, `python3.11 -m venv .venv`, `.venv/bin/python -m pip install -r requirements.lock` (exit 0). Then, after `git pull` of the final commit `8d07bf5`:
+`git clone --branch prepub-audit` of this repository into `~/gdn-prepub/clone2`, `data/raw/` copied in, `origin` set to the GitHub URL, `python3.11 -m venv .venv`, `.venv/bin/python -m pip install -r requirements.lock` (exit 0). Then, after `git pull` of the final commit `7a70d9e`:
 
 | Check | Result |
 |---|---|
 | `make all`, then `git status --short` | exit 0; status empty |
-| `make test` | `176 passed, 14 warnings in 31.68s`, exit 0 |
+| `make test` | `176 passed, 14 warnings in 32.92s`, exit 0 |
 | `make check-determinism` | `identical (50 files)`, exit 0 |
 | Gate, all ten families, `--repo ~/gdn-prepub/clone2` | `42 assertions, 4 failing, 3 warning`: the same four failures and three warnings as the main tree, number for number |
 
@@ -85,4 +85,5 @@ The first attempt, in `~/gdn-prepub/clone` with this Mac's `python3` (3.9.6), fa
 
 ## Merge check (P8.5)
 
-`git fetch --all --prune` at 21:06 ET: `origin/main` was still at `36fed31`, the commit `prepub-audit` was cut from. On the throwaway branch `prepub-mergecheck`, `git merge --no-commit --no-ff origin/main` printed `Already up to date.` No conflict. The branch is left in place. The daily workflow will commit to `main` again; `GO_PUBLIC.md` step 2 says how to merge when it has.
+- 2026-11-11, 21:06 and 22:09 ET: `origin/main` was still at `36fed31`; `git merge --no-commit --no-ff origin/main` on the throwaway branch `prepub-mergecheck` printed `Already up to date.`
+- 2026-11-12, 09:25 ET: `origin/main` had two new commits from the daily workflow (`1481ce0`, `8c7692f`). A trial merge on `prepub-mergecheck2` stopped on two generated files, `README.md` and `report/note.html`. Both were regenerated from the merged data, the merge was committed (`bbf88fd`) and `prepub-audit` was fast-forwarded to it (DECISIONS D19). `git log prepub-audit..origin/main` is now empty, so `main` can take `prepub-audit` with no conflict until the workflow commits again. `GO_PUBLIC.md` step 2 says what to do when it has.

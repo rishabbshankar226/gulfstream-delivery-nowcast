@@ -4,7 +4,7 @@ One row per finding. Severity per §2 of the spec. Status is `fixed`, `erratum`,
 
 - Sources: `L<n>` is a lead from the spec's §0; `ledger` is a flagged row of the first `LEDGER.csv`; an ID such as `BUYSIDE-3` points into `docs/prepub/reviews/`. Section 2 maps every reviewer finding to a row here.
 - "Old tree" line numbers are the lines the reviewers read at `9a5cb5a`, before the fix pass.
-- Test: the regression test for a code fix, with its result when the fix is reverted and when it is restored. All 19 pairs are in `REVERT_TESTS.md` (`tools/prepub/revert_check.py`): each reads FAIL reverted, PASS restored. Text written by hand has no code to revert; the ledger is its check (`LEDGER.csv`, 0 flagged rows).
+- Test: the regression test for a code fix, with its result when the fix is reverted and when it is restored. All 20 pairs are in `REVERT_TESTS.md` (`tools/prepub/revert_check.py`): each reads FAIL reverted, PASS restored. Text written by hand has no code to revert; the ledger is its check (`LEDGER.csv`, 0 flagged rows).
 - Commits are on `prepub-audit`. The fix pass was developed in a scratch clone and merged in `e778e23` (DECISIONS D5).
 
 ## 1. Findings
@@ -324,13 +324,13 @@ The first run on the real tree (`cc83c82`) flagged 25 rows. Each maps to a findi
 
 ## 4. Counts
 
-`FINDINGS.md` holds 106 findings (F001 to F107; F019 is an unused number). They come from the spec's 16 leads, the first ledger, five round 1 reviewers, three source checkers, the recompute, three round 2 reviewers, one round 3 reviewer and the main thread's own checks.
+`FINDINGS.md` holds 107 findings (F001 to F108; F019 is an unused number). They come from the spec's 16 leads, the first ledger, five round 1 reviewers, three source checkers, the recompute, three round 2 reviewers, one round 3 reviewer and the main thread's own checks.
 
 | Severity | Fixed | Erratum | Refuted | Open | All |
 |---|---|---|---|---|---|
 | S1 | 19 | 0 | 3 | 2 | 24 |
-| S2 | 47 | 5 | 2 | 1 | 55 |
+| S2 | 48 | 5 | 2 | 1 | 56 |
 | S3 | 18 | 1 | 1 | 7 | 27 |
-| All | 84 | 6 | 6 | 10 | 106 |
+| All | 85 | 6 | 6 | 10 | 107 |
 
 Open S1: F015, F016. Open S2: F081. Open S3: F053, F063, F064, F068, F074, F098, F107.
