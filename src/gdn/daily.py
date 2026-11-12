@@ -4,9 +4,11 @@ Pull, download the snapshot, write the latest nowcast, path row and daily airfra
 §3.6 says so, score any released quarter, then (not for daily-core) rebuild the estimates, the
 workbook, the note, the site data, the README's Live record and the post. Only the paths below are
 staged; the run refuses to start when any other tracked file has uncommitted changes."""
+import csv
 import fcntl
 import importlib
 import importlib.util
+import io
 import json
 import os
 import shutil
@@ -15,6 +17,7 @@ from pathlib import Path
 
 from . import faa, live, sec
 from .gitops import GitError, Ops
+from .files import csv_text
 
 LIVE_PATHS = ["data/snapshots", "results/live", "data/sec_manifest.json"]
 REBUILD_PATHS = ["results/estimates.json", "output/gd_gulfstream_model.xlsx",
@@ -48,12 +51,34 @@ def rebuild(root, pdf=True):
 
 
 def merge_manifests(ours, theirs):
-    """Union of two MANIFEST.json texts' snapshot entries; a date never differs between machines."""
+    """Union of snapshot entries, refusing disagreement about the same date or backtest."""
     a, b = json.loads(ours), json.loads(theirs)
+    if a.get("backtest") and b.get("backtest") and a["backtest"] != b["backtest"]:
+        raise ValueError("backtest conflict: the two machines name different immutable snapshots")
     snaps = dict(a.get("snapshots", {}))
+    for date, entry in b.get("snapshots", {}).items():
+        if date in snaps and snaps[date] != entry:
+            raise ValueError(f"snapshot conflict for {date}: resolve its manifest and files together")
     snaps.update(b.get("snapshots", {}))
     return json.dumps({"backtest": b.get("backtest") or a.get("backtest"),
                        "snapshots": dict(sorted(snaps.items()))}, indent=2) + "\n"
+
+
+def merge_paths(ours, theirs):
+    """Keep both machines' dated observations, preferring upstream on the same date.
+
+    update_latest recomputes the newest observation after the merge from the merged daily table.
+    """
+    rows = {}
+    for text in (ours, theirs):
+        reader = csv.DictReader(io.StringIO(text))
+        if reader.fieldnames != live.PATH_COLS:
+            raise ValueError("path conflict: unexpected CSV header")
+        for row in reader:
+            if not row.get("date") or None in row or any(v is None for v in row.values()):
+                raise ValueError("path conflict: malformed CSV row")
+            rows[row["date"]] = row
+    return csv_text(live.PATH_COLS, [rows[d] for d in sorted(rows)])
 
 
 def run(now=None, offline=False, core=False, root="."):
@@ -90,14 +115,29 @@ def _run(now, offline, core, root):
         ops.commit(ALLOWED, "Carry over uncommitted daily outputs")
 
     def on_conflict(paths):
+        if any(p.startswith("results/live/") and p.endswith(("_lock.json", "_score.json", "_build.json"))
+               for p in paths):
+            print("Conflicting immutable live records require manual review")
+            return False
         if all(_under(p, LIVE_PATHS) or _under(p, GENERATED) for p in paths):
             man = "data/snapshots/MANIFEST.json"
-            if man in paths:
-                ours, theirs = ops.stage_version(man, 2), ops.stage_version(man, 3)
-                if ours and theirs:
-                    (root / man).write_text(merge_manifests(ours, theirs))
-                    ops.add(man)
-                    paths = [p for p in paths if p != man]
+            merged = {}
+            try:
+                for p in paths:
+                    merge = merge_manifests if p == man else (
+                        merge_paths if p.startswith("results/live/") and p.endswith("_path.csv") else None)
+                    if merge:
+                        ours, theirs = ops.stage_version(p, 2), ops.stage_version(p, 3)
+                        if ours is None or theirs is None:
+                            raise ValueError(f"delete/modify conflict in {p}")
+                        merged[p] = merge(ours, theirs)
+            except ValueError as e:
+                print(f"Cannot safely merge daily outputs: {e}")
+                return False
+            for p, text in merged.items():
+                (root / p).write_text(text)
+                ops.add(p)
+            paths = [p for p in paths if p not in merged]
             ops.take_theirs(paths)
             ops.finish_merge()
             live.update_latest(root, now)

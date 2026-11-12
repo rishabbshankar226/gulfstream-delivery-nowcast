@@ -9,6 +9,7 @@ import pytest
 from conftest import FIXTURES, ROOT
 from gdn import events, faa, live
 from gdn.files import write_json
+from gdn.gitops import GitError, Ops
 
 ET = live.ET
 
@@ -73,8 +74,60 @@ class FakeOps:
     def tag_commit(self, tag):
         return self.creates[-1][1] if self.creates else "c-first"
 
+    def file_at_ref(self, ref, path):
+        return (self.root / path).read_bytes()
+
     def abort_merge(self):
         pass
+
+
+class LocalReleaseOps(Ops):
+    """Real local Git objects, with only remote and GitHub operations replaced."""
+
+    def __init__(self, root, clock):
+        super().__init__(root, log=lambda *a: None)
+        self.clock, self.released = clock, None
+        self.git("init", "-q")
+        self.git("config", "user.name", "Test")
+        self.git("config", "user.email", "test@example.invalid")
+
+    def pull(self):
+        return []
+
+    def push(self):
+        return True
+
+    def release_view(self, tag):
+        return self.released
+
+    def release_create(self, tag, target, title, notes):
+        self.git("tag", tag, target)
+        self.released = {"tagName": tag, "publishedAt": live.stamp(self.clock)}
+
+    def fetch_tag(self, tag):
+        pass
+
+
+def test_lock_works_with_a_relative_repository_root(repo, monkeypatch):
+    when = at("2026-10-29T19:00")
+    ops = LocalReleaseOps(repo, when)
+    ops.commit(["data", "config", "results"], "fixture inputs")
+    monkeypatch.chdir(repo.parent)
+    assert live.run_lock(when, root=repo.name, ops=ops, log=lambda *a: None) == 0
+    assert (repo / "results/live/2026Q3_lock.json").exists()
+
+
+def test_lock_record_refuses_prediction_that_differs_from_the_release_tag(repo):
+    when = at("2026-10-29T19:00")
+    ops = LocalReleaseOps(repo, when)
+    p = live.prediction_path(repo, "2026Q3")
+    write_json(p, {"quarter": "2026Q3", "nowcast": {"total": 30}})
+    target = ops.commit_only(p, "original prediction")
+    ops.release_create("lock-2026Q3", target, "lock", "")
+    write_json(p, {"quarter": "2026Q3", "nowcast": {"total": 999}})
+    with pytest.raises(GitError, match="prediction.*tag"):
+        live.write_lock_json(repo, "2026Q3", ops)
+    assert not live.lock_json_path(repo, "2026Q3").exists()
 
 
 @pytest.fixture
@@ -166,6 +219,37 @@ def test_rejected_push_resets_and_retries(repo):
 def test_three_rejected_pushes_give_up(repo):
     rc, ops = lock(repo, "2026-10-29T19:30", reject_pushes=9)
     assert rc == 1 and not ops.creates and ops.resets == 3
+
+
+@pytest.mark.parametrize("state", ["new", "recover", "exists", "recorded"])
+def test_a_lock_record_that_cannot_be_pushed_fails_the_run(repo, state):
+    when = at("2026-10-29T19:00")
+
+    class RejectRecord(FakeOps):
+        def push(self):
+            return not (repo / "results/live/2026Q3_lock.json").exists()
+
+    ops = RejectRecord(repo, when)
+    if state in ("recover", "recorded"):
+        lock(repo, "2026-10-29T19:00")
+        if state == "recover":
+            (repo / "results/live/2026Q3_lock.json").unlink()
+        else:
+            ops.ahead = lambda: 1
+        ops.released = {"tagName": "lock-2026Q3", "publishedAt": live.stamp(when)}
+    elif state == "exists":
+        original = ops.release_view
+        views = []
+
+        def created_between_pulls(tag):
+            views.append(tag)
+            if len(views) > 1:
+                ops.released = {"tagName": tag, "publishedAt": live.stamp(when)}
+            return original(tag)
+
+        write_json(repo / "predictions/2026Q3.json", {"quarter": "2026Q3", "snapshot": "2026-10-29"})
+        ops.release_view = created_between_pulls
+    assert live.run_lock(when, root=repo, ops=ops, log=lambda *a: None) == 1
 
 
 def test_release_without_lock_json_is_recorded(repo):
