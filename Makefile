@@ -70,6 +70,7 @@ all:
 	$(RUN) design
 	$(RUN) holdout
 	$(RUN) errors
+	$(RUN) sensitivity
 	$(RUN) estimates
 	$(RUN) workbook
 	$(RUN) charts

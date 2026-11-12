@@ -11,6 +11,7 @@ STAGES = {
     "design": ("model", "run_design"),
     "holdout": ("model", "run_holdout"),
     "errors": ("errors", "run"),
+    "sensitivity": ("sensitivity", "run"),
     "build": ("live", "run_build"),
     "snapshot": ("live", "run_snapshot"),
     "nowcast": ("live", "run_nowcast"),
