@@ -55,10 +55,11 @@ Do these steps in order. They replace decisions A and B below, and they replace 
    - Check, once public, from a logged-out browser: `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/commit/a44e5aca3756941a075150d9e381020826f3fb81` returns 404.
 9. **Record it, in the fresh clone.**
    - Add `docs/prepub/COMMIT_MAP.csv`: copy `~/gdn-rewrite.git.commit_map.csv` into it, so every SHA the audit notes cite can be looked up.
-   - Add ERRATA E11: "History rewritten on <date> to remove personal data. Every commit hash changed. The lock commit `a44e5ac` is now `<new>`, and the `lock-2026Q3` tag points at it. `predictions/2026Q3.json` is byte-identical, and its sha256 still equals the release notes. The release and its `published_at` are unchanged. Its `targetCommitish` still names `a44e5ac`."
+   - Add ERRATA E11: "History rewritten on <date> to remove personal data. Every commit hash changed. The lock commit `a44e5ac` is now `<new>`, and the `lock-2026Q3` tag points at it. `predictions/2026Q3.json` is byte-identical, and its sha256 still equals the release notes. The release and its `published_at` are unchanged. Its `targetCommitish` still names `a44e5ac`, and so does the `commit` field of `results/live/2026Q3_lock.json` (and of `site/data.json`, which copies it). That file is part of the record and stays as written; nothing in the code reads the field back."
    - Add one line to `LOCK_CHECK.md` naming the new lock hash.
    - Commit and push.
-10. **Restart the workflow** (Actions, nowcast, Enable workflow). Then carry on from step 3 of part 2. Steps 2 and 2b of part 2 are done.
+10. **Expect one new gate failure.** v1's gate (`L3`) compares that `commit` field with the tag's commit, so it fails after the rewrite for this reason alone. Log it in `DECISIONS.md` under R11 with E11.
+11. **Restart the workflow** (Actions, nowcast, Enable workflow). Then carry on from step 3 of part 2. Steps 2 and 2b of part 2 are done.
 
 **Security settings for the public repository** (do them with step 4b of part 2):
 
