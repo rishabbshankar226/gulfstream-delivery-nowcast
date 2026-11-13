@@ -2,11 +2,11 @@
 
 ## The 60-second version
 
-General Dynamics reports how many Gulfstream jets it delivered each quarter. I wanted to know how closely FAA registrations track that count. I read every Gulfstream jet in the FAA's public registry, took the first sign that each one reached a customer, counted those dates in GD's fiscal quarters, and scaled the count by how many deliveries GD reported per registration over the four quarters before.
+General Dynamics reports how many Gulfstream jets it delivered each quarter. I wanted to know how closely FAA registrations track that count. I read the FAA's public registry for the Gulfstream jet types my scope rule keeps, took the first sign that each one reached a customer, counted those dates in GD's fiscal quarters, and scaled the count by how many deliveries GD reported per registration over the four quarters before.
 
 I fixed the rules on 12 design quarters and committed them before scoring 26 held-out quarters, minutes before and in the same session, so only the locked quarters are out of sample in the strict sense. Over those 26 quarters my registry estimate was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable, and simply repeating the same quarter last year missed by less on average, 4.6. So I report it as a tracker, not as an edge.
 
-The test that matters is live. On the day before each earnings release, the pipeline locks its estimate as a timestamped GitHub release with the file's sha256 in the notes, and scores it against GD's count when the filing lands. The first lock, for 2026Q3, said 32.0 with a band of 21.2 to 37.2. GD reported 40 on 2026-10-30: a miss of 8.0, outside the band, and further off than GD's guidance pace (a miss of 6.2) or the same quarter last year (a miss of 1). The research note, the Excel model and the dashboard all read from the same files.
+The test that matters is live. On the day before each earnings release, the pipeline locks its estimate as a timestamped GitHub release with the file's sha256 in the notes, and scores it against GD's count when the filing lands. The first lock, for 2026Q3, said 32.0 with a band of 21.2 to 37.2, a band that held GD's count in 18 of 26 backtest quarters against a nominal 80%. GD reported 40 on 2026-10-30: a miss of 8.0, outside the band, and further off than the pace I built from GD's outlook (a miss of 6.2) or the same quarter last year (a miss of 1). The research note, the Excel model and the dashboard all read from the same files.
 
 ## How the registry count works
 

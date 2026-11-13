@@ -7,4 +7,4 @@ f68a207061b489c3d5b33735c6a1b6b571385efb362ce7d9daa08b1791b9ac1a  data/processed
 323e572851f0d0de61aef615e4a77d7ad775d4307ff31b11ba25496e71776ba1  data/processed/backlog_2026Q2.csv
 7be00a770afc69522b09d3b69cf3f3e6b2b9dcc8e839c768acb12728f074204c  results/live/2026Q3_score.json
 2026-10-19  backtest snapshot
-0af94992f2c7fd61048742f151e142f23990a0e7418de24dbf55214ab42714a8  src/gdn/workbook.py
+b4c86e635b0bc5d793e3dcca486cf3b495d5e42ee1b959292f928bffeb91ec12  src/gdn/workbook.py

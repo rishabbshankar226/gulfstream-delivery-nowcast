@@ -11,6 +11,7 @@ import pytest
 
 from conftest import ROOT
 from gdn import live, note, report
+from gdn.fiscal import qidx
 from gdn.files import write_json
 
 
@@ -19,11 +20,17 @@ def scored(tmp_path):
     """A clone where 2026Q3 is scored and 2026Q4's first files exist; `lock` adds the lock first."""
     root = tmp_path / "repo"
     subprocess.run(["git", "clone", "-q", str(ROOT), str(root)], check=True)
-    # Back to the day before the first lock: no prediction, lock or score, and no later quarter's files.
-    for rel in ("predictions/2026Q3.json", "results/live/2026Q3_lock.json", "results/live/2026Q3_score.json",
-                "results/live/2026Q4_latest.json", "results/live/2026Q4_path.csv",
-                "data/processed/segments_reported.csv"):
-        (root / rel).unlink(missing_ok=True)
+    # Back to the day before the first lock: no prediction, lock or score, and no later quarter's files. F126: by
+    # quarter, not by a fixed list, so the 2026Q4 lock and score, and every later one, are removed too.
+    first = qidx("2026Q3")
+    for p in [*(root / "predictions").glob("*.json"), *(root / "results/live").glob("*_lock.json"),
+              *(root / "results/live").glob("*_score.json")]:
+        if qidx(p.name[:6]) >= first:
+            p.unlink()
+    for p in [*(root / "results/live").glob("*_latest.json"), *(root / "results/live").glob("*_path.csv")]:
+        if qidx(p.name[:6]) > first:
+            p.unlink()
+    (root / "data/processed/segments_reported.csv").unlink(missing_ok=True)
 
     def make(lock, public=None):
         latest = json.loads((root / "results/live/2026Q3_latest.json").read_text())
@@ -72,8 +79,10 @@ def test_a_locked_and_scored_quarter_keeps_its_text(scored):
     miss = f"{abs(latest - 35):.1f}"
     post = report.post(root)
     assert post.startswith(f"My first locked estimate of Gulfstream deliveries landed inside its band: I said "
-                           f"{latest:.1f} for 2026Q3, General Dynamics reported 35.")
+                           f"{latest:.1f} for 2026Q3, General Dynamics (GD) reported 35.")
     assert f"The 2026Q3 miss was {miss}, inside my 80% band" in post
+    # F113. The band is never named without its backtest coverage.
+    assert "(it held 18 of 26 past quarters)" in post
     note.build(root)
     t = plain((root / "report/note.html").read_text())
     assert "at 19:20 ET on 2026-10-29" in t and "GD reported 35" in t and f"missed by {miss}" in t

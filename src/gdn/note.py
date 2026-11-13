@@ -12,7 +12,8 @@ from pathlib import Path
 from . import claims as claims_mod
 from . import live, model
 from .estimates import DEFENSE, LABEL, SEGMENTS, basis_path
-from .report import comparators, lock_old_events, lock_words, readings_footnote
+from .report import (comparators, even_split, lock_old_events, lock_words, locked_scores, readings_footnote,
+                     split_sentence)
 from .fiscal import Calendar, qrange, shift
 from .files import read_csv, read_json, sha256, write_text
 
@@ -304,7 +305,7 @@ def build(root="."):
         d, t = et_time(lock["published_at"])
         band = "inside" if score["inside_band"] else "outside"
         live_point = (f"For {q} I locked a registry estimate of {f1(pred['nowcast']['total'])} Gulfstream deliveries, "
-                      f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}, as a "
+                      f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}{band_held(h)}, as a "
                       f"{lock_words(cfg, lock['published_at'])}, at {t} ET on {d}. GD reported "
                       f"{score['reported']['total']}{' on ' + rel if rel else ''}: the lock missed by "
                       f"{f1(score['ae_total'])} ({score['ape_pct']:.0f}%), {band} the band.")
@@ -312,6 +313,7 @@ def build(root="."):
         if cmp_:
             live_point += (" Other misses for the quarter: "
                            + ", ".join(f"{lab} ({val}) by {miss}" for lab, val, miss in cmp_) + ".")
+            live_point += stated_shape(root, q) + even_split(root, q, score)
             live_point += old_events_line(root, pred)
     elif lock:
         d, t = et_time(lock["published_at"])
@@ -323,7 +325,9 @@ def build(root="."):
             live_point += f", against a guidance pace of {f1(score['guidance_pace'])}"
         live_point += "."
     add('<div class="keypoints"><ol>')
-    add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(FRAMING.format(snap=snap))}</li>")
+    split = split_sentence(root)
+    add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(GLOSS)}" + (f" {esc(split)}" if split else "")
+        + f" {esc(FRAMING.format(snap=snap))}</li>")
     add(f"<li>{esc(live_point)}" + (f" GD expects to report on {rel}.{rel_cite}" if rel and not score else "") + "</li>")
     if rseg:
         add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, the locked "
@@ -370,8 +374,8 @@ def build(root="."):
 
     # 4. The tracker
     add('<h2>The tracker</h2>')
-    add("<p>I read every Gulfstream jet in the FAA's aircraft registry, including the G280, which the registry "
-        "files under its builder, IAI. For each airframe I take the first sign that it reached a customer: a "
+    add("<p>I read the FAA's aircraft registry for every Gulfstream jet type my scope rule keeps, including the "
+        "G280, which the registry files under its builder, IAI. For each airframe I take the first sign that it reached a customer: a "
         "customer's registration certificate or the cancellation of Gulfstream's own registration for export, "
         "whichever comes first, no later than a year after the jet's first airworthiness date. I count those events in each "
         "of GD's fiscal quarters, by cabin, and scale the count by how many deliveries GD reported per registry "
@@ -417,9 +421,11 @@ def build(root="."):
         f"registry estimate's past-miss band held GD's count in {h['band']['hits']} of 26 held-out quarters "
         f"({pct(h['band']['coverage_pct'])}, against a nominal 80%; 95% interval {pct(h['band']['cp95_pct'][0])} to "
         f"{pct(h['band']['cp95_pct'][1])}).</p>")
-    add(f'<div class="exhibit"><div class="cap">Exhibit 4. GD\'s reported deliveries against the five estimates'
-        f'</div><img src="../output/charts/track_record.png" alt="Line chart of GD\'s reported Gulfstream '
-        f'deliveries by quarter from 2016Q1 to 2026Q2 against the five estimates"></div>')
+    live_tail = (", and each locked live estimate with its past-miss band" if locked_scores(root) else "")
+    add(f'<div class="exhibit"><div class="cap">Exhibit 4. GD\'s reported deliveries against the five backtest '
+        f'estimates{live_tail}</div><img src="../output/charts/track_record.png" alt="Line chart of GD\'s reported '
+        f'Gulfstream deliveries by quarter from 2016Q1, against the five backtest estimates to 2026Q2{live_tail}">'
+        '</div>')
     ea = read_csv(root / "results/holdout.csv")
     ratio_rows = sorted([r for r in ea if r["model"] == "ratio"], key=lambda r: -float(r["ae"]))[:5]
     yrs = by_year(root, chosen)
@@ -459,7 +465,7 @@ def build(root="."):
             f"{tr_['reported']['mid']} mid-cabin deliveries against {tr_['registry']['large']} and "
             f"{tr_['registry']['mid']} registry events. Scaled the same way, the estimate is "
             f"{f1(pred['nowcast']['total'])} ({f1(pred['nowcast']['large'])} large, {f1(pred['nowcast']['mid'])} mid), "
-            f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}.")
+            f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}{band_held(h)}.")
     if lock:
         d, t = et_time(lock["published_at"])
         body += f" I locked this estimate as a {lock_words(cfg, lock['published_at'])}, at {t} ET on {d}."
@@ -551,7 +557,8 @@ def build(root="."):
            "release (accession 0000040533-26-000036, Exhibit H) reports Marine Systems backlog of $146.9B, so this "
            "table is not current.</div>" if score else "") + "</div>")
     add("<p>For the defense segments I use my defense backlog study's best next-quarter baseline. That study "
-        "tested five other defense primes; GD was left out because it stopped tagging backlog in XBRL in 2018. Pooled "
+        "tested five other defense primes; GD was left out because the SEC's XBRL company-facts data holds no "
+        "quarterly GD backlog after 2018Q3. Pooled "
         "across those five, the next-quarter error was 9.9% for a backlog model, 7.3% for the seasonal naive and 6.5% "
         "for the seasonal naive with drift; four quarters out it was 9.4% for backlog, 5.8% for trailing revenue and "
         "6.0% for trailing revenue with drift. So the 2026Q3 defense figures above are the seasonal naive with drift, "
@@ -564,11 +571,13 @@ def build(root="."):
         _watch(add, C, Y, seg, btb)
 
     # 8. Risks
-    risks = C.prefix("risk-")
+    own = "risk-midcabin-supplier-delay"
+    risks = [cid for cid in C.prefix("risk-") if cid != own]
     if risks:
         add("<h2>Risks</h2><p>The risks closest to this tracker are Gulfstream's own, and the product cycle section "
             "cites them: the planned production break between the last G280 and the G300, and the timing of the "
-            "G400. Below are GD's general risk factors, as its filings state them; the limits of my method follow "
+            "G400." + (f" A third bears on the mid-cabin count directly: {C.say(own)}" if C.has(own) else "")
+            + " Below are GD's general risk factors, as its filings state them; the limits of my method follow "
             "separately.</p>")
         add('<ul class="tight">' + "".join(f"<li>{C.say(cid)}</li>" for cid in risks) + "</ul>")
 
@@ -666,6 +675,30 @@ def used_share(root):
             f"({len(old) / len(ev) * 100:.1f}%) are airframes at least three years old.")
 
 
+GLOSS = ("Here the registry count is my scaled registry estimate, and GD's guidance pace is my construction from GD's "
+         "full-year outlook, not a figure GD publishes.")
+ORDINAL = {1: "first", 2: "second", 3: "third", 4: "fourth"}
+
+
+def band_held(h):
+    """F113. The band's coverage on the held-out quarters, said wherever the band is shown."""
+    b = h["band"]
+    return f", which held GD's count in {b['hits']} of {b['n']} held-out quarters against a nominal 80%"
+
+
+def stated_shape(root, q):
+    """F115. The latest call in q's year, before q's end, that said q would be among the year's highest quarters."""
+    end = Calendar.load(root).end(q)
+    word = ORDINAL[int(q[5])]
+    hits = [r for r in read_csv(Path(root) / "data/guidance.csv")
+            if r["call_date"][:4] == q[:4] and (end is None or r["call_date"] <= end)
+            and word in r["quote"].lower() and "highest" in r["quote"].lower()]
+    if not hits:
+        return ""
+    r = max(hits, key=lambda x: x["call_date"])
+    return f" On its {r['call_date']} call GD said the {word} quarter would be among the year's highest."
+
+
 def limitations(root):
     """The seven limitations from DECISIONS.md's README list, in plain words."""
     return [
@@ -687,6 +720,9 @@ def limitations(root):
         "production break before the G300 (product cycle, above). The method is untested in a quarter with few or no "
         "mid-cabin deliveries.",
         "Band: the past-miss band comes from errors measured on a finished registry file, so it may not fit a live lock.",
+        "Scope and holder: the scope rule keeps engine-type codes 4 and 5, and the FAA files one G700 type code under "
+        "another, so those G700s are outside the count until the rule is amended. The holder rule reads registrations "
+        "to Gulfstream's own leasing company as deliveries. The README's Limitations give the size of each.",
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
         "reading or could not confirm it: five were used jets read as new deliveries, two had an earlier stated "
         "delivery, and three could not be confirmed. All but one source was a registry mirror or aircraft-history "

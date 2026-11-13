@@ -139,8 +139,9 @@ def summary(wb):
     put(ws, "C6", "=AVERAGE(Quarters!T18:T43)", F_AIR)
     put(ws, "A8", "MAE is the average miss in aircraft. The lowest holdout figure in column C is the baseline that "
                   "missed by least. Guidance has no design-window figure.")
-    put(ws, "A9", "Read rows 2 to 6 before anything else: a baseline with a lower holdout figure than MAE ratio beat the "
-                  "registry estimate. The Live sheet holds each locked quarter, what GD reported and the miss.")
+    put(ws, "A9", "Read rows 2 to 6 before anything else. A baseline with a lower holdout figure than MAE ratio missed by "
+                  "less on average; none of the preregistered sign tests separates it from the registry estimate. The "
+                  "Live sheet holds each locked quarter, what GD reported and the miss.")
     ws.freeze_panes = "B2"
     widths(ws, [16, 12, 12])
 
@@ -180,6 +181,8 @@ def live_sheet(wb, root, pred):
     put(ws, "B13", p90, F_AIR, typed=True)
     put(ws, "B14", "=B11-B13", F_AIR)
     put(ws, "B15", "=B11-B12", F_AIR)
+    hb = read_json(Path(root) / "results/metrics.json")["holdout"]["band"]
+    put(ws, "C14", f"The band held GD's count in {hb['hits']} of {hb['n']} held-out quarters, against a nominal 80%.")
     # Once GD has reported the quarter: its count, the lock's miss and where the count fell against the band.
     sp = Path(root) / "results/live" / f"{q}_score.json"
     if sp.exists():

@@ -244,9 +244,11 @@ def readings_footnote(root):
     a, c = v.get("outlook_2021_as_117"), v.get("quarter_plans")
     if not a or not c:
         return ""
-    return (" GD's January 2021 call gave the year as \"10 fewer aircraft\" than 2020; read as 117, the guidance pace "
-            f"misses by {f1(a['mae']['guidance'])} on average, and with the plans GD stated for single quarters in its "
-            f"place, by {f1(c['mae']['guidance'])}, not {f1(pace_mae(sens))} (results/exploratory/sensitivity.md).")
+    return (" Two readings of GD's calls that I tried after seeing the held-out results: GD's January 2021 call gave "
+            f"the year as \"10 fewer aircraft\" than 2020, and read as 117 the guidance pace misses by "
+            f"{f1(a['mae']['guidance'])} on average; with the plans GD stated for single quarters in its place it misses "
+            f"by {f1(c['mae']['guidance'])}, not {f1(pace_mae(sens))}." + both_readings(sens)
+            + " The variants are in results/exploratory/sensitivity.md.")
 
 
 def lock_old_events(root, p, years=3):
@@ -540,8 +542,8 @@ def post(root):
     h = m["holdout"]
     scores = live.scores(root)
     ls = locked_scores(root)
-    what = ("My tracker scales FAA registrations into an estimate of the Gulfstream jets General "
-            "Dynamics (GD) reports each quarter, locked on GitHub the day before GD reports.")
+    what = ("My tracker scales FAA registrations into an estimate of the Gulfstream jets GD reports each quarter, "
+            "locked on GitHub the day before GD reports.")
     lines = []
     if ls:
         q, s, p, lock = ls[-1]
@@ -552,7 +554,7 @@ def post(root):
         if len(ls) == 1:
             verb = "missed" if not s["inside_band"] else "landed inside its band"
             lines.append(f"My first locked estimate of Gulfstream deliveries {verb}: I said "
-                         f"{f1(s['nowcast']['total'])} for {q}, General Dynamics reported {s['reported']['total']}.")
+                         f"{f1(s['nowcast']['total'])} for {q}, General Dynamics (GD) reported {s['reported']['total']}.")
         else:
             hits = sum(1 for _, x, _, _ in ls if x["inside_band"])
             avg = sum(x["ae_total"] for _, x, _, _ in ls) / len(ls)
@@ -560,11 +562,13 @@ def post(root):
             # and report.run would have stopped the daily rebuild after the second score.
             lines.append(f"{len(ls)} locked estimates so far: off by {f1(avg)} jets on "
                          f"average, {hits} of {len(ls)} inside the band. The latest, {q}: I said "
-                         f"{f1(s['nowcast']['total'])}, General Dynamics reported {s['reported']['total']}.")
+                         f"{f1(s['nowcast']['total'])}, General Dynamics (GD) reported {s['reported']['total']}.")
         lines += [what, ""]
-        detail = f"The {q} miss was {f1(s['ae_total'])}, {band} my 80% band of past misses."
+        hb = h["band"]
+        detail = (f"The {q} miss was {f1(s['ae_total'])}, {band} my 80% band of past misses (it held {hb['hits']} of "
+                  f"{hb['n']} past quarters).")
         if pace and yago:
-            detail += (f" A pace I derived from GD's own full-year outlook missed by {pace[2]}, and last year's same "
+            detail += (f" My pace from GD's full-year outlook missed by {pace[2]}, and last year's same "
                        f"quarter ({yago[1]}) by {yago[2]}.")
         if lock_words(read_json(root / "config/calendar.json"), lock["published_at"]) == PRIVATE:
             detail += " The repository was private then; the timestamp is GitHub's."
@@ -581,7 +585,7 @@ def post(root):
     lines += ["Backtest (rules set minutes before scoring): "
               + headline(m) + low_line(m).replace(" Simply repeating", " Repeating")
               + " (Registry count: my scaled estimate; the pace: mine.) The test reads a "
-              "registry copy that had months or years to fill in, so only locked quarters show whether it counts jets "
+              "registry copy that had months or years to fill in, so only locked quarters show if it counts jets "
               "in time." + one, "",
               f"Dashboard: {DASH}", f"Code: {REPO}", "",
               DISCLAIMER, "",

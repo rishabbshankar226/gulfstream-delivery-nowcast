@@ -85,8 +85,35 @@ def series(root):
     return out
 
 
+LOCKED = "Locked, with band"
+
+
+def locked_points(root):
+    """F117. [(quarter, locked estimate, (band low, band high), GD's count)] for each quarter that was locked and then
+    scored, in order. The track chart draws them after the backtest, so the image a reader sees first shows the live
+    record too. A quarter that missed its lock window, or is locked but not yet scored, has no point."""
+    from . import live
+    root = Path(root)
+    out = []
+    for q, s in sorted(live.scores(root).items(), key=lambda kv: qidx(kv[0])):
+        p = root / "predictions" / f"{q}.json"
+        if s.get("locked") and s.get("nowcast") and p.exists() and qidx(q) > qidx(QS[-1]):
+            lo, hi = read_json(p)["band"]
+            out.append((q, s["nowcast"]["total"], (lo, hi), s["reported"]["total"]))
+    return out
+
+
+def track_quarters(root):
+    """The track chart's x axis: the backtest quarters, then every quarter through the last scored lock."""
+    pts = locked_points(root)
+    return QS + (qrange(QS[-1], pts[-1][0])[1:] if pts else [])
+
+
 def track_record(root, snap):
     rep = {r["quarter"]: int(r["total"]) for r in read_csv(Path(root) / "data/processed/gd_deliveries.csv")}
+    pts = locked_points(root)
+    qs = track_quarters(root)
+    rep.update({q: n for q, _, _, n in pts})
     s = series(root)
     fig, ax = _fig()
     ax.axvspan(QS.index("2017Q1") - 0.5, QS.index("2019Q4") + 0.5, color="#423e38", alpha=0.07, lw=0)
@@ -95,15 +122,27 @@ def track_record(root, snap):
     for m in ("last", "seasonal", "guidance", "raw", "ratio"):
         xs = [QS.index(q) for q in QS if q in s[m]]
         ax.plot(xs, [s[m][QS[i]] for i in xs], label=NAMES[m], **STYLE[m])
-    ax.plot(range(len(QS)), [rep[q] for q in QS], label=NAMES["reported"], **STYLE["reported"])
-    _quarter_axis(ax, QS)
-    ax.set_ylim(0, max(max(rep.values()), max(max(v.values()) for v in s.values())) * 1.12)
+    xr = [i for i, q in enumerate(qs) if q in rep]
+    ax.plot(xr, [rep[qs[i]] for i in xr], label=NAMES["reported"], **STYLE["reported"])
+    top = max(max(rep.values()), max(max(v.values()) for v in s.values()))
+    if pts:
+        ax.axvspan(len(QS) - 0.5, len(qs) - 0.5, color=ACCENT, alpha=0.08, lw=0)
+        ax.text(len(qs) - 0.55, 3, "Locked", fontsize=15, color=MUTED, ha="right")
+        for i, (q, est, (lo, hi), _) in enumerate(pts):
+            ax.errorbar([qs.index(q)], [est], yerr=[[est - lo], [hi - est]], fmt="D", color=ACCENT, ms=12,
+                        capsize=7, lw=2.4, mfc=ACCENT, mec=INK, label=LOCKED if i == 0 else None, zorder=5)
+        top = max(top, max(hi for _, _, (_, hi), _ in pts))
+    _quarter_axis(ax, qs)
+    ax.set_ylim(0, top * 1.12)
     h, lab = ax.get_legend_handles_labels()
-    order = [lab.index(NAMES[m]) for m in ("reported", "ratio", "raw", "guidance", "seasonal", "last")]
+    keys = ("reported", "ratio", "raw", "guidance", "seasonal", "last")
+    order = [lab.index(NAMES[m]) for m in keys] + ([lab.index(LOCKED)] if pts else [])
     ax.legend([h[i] for i in order], [lab[i] for i in order], loc="lower left", bbox_to_anchor=(0, 1.0),
-              ncol=3, frameon=False, handlelength=3.2)
-    _finish(fig, ax, "Gulfstream deliveries by quarter: GD's count against five estimates",
-            "Aircraft delivered per quarter", snap)
+              ncol=4 if pts else 3, frameon=False, handlelength=3.2 if not pts else 2.6,
+              columnspacing=2.0 if not pts else 1.2)
+    title = ("GD's Gulfstream deliveries against five backtest estimates and the live lock" if pts
+             else "Gulfstream deliveries by quarter: GD's count against five estimates")
+    _finish(fig, ax, title, "Aircraft delivered per quarter", snap)
     _save(fig, root, "track_record.png")
 
 
@@ -242,6 +281,7 @@ def input_digest(root):
         files += [lv / f"{q}_path.csv", lv / f"{q}_latest.json", lv / f"{q}_lock.json", lv / f"{q}_score.json",
                   root / "predictions" / f"{q}.json"]
     files += sorted(lv.glob("*_score.json"))
+    files += [root / "predictions" / f"{p.name[:6]}.json" for p in sorted(lv.glob("*_score.json"))]
     lines = [f"{sha256(p.read_bytes())}  {p.relative_to(root)}" for p in dict.fromkeys(files) if p.exists()]
     lines.append(f"{sha256(Path(__file__).read_bytes())}  src/gdn/charts.py")
     return "\n".join(lines) + "\n"

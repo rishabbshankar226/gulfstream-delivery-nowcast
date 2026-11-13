@@ -10,7 +10,7 @@
 <meta property="og:description" content="A student project: FAA aircraft registrations against the Gulfstream deliveries General Dynamics reports, tested on past quarters and locked before each release.">
 <meta property="og:url" content="https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/">
 <meta property="og:image" content="https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/preview.png">
-<meta property="og:image:alt" content="GD's reported Gulfstream deliveries by quarter against the five estimates">
+<meta property="og:image:alt" content="GD's reported Gulfstream deliveries by quarter against five backtest estimates, and each locked live estimate with its band">
 <meta name="color-scheme" content="light dark">
 <meta name="theme-color" content="#f5f4f1" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)">
@@ -97,7 +97,7 @@
   <section class="panel" aria-labelledby="h-method">
     <h2 id="h-method">Method</h2>
     <ol class="method">
-      <li>Each Gulfstream jet in the FAA registry gets a delivery date: a customer's registration, or an export off Gulfstream's own registration, whichever comes first.</li>
+      <li>Each Gulfstream jet in the FAA registry that my scope rule keeps gets a delivery date: a customer's registration, or an export off Gulfstream's own registration, whichever comes first. One type code of a newer large-cabin jet falls outside the rule; the README's Limitations name it and give its size.</li>
       <li>Those dates are counted in GD's fiscal quarters, by cabin size.</li>
       <li>The count is scaled by how many deliveries GD reported per registration over the four quarters before.</li>
       <li>The quarters from 2017Q1 to 2019Q4 set the rule; the 26 quarters from 2020Q1 to 2026Q2 test it against GD's guidance pace (my construction, not a figure GD publishes: its full-year delivery outlook less the deliveries already reported, spread by each quarter's usual share of the year) and two simple rules of thumb.</li>

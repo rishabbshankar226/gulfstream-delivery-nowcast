@@ -7,11 +7,11 @@
     reported: "GD reported",
     ratio: "Registry estimate",
     raw: "Raw registry count",
-    guidance: "GD's guidance pace",
+    guidance: "Pace built from GD's outlook",
     seasonal: "Same quarter last year",
     last: "Last quarter"
   };
-  var BASE = { guidance: "GD's guidance pace", seasonal: "the same quarter last year", last: "last quarter" };
+  var BASE = { guidance: "the pace I built from GD's outlook", seasonal: "the same quarter last year", last: "last quarter" };
   var DASH = { reported: [], ratio: [], raw: [7, 4], guidance: [10, 4, 2, 4], seasonal: [5, 4], last: [2, 3] };
   var WIDTH = { reported: 3, ratio: 2.4, raw: 1.6, guidance: 1.6, seasonal: 1.6, last: 1.8 };
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -135,7 +135,9 @@
     text($("live-status"), L.quarter + " · " + status);
     text($("live-figure"), f1(pred.nowcast.total));
     if ($("live-unit")) text($("live-unit"), L.lock ? "deliveries, locked estimate" : "deliveries, estimated");
-    text($("live-band"), "Band of past misses: " + f1(pred.band[0]) + " to " + f1(pred.band[1]) + " deliveries.");
+    var hb = data.metrics.holdout.band;
+    text($("live-band"), "Band of past misses: " + f1(pred.band[0]) + " to " + f1(pred.band[1]) + " deliveries. " +
+      "It held GD's count in " + hb.hits + " of " + hb.n + " held-out quarters, against a nominal 80%.");
     var facts = $("live-facts");
     facts.textContent = "";
     function fact(k, v) { facts.appendChild(el("dt", null, k)); facts.appendChild(el("dd", null, v)); }
@@ -144,7 +146,7 @@
       latest.events.large + " large-cabin, " + latest.events.mid + " mid-cabin (snapshot " + latest.snapshot + ")");
     // The window opens the day after the last quarter's fiscal end.
     fact("Quarter window", dayAfter(latest.window_start) + " to " + latest.window_end);
-    if (L.guidance_pace !== null) fact("GD's guidance pace", f1(L.guidance_pace) + " deliveries" +
+    if (L.guidance_pace !== null) fact("Pace I built from GD's outlook", f1(L.guidance_pace) + " deliveries" +
       (L.score && L.score.guidance_ae !== null ? " (missed by " + f1(L.score.guidance_ae) + ")" : ""));
     fact("GD's typical quarter", "about " + whole(typicalCount()) + " deliveries since 2020");
     var qi = data.quarters.indexOf(L.quarter);
@@ -218,7 +220,7 @@
       sets.push({
         label: NAME[m], data: data.backtest[m], borderColor: css("--s-" + m), backgroundColor: css("--s-" + m),
         borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1,
-        hidden: narrow.matches && (m === "raw" || m === "seasonal" || m === "last")
+        hidden: narrow.matches && (m === "raw" || m === "last")
       });
     });
     var opts = baseOptions("Aircraft delivered per quarter", "Fiscal quarter");
@@ -297,7 +299,7 @@
         pointRadius: 4, pointHoverRadius: 6, tension: 0, spanGaps: true, order: 1 }
     ];
     if (L.guidance_pace !== null) {
-      sets.push({ type: "line", label: "GD's guidance pace", data: labels.map(function () { return L.guidance_pace; }), borderColor: css("--s-guidance"),
+      sets.push({ type: "line", label: "Pace built from GD's outlook", data: labels.map(function () { return L.guidance_pace; }), borderColor: css("--s-guidance"),
         borderDash: DASH.guidance, borderWidth: 1.6, pointRadius: 0, order: 2 });
     }
     if (L.locked && L.lock) {
@@ -322,7 +324,7 @@
     var lastTot = rows[rows.length - 1].nowcast_total;
     $("c-path").setAttribute("aria-label", "Chart of the " + L.quarter + " estimate by registry snapshot date: latest " + f1(lastTot) +
       " deliveries with a band of past misses from " + f1(lastTot - below) + " to " + f1(lastTot + above) +
-      (L.guidance_pace !== null ? ", against GD's guidance pace of " + f1(L.guidance_pace) : "") + ". The table below lists every snapshot.");
+      (L.guidance_pace !== null ? ", against the pace I built from GD's outlook, " + f1(L.guidance_pace) : "") + ". The table below lists every snapshot.");
     table("t-path", "The " + L.quarter + " estimate by snapshot date", ["Snapshot", "Large-cabin registrations", "Mid-cabin registrations", "Estimate", "Band low", "Band high"],
       rows.map(function (r) {
         return { cells: [r.date, String(r.events_large), String(r.events_mid), f1(r.nowcast_total), f1(r.nowcast_total - below), f1(r.nowcast_total + above)] };
@@ -395,7 +397,7 @@
         ", so the registry is counting more registrations per delivery than usual." : "")));
     var tr = h.truncation_mae;
     table("t-trunc", "Average miss when each test quarter's registrations are cut early, against " + f1(h.mae.guidance) +
-      " for GD's guidance pace on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
+      " for the pace I built from GD's outlook on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
       ["0", "30", "60", "90"].map(function (d) { return { cells: [d, f1(tr[d])] }; }));
   }
 
