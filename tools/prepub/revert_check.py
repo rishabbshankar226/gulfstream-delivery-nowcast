@@ -78,6 +78,51 @@ CASES = [
      "tests/test_after_score.py::test_the_post_counts_its_locked_quarters"),
     ("F058", "src/gdn/sensitivity.py", "    if plans:\n        variants += [", "    if False:\n        variants += [",
      "tests/test_prepub_text.py::test_gd_stated_quarter_plans_are_scored_beside_the_guidance_pace"),
+    # round 4 (docs/prepub/ROUND4_VERDICT.md)
+    ("F124", "src/gdn/live.py", '        if not f.get("accepted"):\n', '        if False:\n',
+     "tests/test_live.py::test_a_lock_is_not_scored_when_sec_gives_no_acceptance_time"),
+    ("F109", "src/gdn/note.py",
+     "GD was left out because the SEC's XBRL company-facts data holds no \"\n        \"quarterly GD backlog after 2018Q3.",
+     "GD was left out because it stopped tagging backlog in XBRL in 2018.",
+     "tests/test_round4.py::test_the_note_states_why_gd_left_the_defense_study_as_the_filings_allow"),
+    ("F113 (post)", "src/gdn/report.py",
+     "my 80% band of past misses (it held {hb['hits']} of \"\n                  f\"{hb['n']} past quarters).\")",
+     "my 80% band of past misses.\")",
+     "tests/test_after_score.py::test_a_locked_and_scored_quarter_keeps_its_text"),
+    ("F113 (note)", "src/gdn/note.py",
+     "    return f\", which held GD's count in {b['hits']} of {b['n']} held-out quarters against a nominal 80%\"",
+     "    return \"\"",
+     "tests/test_round4.py::test_the_band_is_shown_with_its_coverage_in_the_note_and_the_workbook"),
+    ("F113 (workbook)", "src/gdn/workbook.py", '    put(ws, "C14", f"The band held GD', '    pass  # put(ws, "C14", f"The band held GD',
+     "tests/test_round4.py::test_the_band_is_shown_with_its_coverage_in_the_note_and_the_workbook"),
+    ("F113 (dashboard)", "site/app.js",
+     "\" deliveries. \" +\n      \"It held GD's count in \" + hb.hits + \" of \" + hb.n + \" held-out quarters, against a nominal 80%.\");",
+     "\" deliveries.\");",
+     "tests/test_site_a11y.py::test_the_live_card_states_the_band_coverage_and_names_the_pace_as_mine"),
+    ("F114 (dashboard)", "site/app.js", "fact(\"Pace I built from GD's outlook\",", "fact(\"GD's guidance pace\",",
+     "tests/test_site_a11y.py::test_the_live_card_states_the_band_coverage_and_names_the_pace_as_mine"),
+    ("F114 F116 (note)", "src/gdn/note.py",
+     '{esc(low_line(m))} {esc(GLOSS)}" + (f" {esc(split)}" if split else "")', '{esc(low_line(m))}"',
+     "tests/test_round4.py::test_the_notes_first_page_glosses_its_terms_and_says_where_the_edge_comes_from"),
+    ("F115", "src/gdn/note.py", "            live_point += stated_shape(root, q) + even_split(root, q, score)\n",
+     "            pass\n",
+     "tests/test_round4.py::test_gds_stated_shape_of_the_year_and_the_even_split_sit_beside_the_pace"),
+    ("F117", "src/gdn/charts.py",
+     '        if s.get("locked") and s.get("nowcast") and p.exists() and qidx(q) > qidx(QS[-1]):', "        if False:",
+     "tests/test_round4.py::test_the_track_chart_draws_each_scored_lock_after_the_backtest"),
+    ("F118", "site/app.js", '(m === "raw" || m === "last")', '(m === "raw" || m === "seasonal" || m === "last")',
+     "tests/test_site_a11y.py::test_a_phone_keeps_the_baseline_that_won_on_the_track_chart"),
+    ("F119", "src/gdn/note.py",
+     "I read the FAA's aircraft registry for every Gulfstream jet type my scope rule keeps, including the \"\n        \"G280,",
+     "I read every Gulfstream jet in the FAA's aircraft registry, including the \"\n        \"G280,",
+     "tests/test_round4.py::test_the_note_does_not_say_it_reads_every_gulfstream_jet"),
+    ("F122", "src/gdn/note.py",
+     '(f" A third bears on the mid-cabin count directly: {C.say(own)}" if C.has(own) else "")', '""',
+     "tests/test_round4.py::test_the_notes_risks_carry_the_mid_cabin_supplier_delay"),
+    ("F123", "src/gdn/workbook.py",
+     'before anything else. A baseline with a lower holdout figure than MAE ratio missed by "',
+     'before anything else: a baseline with a lower holdout figure than MAE ratio beat the "',
+     "tests/test_round4.py::test_the_workbook_summary_does_not_say_a_baseline_beat_the_estimate"),
 ]
 
 
@@ -123,5 +168,7 @@ print(f"\n{len(CASES)} fixes checked, {len(CASES) - bad} with FAIL when reverted
 print("\nNot in this table: F003 is a repair of six tests, whose failing state is the baseline run in `BASELINE.md` "
       "(`6 failed, 114 passed`) and whose passing state is the current suite. F048 corrects a comment, not code; its "
       "test (`tests/test_model.py::test_nearest_rank_positions_match_exact_arithmetic`) pins the behaviour the comment "
-      "now describes.")
+      "now describes. Round 4's F125, F126 and F127 change tests only: F125 and F127 add direct tests of code that was "
+      "already right (the neither-date bound and the old-airframe counts), and F126 moves tests off the tracked live "
+      "files; F126's check against a 2026Q4-locked tree is in DECISIONS.md D24.")
 sys.exit(1 if bad else 0)
