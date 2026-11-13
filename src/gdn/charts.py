@@ -140,8 +140,8 @@ def track_record(root, snap):
     ax.legend([h[i] for i in order], [lab[i] for i in order], loc="lower left", bbox_to_anchor=(0, 1.0),
               ncol=4 if pts else 3, frameon=False, handlelength=3.2 if not pts else 2.6,
               columnspacing=2.0 if not pts else 1.2)
-    title = ("GD's Gulfstream deliveries against five backtest estimates and the live lock" if pts
-             else "Gulfstream deliveries by quarter: GD's count against five estimates")
+    title = ((f"GD's Gulfstream deliveries against five backtest estimates and the live lock{'s' if len(pts) > 1 else ''}")
+             if pts else "Gulfstream deliveries by quarter: GD's count against five estimates")
     _finish(fig, ax, title, "Aircraft delivered per quarter", snap)
     _save(fig, root, "track_record.png")
 

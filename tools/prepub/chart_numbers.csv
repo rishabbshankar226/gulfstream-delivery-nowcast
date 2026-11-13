@@ -40,3 +40,7 @@ output/charts/nowcast_path.png,32.0,path chart: locked estimate diamond,live.202
 output/charts/nowcast_path.png,2026-10-30,path chart: GD reported annotation date,cal.release.2026Q3,date,read from the image
 output/charts/nowcast_path.png,2026-10-19,path chart: source line first snapshot,path.2026Q3.first,date,read from the image
 output/charts/nowcast_path.png,2026-10-30,path chart: source line last snapshot,path.2026Q3.last,date,read from the image
+output/charts/track_record.png,32.0,track record chart: the 2026Q3 locked estimate (diamond),live.2026Q3.pred.nowcast.total,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,21.2,track record chart: the 2026Q3 lock's band low (lower whisker),live.2026Q3.pred.band.0,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,37.2,track record chart: the 2026Q3 lock's band high (upper whisker),live.2026Q3.pred.band.1,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,40,track record chart: GD's reported 2026Q3 count (end of the black line),live.2026Q3.score.reported.total,f0,read by eye off the axis (round 4)

@@ -2,10 +2,10 @@
 
 ## After the fix pass (2026-11-12, at `2393a18`)
 
-**Still NO-GO, and every item left is the owner's.** The fix pass closed everything the audit could close.
+**Still NO-GO, and every blocking item left is the owner's.** The fix pass closed everything the audit could close.
 
 - The two new blocking findings that sat in code and text are fixed: the note's XBRL sentence (F109) and the late-lock guard that failed open (F124).
-- Seventeen of the eighteen new S2 findings are fixed. That includes the cold read's one finding (F130) and all seven first-screen findings: F113 to F117, F123 and F130.
+- Seventeen of the eighteen new S2 findings are fixed. That includes the cold read's one finding (F130) and the first-screen findings F113, F114, F116, F117, F123 and F130. F115 is fixed where the pace is defined; its post and live-card part is regraded to S3 (`FINDINGS.md` 5.3).
 - The private name and the home paths are gone from the tracked files (F110, F111). They remain in history.
 
 What stops the post now is only what the owner must decide or do:
@@ -15,12 +15,12 @@ What stops the post now is only what the owner must decide or do:
 3. **The private name in the branch history** (F110, A.3 below): a local squash merge, with `origin/prepub-audit` deleted before the flip, keeps it off `main`.
 4. **`GO_PUBLIC.md` step 1**, dating the position statement (F081).
 
-After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129).
+After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129). One order matters: `origin/prepub-audit` on GitHub still points at `4388294`, whose `DECISIONS.md` holds the private name, so step 2b (delete that branch) must come before step 4 (make the repository public).
 
 | # | Criterion | Holds | Measurement at `2393a18` (`BASELINE.md`, Round 4 final) |
 |---|---|---|---|
 | 1 | Zero open S1 | **no** | F015 and F016, and the history half of F110 and F111. All four are the owner's. F109 and F124 are fixed. |
-| 2 | Zero open S2 on the five first screens | **no** | F081 only, which is the owner's. F113 to F117, F123 and F130 are fixed. |
+| 2 | Zero open S2 on the five first screens | **no** | F081 only, which is the owner's. F113, F114, F116, F117, F123 and F130 are fixed. F115 is fixed on the README and the note; its post and live-card part is regraded to S3, with the reason in `FINDINGS.md` 5.3. |
 | 3 | Ledger clean after its plants | yes | `rows 2923  flagged 0`; 9 of 9 plants caught at `2393a18`. |
 | 4 | Recompute matches | yes | Round 4's blind recompute matched every headline figure. The fix pass computed no new figure; it showed existing ones in more places, each traced by the ledger. The cold read matched every figure it checked. |
 | 5 | Lock checks pass | yes | As in the round 4 table below. |

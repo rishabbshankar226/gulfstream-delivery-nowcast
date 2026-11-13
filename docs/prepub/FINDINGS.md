@@ -390,6 +390,7 @@ Raw counts across the eleven reports: S1 6, S2 39, S3 70. After clustering dupli
 | EDITOR-7 (and HIRING-9, SELLSIDE-6) | S2 | S3 | The note's Exhibit 11 leaves out the Summary sheet's guidance row. No figure differs, and 6.9 is in Exhibit 2. |
 | COMPLIANCE-3 | S2 | S3 | The note and the post do not disclaim the FAA. The note's footer has "Not affiliated with General Dynamics or Gulfstream". The spec's P7.1 asks for those two only. |
 | CODE-4 | S2 | S3 | `public_since` is documented in `GO_PUBLIC.md:62-68`. Only the job's log message leaves it out. |
+| F115 (the post and the dashboard's live card) | S2 | S3 | The substance of the S2 was that a reader could take 33.8 for GD's own number. After F113 and F114 the post says "My pace from GD's full-year outlook" and the live card says "Pace I built from GD's outlook", so neither reads as GD's. GD's "third quarter among the highest" and the 40.5 even split are on the README's first screen and the note's first page, where the pace is defined. The post has no room under its cap. |
 | STATS-2 (label part) | S2 | S3 | The note cites `results/exploratory/sensitivity.md`, which labels the reading by its path. The missing combined reading is in F116. |
 | SELLSIDE-1 | S1 | S1 | Kept. A factual claim the filings contradict. |
 | EXPOSURE-1 | S1 | S1 | Kept, under the round 4 rule fixed before launch (personal data exposed on going public is S1). |

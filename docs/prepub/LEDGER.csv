@@ -2920,5 +2920,9 @@ chart,output/charts/nowcast_path.png,32.0,path chart: locked estimate diamond,pr
 chart,output/charts/nowcast_path.png,2026-10-30,path chart: GD reported annotation date,config/calendar.json [cal.release.2026Q3],2026-10-30,traced,read from the image
 chart,output/charts/nowcast_path.png,2026-10-19,path chart: source line first snapshot,results/live/2026Q3_path.csv [path.2026Q3.first],2026-10-19,traced,read from the image
 chart,output/charts/nowcast_path.png,2026-10-30,path chart: source line last snapshot,results/live/2026Q3_path.csv [path.2026Q3.last],2026-10-30,traced,read from the image
+chart,output/charts/track_record.png,32.0,track record chart: the 2026Q3 locked estimate (diamond),predictions/2026Q3.json [live.2026Q3.pred.nowcast.total],32.0,traced,read by eye off the axis (round 4)
+chart,output/charts/track_record.png,21.2,track record chart: the 2026Q3 lock's band low (lower whisker),predictions/2026Q3.json [live.2026Q3.pred.band.0],21.2,traced,read by eye off the axis (round 4)
+chart,output/charts/track_record.png,37.2,track record chart: the 2026Q3 lock's band high (upper whisker),predictions/2026Q3.json [live.2026Q3.pred.band.1],37.2,traced,read by eye off the axis (round 4)
+chart,output/charts/track_record.png,40,track record chart: GD's reported 2026Q3 count (end of the black line),results/live/2026Q3_score.json [live.2026Q3.score.reported.total],40,traced,read by eye off the axis (round 4)
 readme,"README.md (Limitations, Export)",a few,registry yearly mid-cabin count within a few jets of GD's since 2022,"registry_quarterly.csv minus gd_deliveries.csv, mid cabin, by full year {""2022"": 1, ""2023"": -2, ""2024"": 4, ""2025"": 3}",largest gap 4,traced,a few is read as five or fewer
 build-notes,docs/build/ (29 files),,dated build logs from v1; figures in them are as of their date,docs/build/README.md notice,,traced,

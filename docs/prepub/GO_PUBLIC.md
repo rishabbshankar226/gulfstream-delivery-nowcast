@@ -44,7 +44,7 @@ git switch main && git pull --ff-only
 git merge --no-ff prepub-audit
 ```
 
-When the audit ended, `prepub-audit` already held every commit of `origin/main` (`8c7692f`, the workflow's 2026-11-12 run, merged in `bbf88fd`), so the merge was clean. Merge the local branch. `origin/prepub-audit` on GitHub may be behind it: `git log --oneline origin/prepub-audit..prepub-audit` lists what it lacks. Do not merge through a GitHub pull request: its `refs/pull/*/head` keeps every branch commit reachable after the branch is deleted. If you chose a squash merge in decision A or under `ROUND4_VERDICT.md` A.3, run `git merge --squash prepub-audit && git commit` in place of `git merge --no-ff prepub-audit`. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs and their stamps). For each one take either side, then rebuild them all from the merged data and code:
+When the audit ended, `prepub-audit` already held every commit of `origin/main` (`8c7692f`, the workflow's 2026-11-12 run, merged in `bbf88fd`), so the merge was clean. Merge the local branch. `origin/prepub-audit` on GitHub may be behind it: `git log --oneline origin/prepub-audit..prepub-audit` lists what it lacks. Do not merge through a GitHub pull request: its `refs/pull/*/head` keeps every branch commit reachable after the branch is deleted. If you chose a squash merge in decision A or under `ROUND4_VERDICT.md` A.3, run `git merge --squash prepub-audit && git commit` in place of `git merge --no-ff prepub-audit`. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs, the charts under `output/charts/`, `site/preview.png`, and their stamps). For each one take either side, then rebuild them all from the merged data and code:
 
 ```
 git checkout --theirs -- <each conflicted file>
@@ -106,7 +106,7 @@ GitHub, the repository's Settings, General, Danger Zone, Change repository visib
 
 ### 4b. Protect the record on GitHub (round 4, F129)
 
-Do this straight after step 4, before the post. Once the repository is public nothing else stops a moved tag or a force-push.
+Do this straight after step 4, before the post. Once the repository is public nothing else stops a moved tag or a force-push. The option names below are as I expect GitHub to show them; this audit did not open those settings pages. If the words differ, pick the rules that stop updates, deletions and force pushes.
 
 - Settings, Rules, Rulesets, New tag ruleset: target `lock-*`, enforcement Active, and turn on "Restrict updates" and "Restrict deletions".
 - Settings, Rules, Rulesets, New branch ruleset: target the default branch, and turn on "Block force pushes" and "Restrict deletions". The daily workflow pushes ordinary commits, which these rules allow.
