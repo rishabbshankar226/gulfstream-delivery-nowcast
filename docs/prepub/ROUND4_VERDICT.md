@@ -1,5 +1,72 @@
 # Round 4 verdict: eleven auditors
 
+## After the fix pass (2026-11-12, at `2393a18`)
+
+**Still NO-GO, and every item left is the owner's.** The fix pass closed everything the audit could close.
+
+- The two new blocking findings that sat in code and text are fixed: the note's XBRL sentence (F109) and the late-lock guard that failed open (F124).
+- Seventeen of the eighteen new S2 findings are fixed. That includes the cold read's one finding (F130) and all seven first-screen findings: F113 to F117, F123 and F130.
+- The private name and the home paths are gone from the tracked files (F110, F111). They remain in history.
+
+What stops the post now is only what the owner must decide or do:
+
+1. **Decision A**, the email address on 62 commits of `main` (F015, F112).
+2. **Decision B**, the home paths in the 16 build briefs and in history (F016, F111).
+3. **The private name in the branch history** (F110, A.3 below): a local squash merge, with `origin/prepub-audit` deleted before the flip, keeps it off `main`.
+4. **`GO_PUBLIC.md` step 1**, dating the position statement (F081).
+
+After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129).
+
+| # | Criterion | Holds | Measurement at `2393a18` (`BASELINE.md`, Round 4 final) |
+|---|---|---|---|
+| 1 | Zero open S1 | **no** | F015 and F016, and the history half of F110 and F111. All four are the owner's. F109 and F124 are fixed. |
+| 2 | Zero open S2 on the five first screens | **no** | F081 only, which is the owner's. F113 to F117, F123 and F130 are fixed. |
+| 3 | Ledger clean after its plants | yes | `rows 2923  flagged 0`; 9 of 9 plants caught at `2393a18`. |
+| 4 | Recompute matches | yes | Round 4's blind recompute matched every headline figure. The fix pass computed no new figure; it showed existing ones in more places, each traced by the ledger. The cold read matched every figure it checked. |
+| 5 | Lock checks pass | yes | As in the round 4 table below. |
+| 6 | Post links resolve after a named step | yes | Unchanged. |
+| 7 | Tests, gate and determinism on a fresh clone | yes, with logged gate failures | Fresh clone without `data/raw/`: `196 passed, 2 skipped`. Main tree: `198 passed`, `identical (50 files)`, `make all` leaves the tree clean. Gate: `42 assertions, 4 failing`, the same IDs as D18 (D24). |
+| 8 | Interview notes and resume state the scored record | yes | The ledger traces both files with 0 flagged. |
+| 9 | Round 3 found no S1 | yes, superseded | Of round 4's four new S1, two are fixed. The other two are fixed at the tip and wait on the owner for history. |
+| 10 | Source rows verified or closed | yes | `SOURCES_CLAIMS.csv:55` now carries F109, fixed, in place of F043's wrong refutation. |
+| 11 | Record hashes match | yes by D3, **no** literally | 59 of 61, as in D20. The protected-path diff from `4388294` is empty. |
+| 12 | P3.5 found nothing open | **no** | F015, F016, and the history half of F110 and F111. |
+| 13 | Every required item finished | yes | `PLAN.md`, R4.0 to R4.10. |
+
+**What the fix pass changed on the public surfaces:**
+
+- **The post.** The band's coverage is beside the band, and the pace is called mine. It is 1,282 characters.
+- **The README.** The first screen calls the pace mine. The hero image draws the lock with its band. The coverage sentence names its unit. The guard sentence counts four guards.
+- **The dashboard.**
+  - The lead, the live card and the legends call the pace mine.
+  - The live card gives the band's coverage.
+  - A phone keeps the baseline that won.
+  - The scope sentence no longer says "every jet".
+- **The note.**
+  - The XBRL sentence is corrected.
+  - The first page glosses the preregistered sentence and says where the edge comes from.
+  - The key point and the locked-quarter paragraph give the band's coverage.
+  - GD's own "third quarter among the highest" and the 40.5 even split sit beside the scored pace.
+  - The after-the-fact readings are labelled, with the combined reading.
+  - "Every Gulfstream jet" is gone, and a scope and holder limitation is added.
+  - The risks carry the mid-cabin supplier delay from GD's 10-Q.
+- **The workbook.** The Summary no longer says "beat", and the Live sheet gives the band's coverage.
+- **The owner's material.** The interview notes and resume bullets carry the coverage and qualify "held-out".
+- **Behind the surfaces.**
+  - The score step refuses a locked quarter when the SEC gives no acceptance time (ERRATA E9 is amended).
+  - Tests no longer pin today's live state.
+  - New tests cover the neither-date bound and the old-airframe counts.
+  - `docs/prepub/` has an index.
+  - The runbook protects the record and cleans up branches.
+
+**Still open at S3, and not blocking:** the round 4 S3 rows in `FINDINGS.md` 5.4 and 5.7 that the fix pass did not touch.
+
+**Who has read the fixed tree:** one cold reader (`reviews/round4_coldread.md`) read the changed first screens and said GO. Its one S2 is fixed (F130). Nobody has read the F130 fix itself except through its test, the ledger and this battery.
+
+---
+
+The rest of this file is the verdict as round 4 wrote it, before the fix pass.
+
 **NO-GO.** Five of the spec's 13 criteria fail (1, 2, 10, 11 literally, 12). Round 4 found four new S1 findings:
 
 - a false sentence in the note about GD's filings (F109);

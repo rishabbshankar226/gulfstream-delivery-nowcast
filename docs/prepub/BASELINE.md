@@ -124,3 +124,20 @@ Measured 2026-11-12 between 20:45 and about 20:50 ET, on clean trees at `b461695
 | Revert tests (R6) | `tools/prepub/revert_check.py ~/gdn-prepub/scratch/revert_round4` (`REVERT_TESTS.md`) | 36 fixes checked, 36 FAIL when reverted and PASS when restored |
 | Fresh clone, no `data/raw/` | `git clone` to `~/gdn-prepub/clone_round4`; `make test`, `make all`, `git status --short` with the main checkout's venv | `195 passed, 2 skipped`; `make all` exit 0; status empty |
 | Record | `shasum -a 256 -c docs/prepub/RECORD_HASHES.txt`; `git diff --stat 4388294..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` | 59 of 61, as in D20; the diff prints nothing |
+
+### Round 4, final (after F130)
+
+Measured 2026-11-12 from 21:06 ET on a clean tree at `2393a18`, after the last change to any public surface (`4f96be4`).
+
+| Check | Result |
+|---|---|
+| `make test` | `198 passed, 14 warnings in 56.10s` |
+| `make check-determinism` | `identical (50 files)` |
+| `make all`, then `git status --short` | exit 0; status empty |
+| PDF stamp | `sha256(report/note.html)` equals `output/GD_research_note.inputs.sha256` (`ea2b7d56533ea144...`) |
+| Gate, all ten families (`.build/gate_round4_final.json`) | `42 assertions, 4 failing, 3 warning`: `R2`, `K1`, `N1`, `Y1`, as in D18 and D24 |
+| Ledger | `rows 2923  flagged 0` |
+| Nine plants (`plantA9`, `plantB9`) | 9 planted, 9 caught, 0 missed |
+| Revert tests (`~/gdn-prepub/scratch/revert_round4b`, `REVERT_TESTS.md`) | 37 fixes checked, 37 FAIL when reverted and PASS when restored |
+| Fresh clone without `data/raw/` (`~/gdn-prepub/clone_round4b`) | `196 passed, 2 skipped` |
+| Record | 59 of 61 hashes, as in D20; the protected-path diff from `4388294` prints nothing |

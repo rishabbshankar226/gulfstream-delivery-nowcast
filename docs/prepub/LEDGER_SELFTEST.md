@@ -95,7 +95,7 @@ The clean copy's two flagged rows are both `stale` rows on sentences that say th
 
 ## Rerun after the round 4 fix pass (2026-11-12)
 
-Round 4 reworded sentences on every surface (F113, F114, F115, F116, F119, F121) and changed the post. The ledger's templates and staleness patterns in `tools/prepub/ledger_rules.py` were updated to the new wording (commit "ledger rules follow the reworded sentences"); no rule was loosened to pass a number. The nine plants were then rerun at `205245b`, and again at `de26f49` after one more rule change (the resume bullet), with the same result:
+Round 4 reworded sentences on every surface (F113, F114, F115, F116, F119, F121) and changed the post. The ledger's templates and staleness patterns in `tools/prepub/ledger_rules.py` were updated to the new wording (commit "ledger rules follow the reworded sentences"); no rule was loosened to pass a number. The nine plants were then rerun at `205245b`, again at `de26f49` after one more rule change (the resume bullet), and last at `2393a18` after F130 (copies `plantA9`, `plantB9`), each with the same result:
 
 - Copies: `git archive prepub-audit | tar -x -C <dir>` into `~/gdn-prepub/plantA7/` (clean) and `~/gdn-prepub/plantB7/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link; `make pdf` in the planted copy for plant 7.
 - Ledgers: clean `rows 2925  flagged 2`; planted `rows 2927  flagged 38`. The clean copy's two rows are the two private-lock sentences explained above.

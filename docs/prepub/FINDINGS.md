@@ -485,7 +485,7 @@ No round 4 finding moves the record. `shasum -a 256 predictions/2026Q3.json` pri
 | | Fixed | Open, with the owner | All |
 |---|---|---|---|
 | S1 new (F109, F110, F111, F124) | 2 (F109, F124) | 2 (F110 and F111: fixed at the tip, history is the owner's) | 4 |
-| S2 new (F112 to F123, F125 to F129) | 16 | 1 (F129: the runbook step is written, the settings are the owner's) | 17 |
+| S2 new (F112 to F123, F125 to F130) | 17 | 1 (F129: the runbook step is written, the settings are the owner's) | 18 |
 
 Still open from before round 4, all the owner's: F015 and F016 (S1), F081 (S2), and the S3 rows F063, F064, F068, F074, F098, F107. The round 4 S3 rows in 5.4 stay as listed, apart from those the fix pass touched in passing: CODE-9 and EDITOR-2 (the dashboard's pace name, with F114), and HIRING-7 (the track chart, with F117).
 

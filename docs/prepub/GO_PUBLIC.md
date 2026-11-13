@@ -55,7 +55,7 @@ git add <the same files> && git commit
 Never resolve a conflict in `predictions/`, `results/live/`, `data/snapshots/` or `docs/PREREGISTRATION.md` by hand: the audit did not touch them, so `main`'s side is the only side.
 
 - Use the project's environment: Python 3.11 with `requirements.lock` installed (the README's Reproduce section). The system `python3` on this Mac is 3.9.6 and cannot install the pinned requirements.
-- Check: `make test` ends with no failure (197 tests passed when round 4's fix pass ended; a clone without the untracked `data/raw/` folder prints 195 passed and 2 skipped). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
+- Check: `make test` ends with no failure (198 tests passed when round 4's fix pass ended; a clone without the untracked `data/raw/` folder prints 196 passed and 2 skipped). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
 
 ### 2b. Clean up the branches that would go public
 

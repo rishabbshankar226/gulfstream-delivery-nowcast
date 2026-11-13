@@ -74,14 +74,14 @@ Started 2026-11-12 13:59 ET on the frozen commit `4388294`. Audit only.
 | R4.6 | Verdict and improvements | done | `ROUND4_VERDICT.md`; gate rerun after the last commit |
 | R4.7 | Fix pass, lists B and C of `ROUND4_VERDICT.md` | done | F109, F112 to F128 fixed; F110, F111 fixed at the tip; F129 runbook step written (`FINDINGS.md` 5.6) |
 | R4.8 | Battery after the fix pass | done | `BASELINE.md`, Round 4 fix pass: 197 passed, ledger 0 flagged, 9 of 9 plants, 36 of 36 revert pairs, gate 4 failing as D18 |
-| R4.9 | Cold read of the changed first screens | running | `reviews/round4_coldread.md` |
-| R4.10 | Verdict after the fix pass | pending | `ROUND4_VERDICT.md`, top section |
+| R4.9 | Cold read of the changed first screens | done | `reviews/round4_coldread.md` |
+| R4.10 | Verdict after the fix pass | done | `ROUND4_VERDICT.md`, top section |
 
 ## Running
 
 Nothing is running. All eleven auditors reported between about 14:25 and 14:40 ET; their reports are committed in `1030d7a`. The verdict is `ROUND4_VERDICT.md`: NO-GO.
 
-Fix pass: one cold reader (`coldread`) launched about 20:50 ET on the tree at `b128144`; it writes only `reviews/round4_coldread.md`.
+Fix pass: one cold reader (`coldread`) ran from about 20:50 ET on the tree at `b128144` and reported GO with one S2 (F130, fixed). Nothing is running now.
 
 ## Cut items
 
