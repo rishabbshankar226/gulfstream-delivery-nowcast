@@ -141,3 +141,7 @@ Measured 2026-11-12 from 21:06 ET on a clean tree at `2393a18`, after the last c
 | Revert tests (`~/gdn-prepub/scratch/revert_round4b`, `REVERT_TESTS.md`) | 37 fixes checked, 37 FAIL when reverted and PASS when restored |
 | Fresh clone without `data/raw/` (`~/gdn-prepub/clone_round4b`) | `196 passed, 2 skipped` |
 | Record | 59 of 61 hashes, as in D20; the protected-path diff from `4388294` prints nothing |
+
+### Round 4, last (after the advisor's review)
+
+At `fc3157c`, a clean tree (its only code change since `2393a18` is the chart title for two or more locks, which leaves today's image byte-identical): `make test` `198 passed, 14 warnings in 48.07s`; `make check-determinism` `identical (50 files)`; `make all` exit 0 with an empty status; gate (`.build/gate_round4_last.json`) `42 assertions, 4 failing, 3 warning`, the IDs `R2`, `K1`, `N1`, `Y1` of D18 and D24; ledger `rows 2927  flagged 0`; the protected-path diff from `4388294` prints nothing.
