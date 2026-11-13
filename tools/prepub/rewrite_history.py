@@ -1,13 +1,17 @@
 """Rewrite this repository's history so it can go public with no personal data in it (GO_PUBLIC.md, part 0).
 
     PRIVATE_NAME='<your private name>' python3 tools/prepub/rewrite_history.py \
+        --old-email '<the personal address to remove>' \
         --new-email '<id>+<handle>@users.noreply.github.com' --out ~/gdn-rewrite.git
 
 What it does, on a NEW mirror clone at --out (this checkout is never touched, and nothing is pushed):
 
-1. Every commit's author and committer email that equals this checkout's `git config user.email` becomes --new-email.
+0. It refuses to run unless refs/remotes/origin/main is an ancestor of main (fetch and pull first), so no commit the
+   daily workflow pushed is lost when the rewritten main is force-pushed.
+1. Every commit's author and committer email that equals --old-email becomes --new-email.
 2. In every file of every commit, and in every commit message, the home-folder prefix (/Users/<account>) becomes `~`,
-   the account name in an `ls -l` owner column becomes `owner`, and PRIVATE_NAME becomes `[private name]`.
+   the account name in an `ls -l` owner column becomes `owner`, PRIVATE_NAME becomes `[private name]`, and the
+   phrases that name the old address's mail provider (round 4 found ten) or narrow the account name are reworded.
    Only blobs holding one of those patterns are rewritten; every other file keeps its exact bytes.
 3. Tags are rewritten onto the new commits (lock-2026Q3 included). Author and commit dates are kept.
 
@@ -17,8 +21,9 @@ tip, that predictions/2026Q3.json at the new lock tag hashes to the value in the
 lock commit keeps its date and author. It writes commit_map.csv (old SHA, new SHA, date, subject) next to the mirror
 and prints the push commands for the owner to run. It exits non-zero if any check fails.
 
-No personal value is written into this file: the email is read from git config, the account from the home folder, and
-the private name from the environment.
+No personal value is written into this file: the email comes from --old-email, the account from the home folder, and
+the private name from the environment. After the rewrite every author and committer email on the rewritten refs must be
+a no-reply or bot address, whatever --old-email was.
 """
 import argparse
 import csv
@@ -35,13 +40,19 @@ LOCK_SHA256 = "3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23"
 RECORD = ["predictions", "results/live", "data/snapshots", "docs/PREREGISTRATION.md", ".github"]
 REPO_URL = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast.git"
 
+SED = (' -e "s|$OLD_HOME|~|g" -e "s|$ACCT  staff|owner  staff|g" -e "s|$PRIV|[private name]|g"'
+       ' -e "s|personal email address|personal email address|g" -e "s|personal email address|personal email address|g"'
+       ' -e "s|email address|email address|g" -e "s|<personal email>|<personal email>|g"'
+       ' -e "s|email\\.com|a personal domain|g" -e "s#@<personal domains>#@<personal domains>#g"'
+       ' -e "s|; it does not|; it does not|g" -e "s|[Gg]mail|email|g"')
+
 INDEX_FILTER = r"""#!/bin/sh
-git grep --cached -l -I -i -e "$OLD_HOME" -e "$ACCT  staff" -e "$PRIV" 2>/dev/null | while IFS= read -r path; do
+git grep --cached -l -I -i -e "$OLD_HOME" -e "$ACCT  staff" -e "$PRIV" -e "email" -e "narrowing phrase" 2>/dev/null | \
+while IFS= read -r path; do
   entry=$(git ls-files -s -- "$path")
   mode=$(printf '%s' "$entry" | cut -d' ' -f1)
   sha=$(printf '%s' "$entry" | cut -d' ' -f2)
-  new=$(git cat-file -p "$sha" | sed -e "s|$OLD_HOME|~|g" -e "s|$ACCT  staff|owner  staff|g" -e "s|$PRIV|[private name]|g" \
-        | git hash-object -w --stdin)
+  new=$(git cat-file -p "$sha" | sed SEDEXPR | git hash-object -w --stdin)
   git update-index --cacheinfo "$mode,$new,$path"
 done
 """
@@ -62,9 +73,12 @@ def refs(repo, original=False):
 def scan(repo, rs, email, home, acct, priv):
     meta = git(repo, "log", "--format=%ae%n%ce", *rs)
     body = git(repo, "log", "-p", "--format=%B", *rs)
-    return {"commits": len(git(repo, "rev-list", *rs).split()), "email in metadata": meta.count(email),
-            "email in files or messages": body.count(email), "home prefix": body.count(home),
-            "account in ls owner column": body.count(acct + "  staff"), "private name": body.lower().count(priv.lower())}
+    personal = [e for e in meta.split() if "noreply" not in e and "[bot]" not in e]
+    return {"commits": len(git(repo, "rev-list", *rs).split()), "old email in metadata": meta.count(email),
+            "any non-noreply email in metadata": len(personal),
+            "old email in files or messages": body.count(email), "home prefix": body.count(home),
+            "account in ls owner column": body.count(acct + "  staff"), "private name": body.lower().count(priv.lower()),
+            "mail-provider word": body.lower().count("email"), "account-narrowing phrase": body.count("narrowing phrase")}
 
 
 def blobs(repo, ref):
@@ -77,6 +91,7 @@ def blobs(repo, ref):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--old-email", required=True, help="the personal address to remove from commit metadata")
     ap.add_argument("--new-email", required=True, help="your GitHub no-reply address, from Settings, Emails")
     ap.add_argument("--out", required=True, help="a new directory for the rewritten mirror")
     ap.add_argument("--source", default=str(Path(__file__).resolve().parents[2]))
@@ -89,14 +104,18 @@ def main():
     src, out = Path(a.source).resolve(), Path(a.out).expanduser().resolve()
     if out.exists():
         sys.exit(f"{out} exists; give a new directory")
-    email = git(src, "config", "user.email").strip()
+    email = a.old_email.strip()
+    if subprocess.run(["git", "-C", str(src), "merge-base", "--is-ancestor", "refs/remotes/origin/main",
+                       "refs/heads/main"]).returncode:
+        sys.exit("origin/main has commits that main lacks: git fetch, then git switch main && git pull --ff-only, "
+                 "then merge prepub-audit, before you rewrite")
     home = str(Path.home())
     acct = Path.home().name
 
     git(src, "clone", "-q", "--mirror", str(src), str(out))
     git(out, "remote", "set-url", "--push", "origin", "DISABLED")
     with tempfile.NamedTemporaryFile("w", suffix=".sh", delete=False) as f:
-        f.write(INDEX_FILTER)
+        f.write(INDEX_FILTER.replace("SEDEXPR", SED))
     os.chmod(f.name, 0o755)
     env = dict(os.environ, OLD_EMAIL=email, NEW_EMAIL=a.new_email, OLD_HOME=home, ACCT=acct, PRIV=priv,
                FILTER_BRANCH_SQUELCH_WARNING="1")
@@ -105,7 +124,7 @@ def main():
         "--env-filter", 'if [ "$GIT_AUTHOR_EMAIL" = "$OLD_EMAIL" ]; then export GIT_AUTHOR_EMAIL="$NEW_EMAIL"; fi; '
                         'if [ "$GIT_COMMITTER_EMAIL" = "$OLD_EMAIL" ]; then export GIT_COMMITTER_EMAIL="$NEW_EMAIL"; fi',
         "--index-filter", f.name,
-        "--msg-filter", 'sed -e "s|$OLD_HOME|~|g" -e "s|$PRIV|[private name]|g"',
+        "--msg-filter", "sed" + SED,
         "--tag-name-filter", "cat", "--", "--all", env=env)
 
     before, after = refs(out, True), refs(out)

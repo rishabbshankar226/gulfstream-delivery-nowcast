@@ -13,53 +13,79 @@ What the rewrite keeps and changes:
 - Every record file stays byte for byte: `predictions/`, `results/live/`, `data/snapshots/`, `docs/PREREGISTRATION.md` and `.github/`.
 - `predictions/2026Q3.json` keeps its sha256, so it still matches the `lock-2026Q3` release notes.
 - The lock commit keeps its date (2026-10-29 05:51:22 UTC) and its author (`github-actions[bot]`).
-- The release itself, and its `published_at`, are not touched.
+- The release itself is not edited. Step 0 checks, on a throwaway repository, that moving a release's tag leaves the release published with the same `published_at`.
 - What changes: every commit hash, the lock commit's included (`a44e5ac` becomes a new hash), and so the `lock-2026Q3` tag moves to the new commit.
 - The release's `targetCommitish` still names `a44e5ac`. ERRATA E11 says so.
 
-A rehearsal on 2026-11-12, on a scratch mirror, found:
+A rehearsal on 2026-11-12, in this runbook's order (no-reply email set, `prepub-audit` merged into `main`, then the script), found:
 
-| Pattern, across all 190 commits | Before | After |
+| Across all 193 commits | Before | After |
 |---|---|---|
-| Personal email in commit metadata | 286 | 0 |
+| Commit emails that are not a no-reply or bot address | 290 | 0 |
 | Home-folder prefix | 177 | 0 |
 | Account name in an `ls -l` owner column | 2 | 0 |
 | Private name | 4 | 0 |
+| Words naming the old address's mail provider | 16 | 0 |
+| Phrases narrowing the account name | 1 | 0 |
 
-It also found every record file identical at every branch tip and tag, and the lock file's hash unchanged (`DECISIONS.md` D25).
+It also found every record file identical at every branch tip and tag, and the lock file's hash unchanged. No binary file in history (83 PDFs, workbooks, PNGs and compressed snapshots) holds any of these values (`DECISIONS.md` D25).
 
 Do these steps in order. They replace decisions A and B below, and they replace steps 2 and 2b of part 2.
 
+0. **Try the tag move on a throwaway repository first.** This audit could not check how GitHub treats a release whose tag is force-moved, and the release's `published_at` is the one thing that cannot be made again.
+   - Make a private test repository with two commits, A and B. Tag A as `t1`, and publish a release on `t1`.
+   - Note the release's `publishedAt` with `gh release view t1 --json publishedAt,isDraft,targetCommitish`.
+   - Run `git tag -f t1 B && git push --force origin t1`, then the same `gh release view`.
+   - Go on only if the release is still published (`isDraft` false) and `publishedAt` is unchanged. If not, stop: see "If this route fails" below. Delete the test repository afterwards.
 1. **Stop the workflow.** On GitHub, open Actions, then the nowcast workflow, and choose "Disable workflow". Nothing must commit while you rewrite.
    - Check: the workflow shows as disabled.
 2. **Hide your email from now on.**
    - Settings (your account), Emails: turn on "Keep my email addresses private" and "Block command line pushes that expose my email". Copy the no-reply address shown there.
    - In this checkout: `git config user.email <that no-reply address>`.
 3. **Date the position statement:** step 1 of part 2, on `prepub-audit`.
-4. **Merge locally:** `git switch main && git merge --no-ff prepub-audit`.
+4. **Bring `main` up to date, then merge:** `git fetch && git switch main && git pull --ff-only && git merge --no-ff prepub-audit`.
+   - Check: `git merge-base --is-ancestor origin/main main && echo ok` prints ok.
    - Check: `make test` passes, and `make all` then `git status --short` prints nothing.
-5. **Rewrite into a new mirror:**
+5. **Rewrite into a new mirror.** Use the personal address you are removing as the old email, and the no-reply address as the new one:
 
    ```
-   PRIVATE_NAME='<your private name>' python3 tools/prepub/rewrite_history.py --new-email '<your no-reply address>' --out ~/gdn-rewrite.git
+   PRIVATE_NAME='<your private name>' python3 tools/prepub/rewrite_history.py --old-email '<the personal address>' --new-email '<your no-reply address>' --out ~/gdn-rewrite.git
    ```
 
-   - Check: it ends with `ALL CHECKS PASSED`, and every "After" count it prints is 0.
+   - It refuses to run if `main` lacks any commit of `origin/main`.
+   - It ends with `ALL CHECKS PASSED` only when every "After" count is 0. That includes "any non-noreply email in metadata", which catches a wrong `--old-email`.
    - It writes `~/gdn-rewrite.git.commit_map.csv` (old SHA, new SHA) and prints the push commands.
+   - The audit ran it in this order on 2026-11-12: `ALL CHECKS PASSED` (DECISIONS D25).
 6. **Push the rewritten history.** Run the commands it printed: force-push `main`, force-push the tag `lock-2026Q3`, then delete `prepub-audit` and `codex/fix-daily-merge-and-lock-integrity` on GitHub.
    - Check: `git ls-remote --heads origin` lists `main` only.
    - Check: `git ls-remote --tags origin` shows `lock-2026Q3` at the new lock hash the script printed.
-   - Check: `gh release view lock-2026Q3 --json publishedAt` still prints `2026-10-29T05:51:24Z`.
-7. **Retire this checkout.** It still holds the old history. Rename the folder, `git clone` a fresh copy from GitHub, and work only in that copy from now on. Never push from the old one: a push from it would bring the old commits back.
-8. **Ask GitHub to purge the old commits.** At support.github.com, ask GitHub to "remove cached views and unreachable commits" for this repository, after a history rewrite to remove personal data. Attach the old SHAs from the commit map. Wait for their reply before step 4 of part 2.
-   - Check, once public, from a logged-out browser: `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/commit/a44e5aca3756941a075150d9e381020826f3fb81` returns 404.
-9. **Record it, in the fresh clone.**
-   - Add `docs/prepub/COMMIT_MAP.csv`: copy `~/gdn-rewrite.git.commit_map.csv` into it, so every SHA the audit notes cite can be looked up.
+   - Check: `gh release view lock-2026Q3 --json publishedAt,isDraft` still prints `2026-10-29T05:51:24Z` and `false`.
+7. **Retire this checkout and set up a fresh one.** This checkout still holds the old history.
+   - Rename its folder, then `git clone` a fresh copy from GitHub. Never push from the old folder again: a push from it would bring the old commits back.
+   - In the fresh clone:
+     - copy `data/raw/` across from the old folder (it is untracked; without it `make claims` drops every claim);
+     - make the environment with `python3.11 -m venv .venv && .venv/bin/python -m pip install -r requirements.lock`;
+     - copy the untracked `CLAUDE.md` across if you use it;
+     - run `git config user.email <your no-reply address>`.
+   - Check: `make claims` prints `report/claims.json: 44 claims`, and `make test` passes.
+8. **Ask GitHub to purge the old commits, while the repository is still private.**
+   - At support.github.com, ask GitHub to "remove cached views and unreachable commits" for this repository, after a history rewrite to remove personal data. Attach the old SHAs from the commit map.
+   - Ask them as well to remove pull request #1. Its ref, `refs/pull/1/head` at `163eac0` (the merged codex branch), cannot be force-updated and keeps old commits reachable.
+   - Wait for their reply.
+   - Check, still private and logged in: `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/commit/a44e5aca3756941a075150d9e381020826f3fb81` returns 404, and `git ls-remote origin 'refs/pull/*'` prints nothing.
+9. **Record it, in the fresh clone, once the purge is confirmed.**
+   - Add `docs/prepub/COMMIT_MAP.csv` (copy `~/gdn-rewrite.git.commit_map.csv`) so that every SHA the audit notes cite can be looked up. Add it only after step 8's checks pass, because it lists every old SHA.
    - Add ERRATA E11: "History rewritten on <date> to remove personal data. Every commit hash changed. The lock commit `a44e5ac` is now `<new>`, and the `lock-2026Q3` tag points at it. `predictions/2026Q3.json` is byte-identical, and its sha256 still equals the release notes. The release and its `published_at` are unchanged. Its `targetCommitish` still names `a44e5ac`, and so does the `commit` field of `results/live/2026Q3_lock.json` (and of `site/data.json`, which copies it). That file is part of the record and stays as written; nothing in the code reads the field back."
+   - Add one sentence to the README's `## Method`, at the end of the **Live.** paragraph: "On <date> I rewrote this repository's history to remove personal data; the `lock-2026Q3` tag now points at the rewritten lock commit, and the locked file and its sha256 are unchanged ([ERRATA](docs/prepub/ERRATA.md) E11)."
    - Add one line to `LOCK_CHECK.md` naming the new lock hash.
    - Commit and push.
 10. **Expect one new gate failure.** v1's gate (`L3`) compares that `commit` field with the tag's commit, so it fails after the rewrite for this reason alone. Log it in `DECISIONS.md` under R11 with E11.
 11. **Restart the workflow** (Actions, nowcast, Enable workflow). Then carry on from step 3 of part 2. Steps 2 and 2b of part 2 are done.
+
+**If this route fails** (step 0 shows the release changes, or GitHub Support declines step 8), do not make this repository public: its old commits would stay reachable. There are two ways to go:
+
+- **Keep this repository private.** The lock stays checkable by its owner only.
+- **Push the rewritten mirror to a new, empty repository and make that one public.** It has no old objects and no pull request refs. The cost is real: the new repository has no `lock-2026Q3` release, so the 2026Q3 lock's GitHub timestamp stays in the private one. The README must then say that the first lock can be checked only against the file's sha256, not against a public release.
 
 **Security settings for the public repository** (do them with step 4b of part 2):
 

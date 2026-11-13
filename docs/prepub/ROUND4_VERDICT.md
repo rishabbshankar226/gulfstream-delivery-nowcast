@@ -10,7 +10,7 @@
 
 What stops the post now is only what the owner must do. The decisions are made: on 2026-11-12 the owner chose privacy first, with the repository public (DECISIONS D25).
 
-1. **Run `GO_PUBLIC.md` part 0.** It rewrites the history once, so no commit holds the email address, the home paths or the private name (F015, F016, F110, F111), and pushes it before the repository is ever public. A rehearsal took every count to 0 and left every record file and the lock's hash unchanged. Then ask GitHub Support to purge the old commits.
+1. **Run `GO_PUBLIC.md` part 0.** It rewrites the history once, so no commit holds the email address, the home paths or the private name (F015, F016, F110, F111), and pushes it before the repository is ever public. A rehearsal in the runbook's order took every count to 0 and left every record file and the lock's hash unchanged. Part 0 then has GitHub Support purge the old commits and remove pull request #1, whose ref keeps old commits reachable, while the repository is still private. The cost is that the `lock-2026Q3` tag moves to the rewritten lock commit (erratum E11), and going public waits on GitHub Support. Part 0 starts with a trial of the tag move on a throwaway repository. If that trial or the purge fails, the repository stays private, or the rewritten history goes to a new repository that has no release.
 2. **Date the position statement**, `GO_PUBLIC.md` step 1 (F081). Part 0 does this at its own step 3.
 
 After that, parts 0 and 2 of `GO_PUBLIC.md`, in order, make the repository public and protect it, with the security settings in part 0 and step 4b. Part 0 replaces the old steps 2 and 2b, so the branch with the old history is deleted before anything is public.

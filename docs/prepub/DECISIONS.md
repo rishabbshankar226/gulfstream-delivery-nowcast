@@ -168,6 +168,21 @@ The owner wrote: "private and security is the goal, while having the github publ
   - private name from 4 to 0.
 
   Every record file was identical at every branch tip and at the tag. `predictions/2026Q3.json` at the new tag hashed to `3c4cdbd0...6f23`, and the lock commit kept its author and dates. The script printed `ALL CHECKS PASSED`. `filter-repo` is not installed here, so the tool uses git's own `filter-branch`.
-- **What the rewrite cannot do alone.** GitHub's "Removing sensitive data from a repository" page (read 2026-11-12) says old commits may stay reachable by SHA in cached views, and through pull-request refs and forks, until GitHub Support removes them. The repository has never been public and has no forks, and the audit merged nothing through a pull request. Part 0 therefore asks Support to purge before the repository goes public, and checks afterwards that the old lock commit's URL returns 404.
+- **What the rewrite cannot do alone.** GitHub's "Removing sensitive data from a repository" page (read 2026-11-12) says old commits may stay reachable by SHA in cached views, and through pull-request refs and forks, until GitHub Support removes them. The repository has never been public and has no forks. It does have one pull request: `git ls-remote origin 'refs/pull/*'` prints `refs/pull/1/head` at `163eac0`, the codex branch, and a pull-request ref cannot be force-updated. So part 0 asks Support to purge the old commits and remove PR #1 while the repository is still private. It checks, still private, that the old lock commit's URL returns 404 and that no pull-request ref is left. If Support declines, the repository does not go public (part 0, "If this route fails").
 - **The lock record names the old commit.** `results/live/2026Q3_lock.json` stores `"commit": "a44e5ac..."`, written once at lock time by `live.write_lock_json`, and `site/data.json` copies it. `grep` finds no code in `src/gdn` or `site/app.js` that reads the field back, and no surface shows it. After the rewrite the field names a purged commit. It is a record file, so it stays as written, and E11 says so. v1's gate compares the field with the tag's commit (`L3`, `jetgate.py` near line 1240), so `L3` will fail after the rewrite for that reason alone; part 0 step 10 has the owner log it under R11.
 - **Not done by the audit:** no rewrite of this checkout, no push, no change to GitHub, account or Actions settings.
+- **Corrections after review (2026-11-12).**
+  - The first version of the script read the old email from `git config`, which part 0 changes first. It now takes `--old-email`, and it fails unless every email on the rewritten refs is a no-reply or bot address.
+  - It refuses to run unless `main` holds every commit of `origin/main`. Tested: on a scratch clone with `main` one commit behind, it stopped before cloning.
+  - It also rewords the phrases that named the old address's mail provider (16 occurrences in history) and one that narrowed the account name. The same phrases were reworded at the tip, in `EXPOSURE.md`, `FINDINGS.md`, `briefs/compliance.md`, `reviews/compliance.md` and `reviews/round4_exposure.md`.
+  - Rehearsed in the runbook's order (`~/gdn-prepub/scratch/rewrite_order_src` and `rewrite_order_out.git`), it printed `ALL CHECKS PASSED`, with every "After" count 0 across 193 commits.
+  - A scan of all 83 binary blobs in history found none of the values: PDF text and metadata, workbook XML, PNG bytes, gzipped snapshots. The only author and committer names are the GitHub handle and `github-actions[bot]`.
+  - Part 0 now:
+    - starts with a throwaway-repository trial of moving a released tag, since this audit could not check GitHub's behaviour;
+    - pulls before merging;
+    - sets up the fresh clone with `data/raw/` so that `make claims` keeps its 44 claims;
+    - checks the purge while the repository is still private;
+    - publishes the commit map only after the purge;
+    - adds a README sentence pointing to E11;
+    - says what to do if the route fails.
+- **This is a reading of the owner's goal.** The owner asked for a public repository with privacy and security, not for a history rewrite in words. The rewrite is the only way found that meets both and keeps the lock's GitHub release.
