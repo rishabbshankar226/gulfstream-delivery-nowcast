@@ -107,3 +107,20 @@ Measured 2026-11-12, 13:59 to about 14:10 ET, on a clean tree at the frozen comm
 ### Round 4, after the register and verdict
 
 At `f88b7c8`, a clean tree that differs from `4388294` only under `docs/prepub/`: the full gate (`--output .build/gate_round4_final.json`) printed `42 assertions, 4 failing, 3 warning`, with the same `R2`, `K1`, `N1`, `Y1` lists and the same `T3`, `S3`, `L3` warnings as before launch. `shasum -a 256 predictions/2026Q3.json` printed `3c4cdbd0...6f23`. `git diff --stat 4388294..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` printed nothing.
+
+## Round 4 fix pass, after
+
+Measured 2026-11-12 between 20:45 and about 21:10 ET, on clean trees at `b461695` and `de26f49` (the last commit that touches a public surface is `de26f49`, which shortened a resume bullet).
+
+| Check | Command | Result |
+|---|---|---|
+| Tests | `make test` | `197 passed, 14 warnings in 47.60s` (at `b461695`) |
+| Determinism | `make check-determinism` | `identical (50 files)` |
+| Offline rebuild | `make all`, then `git status --short` | exit 0; status empty |
+| PDF stamp | `shasum -a 256 report/note.html` against `output/GD_research_note.inputs.sha256` | equal: `ea2b7d56533ea144...` |
+| Gate, all ten families | the R11 command, `--output .build/gate_round4_fix.json` | at `de26f49`: `42 assertions, 4 failing, 3 warning`, the same IDs as D18 (`R2`, `K1`, `N1`, `Y1`); N1's list now names the note's new figures (DECISIONS D24). At `b461695` a fifth, `K2`, failed on a 246-character resume bullet; `de26f49` shortened it to 218. |
+| Ledger | `tools/prepub/ledger.py --root . --out docs/prepub/LEDGER.csv` | `rows 2923  flagged 0` |
+| Nine plants | `tools/prepub/plant_selftest.py`, copies `plantA8`, `plantB8` at `de26f49` | 9 planted, 9 caught, 0 missed |
+| Revert tests (R6) | `tools/prepub/revert_check.py ~/gdn-prepub/scratch/revert_round4` (`REVERT_TESTS.md`) | 36 fixes checked, 36 FAIL when reverted and PASS when restored |
+| Fresh clone, no `data/raw/` | `git clone` to `~/gdn-prepub/clone_round4`; `make test`, `make all`, `git status --short` with the main checkout's venv | `195 passed, 2 skipped`; `make all` exit 0; status empty |
+| Record | `shasum -a 256 -c docs/prepub/RECORD_HASHES.txt`; `git diff --stat 4388294..HEAD -- predictions results/live data/snapshots docs/PREREGISTRATION.md .github` | 59 of 61, as in D20; the diff prints nothing |
