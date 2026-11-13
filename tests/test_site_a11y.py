@@ -17,6 +17,9 @@ sync_api = pytest.importorskip("playwright.sync_api")
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
+# F126. The tracked site/data.json moves with every daily run and every lock. Tests of the scored 2026Q3 state read
+# this frozen copy of it, taken 2026-11-12, so the 2026Q4 lock does not turn them red.
+SCORED_DATA = ROOT / "tests" / "fixtures" / "site_data_2026Q3_scored.json"
 AXE = (ROOT / "tests" / "vendor" / "axe.min.js").read_text()
 TAGS = ["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"]
 SIZES = [(1280, 900), (390, 844)]
@@ -153,6 +156,18 @@ def _live_page(browser, base_url, data):
     return page
 
 
+def _before_any_lock():
+    """The tracked data.json put back to the day before the first lock: 2026Q3 only, unlocked and unscored.
+    (The tracked file now holds the real 2026Q3 lock and score, and 2026Q4's first rows.)"""
+    data = json.loads((SITE / "data.json").read_text())
+    q3 = next(x for x in data["live"] if x["quarter"] == "2026Q3")
+    q3.update({"locked": None, "lock": None, "score": None})
+    data["live"] = [q3]
+    data["path"] = {"2026Q3": data.get("path", {}).get("2026Q3", [])}
+    data["reported_segments"] = {}
+    return data
+
+
 def _next_quarter(L):
     q4 = json.loads(json.dumps(L))
     q4.update({"quarter": "2026Q4", "build": None, "locked": None, "lock": None, "score": None,
@@ -163,7 +178,7 @@ def _next_quarter(L):
 
 def test_a_scored_quarter_stays_featured_after_the_next_one_starts(browser, base_url):
     # On the score day the same run writes 2026Q4's first files; the page must still show 2026Q3's result.
-    data = json.loads((SITE / "data.json").read_text())
+    data = _before_any_lock()
     q3 = data["live"][-1]
     pred = q3["latest"] or q3["build"]
     q3["locked"] = pred
@@ -182,7 +197,7 @@ def test_a_scored_quarter_stays_featured_after_the_next_one_starts(browser, base
 
 
 def test_without_a_lock_or_score_the_newest_quarter_is_featured(browser, base_url):
-    data = json.loads((SITE / "data.json").read_text())
+    data = _before_any_lock()
     data["live"].append(_next_quarter(data["live"][-1]))
     page = _live_page(browser, base_url, data)
     assert page.inner_text("#live-status").startswith("2026Q4")
@@ -190,7 +205,7 @@ def test_without_a_lock_or_score_the_newest_quarter_is_featured(browser, base_ur
 
 
 def test_a_scored_quarter_without_a_lock_says_it_missed_the_window(browser, base_url):
-    data = json.loads((SITE / "data.json").read_text())
+    data = _before_any_lock()
     q3 = data["live"][-1]
     q3["score"] = {"quarter": "2026Q3", "reported": {"large": 30, "mid": 5, "total": 35}, "accn": "0000040533-26-000040",
                    "locked": False, "nowcast": None, "ae_total": None, "ape_pct": None, "inside_band": None,
@@ -202,3 +217,76 @@ def test_a_scored_quarter_without_a_lock_says_it_missed_the_window(browser, base
     assert "missed its lock window" in facts and "the day before GD reports" not in facts
     assert note.startswith("Not locked") and "Provisional" not in note
     page.context.close()
+
+
+def test_a_scored_lock_states_its_miss_and_its_band_in_the_past_tense(browser, base_url):
+    # F009, F013. The tracked data: 2026Q3 locked and scored. The card says the miss and the band outcome, labels
+    # the release date as past, names the lock as made in a private repository, and sets GD's reported revenue
+    # beside the estimates.
+    page = _live_page(browser, base_url, json.loads(SCORED_DATA.read_text()))
+    status = page.text_content("#live-status")
+    assert status.startswith("2026Q3") and "missed by 8.0" in status and "outside the band" in status
+    facts = page.inner_text("#live-facts")
+    assert "GD reported on" in facts and "GD reports\n" not in facts and "so far" not in facts
+    assert "8.0 deliveries (20%), outside the band" in facts and "(missed by 6.2)" in facts
+    assert "2026-07-06 to 2026-10-04" in facts          # the window opens the day after 2026Q2's fiscal end
+    assert "locked estimate" in page.inner_text("#live-unit")
+    assert "made while the repository was private" in page.inner_text("#live-note")
+    assert "so far" not in page.inner_text("#path-sub")
+    head = page.inner_text("#t-est thead")
+    assert "GD reported" in head and "Estimate less reported" in head
+    assert "GD reported $3.5B of Aerospace revenue" in page.inner_text("#est-why")
+    assert "overstates the swing" not in page.inner_text("#est-why")
+    page.context.close()
+
+
+def test_a_lock_made_after_the_repository_went_public_is_called_public(browser, base_url):
+    # F005. Only a lock published on or after `public_since` is a public one.
+    data = json.loads(SCORED_DATA.read_text())
+    data.update({"public": True, "public_since": "2026-11-20"})
+    page = _live_page(browser, base_url, data)
+    assert "made while the repository was private" in page.inner_text("#live-note")
+    page.context.close()
+    data.update({"public_since": "2026-10-01"})
+    page = _live_page(browser, base_url, data)
+    assert "public GitHub release" in page.inner_text("#live-note")
+    assert "private" not in page.inner_text("#live-note")
+    page.context.close()
+
+
+def _live_page_at(browser, base_url, data, width, height=900):
+    ctx = browser.new_context(viewport={"width": width, "height": height})
+    page = ctx.new_page()
+    page.route("**/data.json", lambda route: route.fulfill(status=200, content_type="application/json",
+                                                          body=json.dumps(data)))
+    page.goto(base_url)
+    page.wait_for_selector("html.ready")
+    return page
+
+
+def test_the_live_card_states_the_band_coverage_and_names_the_pace_as_mine(browser, base_url):
+    # F113, F114. The band is never shown without its backtest coverage, and the first screen never calls the pace
+    # GD's: the label says whose construction it is.
+    data = json.loads(SCORED_DATA.read_text())
+    b = data["metrics"]["holdout"]["band"]
+    page = _live_page(browser, base_url, data)
+    assert f"held GD's count in {b['hits']} of {b['n']} held-out quarters, against a nominal 80%" in \
+        page.inner_text("#live-band")
+    first = page.inner_text("header") + page.inner_text("#live-facts")
+    assert "GD's guidance pace" not in first and "Pace I built from GD's outlook" in first
+    assert "the pace I built from GD's outlook" in page.inner_text("#lead")
+    page.context.close()
+
+
+def test_a_phone_keeps_the_baseline_that_won_on_the_track_chart(browser, base_url):
+    # F118. On a narrow screen the track chart hides lines to stay legible, but never the baseline with the lowest
+    # average miss: the same quarter last year.
+    data = json.loads(SCORED_DATA.read_text())
+    page = _live_page_at(browser, base_url, data, 375, 812)
+    shown = page.evaluate("""() => {
+        const c = Chart.getChart(document.getElementById("c-track"));
+        return c.data.datasets.map((d, i) => [d.label, c.isDatasetVisible(i)]);
+    }""")
+    page.context.close()
+    vis = dict(shown)
+    assert vis["Same quarter last year"] is True

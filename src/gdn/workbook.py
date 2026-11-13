@@ -23,6 +23,9 @@ INPUTS = Path("output/gd_gulfstream_model.inputs.sha256")
 HEAD = ["Quarter", "Fiscal end", "Reported large", "Reported mid", "Reported total", "Registry large", "Registry mid",
         "Ratio large", "Ratio mid", "Ratio total", "Raw total", "Seasonal", "Last", "AE ratio", "AE raw",
         "AE seasonal", "AE last", "Window"]
+# Added after the columns above, which keep their places: GD's guidance pace is a typed input (it is built from call
+# transcripts, not from this sheet), and its miss is a formula.
+HEAD_EXTRA = ["Guidance pace", "AE guidance"]
 
 
 def put(ws, ref, value, fmt=None, typed=False):
@@ -51,19 +54,24 @@ def about(wb, snap, chosen):
     ws.title = "About"
     lines = [
         ("General Dynamics (GD): Gulfstream delivery tracker, model workbook", BOLD),
-        ("Question: how closely do FAA registrations track the Gulfstream deliveries GD reports, and can they "
-         "estimate the count before GD reports it?", None),
+        ("Question: how closely do FAA registrations track the Gulfstream deliveries GD reports, and does an "
+         "estimate locked the day before GD reports hold up?", None),
+        ("Student research project. Not investment advice. Not affiliated with General Dynamics, Gulfstream or the "
+         "FAA.", None),
         ("", None),
         ("Method", BOLD),
         (f"1. Each Gulfstream airframe in the FAA registry snapshot of {snap} gets a delivery date ({chosen}): the "
-         "earlier of a customer's registration and an export cancellation, within a year of first airworthiness.", None),
+         "earlier of a customer's registration and an export cancellation, no later than 365 days after first airworthiness.", None),
         ("2. Registry events are counted in GD's fiscal quarter windows, by cabin (large, mid).", None),
         ("3. Ratio estimate = this quarter's events x reported deliveries over the last four quarters / registry "
          "events over the same four quarters, by cabin.", None),
         ("4. Design window 2017Q1 to 2019Q4 chose the event definition; the 26 quarters 2020Q1 to 2026Q2 are held "
-         "out and scored against seasonal, last-quarter and GD guidance baselines.", None),
+         "out and scored against seasonal, last-quarter and GD guidance baselines. The guidance pace is a typed "
+         "input and my construction, not a figure GD publishes: GD's full-year outlook less deliveries already "
+         "reported, spread over the remaining quarters.", None),
         ("5. Segment estimates: the delivery estimate x trailing Aerospace revenue per delivery, services included: "
-         "a mechanical estimate; defense segments use the seasonal naive with drift.", None),
+         "a mechanical estimate; defense segments use the seasonal naive with drift, a rule from a study of other "
+         "contractors, so applying it to GD is an assumption.", None),
         ("", None),
         ("Colour key", BOLD),
         ("Blue: typed input from a source file. Black: formula.", None),
@@ -86,9 +94,10 @@ def about(wb, snap, chosen):
     ws.column_dimensions["A"].width = 110
 
 
-def quarters(wb, Y, N, chosen, ends):
+def quarters(wb, Y, N, chosen, ends, guidance=None):
     ws = wb.create_sheet("Quarters")
-    header(ws, HEAD)
+    header(ws, HEAD + HEAD_EXTRA)
+    guidance = guidance or {}
     for i, q in enumerate(QUARTERS):
         r = i + 2
         put(ws, f"A{r}", q)
@@ -109,8 +118,11 @@ def quarters(wb, Y, N, chosen, ends):
             for col, src in zip("NOPQ", "JKLM"):
                 put(ws, f"{col}{r}", f"=ABS({src}{r}-E{r})", F_AIR)
             put(ws, f"R{r}", "design" if qidx(q) <= qidx("2019Q4") else "holdout")
+            if q in guidance:
+                put(ws, f"S{r}", guidance[q], F_AIR, typed=True)
+                put(ws, f"T{r}", f"=ABS(S{r}-E{r})", F_AIR)
     ws.freeze_panes = "B2"
-    widths(ws, [9, 11] + [10] * 15 + [9])
+    widths(ws, [9, 11] + [10] * 15 + [9, 10, 10])
     return ws
 
 
@@ -122,6 +134,14 @@ def summary(wb):
         put(ws, f"A{r}", label)
         put(ws, f"B{r}", f"=AVERAGE(Quarters!{col}6:{col}17)", F_AIR)
         put(ws, f"C{r}", f"=AVERAGE(Quarters!{col}18:{col}43)", F_AIR)
+    # The guidance pace exists for the held-out quarters only (the preregistration runs it there).
+    put(ws, "A6", "MAE guidance")
+    put(ws, "C6", "=AVERAGE(Quarters!T18:T43)", F_AIR)
+    put(ws, "A8", "MAE is the average miss in aircraft. The lowest holdout figure in column C is the baseline that "
+                  "missed by least. Guidance has no design-window figure.")
+    put(ws, "A9", "Read rows 2 to 6 before anything else. A baseline with a lower holdout figure than MAE ratio missed by "
+                  "less on average; none of the preregistered sign tests separates it from the registry estimate. The "
+                  "Live sheet holds each locked quarter, what GD reported and the miss.")
     ws.freeze_panes = "B2"
     widths(ws, [16, 12, 12])
 
@@ -161,8 +181,25 @@ def live_sheet(wb, root, pred):
     put(ws, "B13", p90, F_AIR, typed=True)
     put(ws, "B14", "=B11-B13", F_AIR)
     put(ws, "B15", "=B11-B12", F_AIR)
+    hb = read_json(Path(root) / "results/metrics.json")["holdout"]["band"]
+    put(ws, "C14", f"The band held GD's count in {hb['hits']} of {hb['n']} held-out quarters, against a nominal 80%.")
+    # Once GD has reported the quarter: its count, the lock's miss and where the count fell against the band.
+    sp = Path(root) / "results/live" / f"{q}_score.json"
+    if sp.exists():
+        s = read_json(sp)
+        rows = [("GD reported", s["reported"]["total"], F_AIR, True),
+                ("Miss of the lock", "=ABS(B11-B16)", F_AIR, False),
+                ("Miss, % of reported", "=B17/B16", "0%", False),
+                ("GD's count against the band", '=IF(B16<B14,"outside",IF(B16>B15,"outside","inside"))', None, False)]
+        if s.get("guidance_pace") is not None:
+            rows += [("Guidance pace", s["guidance_pace"], F_AIR, True),
+                     ("Guidance pace miss", "=ABS(B20-B16)", F_AIR, False)]
+        rows += [("GD release (SEC accession)", s["accn"], None, False)]
+        for i, (lab, v, fmt, typed) in enumerate(rows, start=16):
+            ws.cell(row=i, column=1, value=lab).font = BOLD
+            put(ws, f"B{i}", v, fmt, typed=typed)
     ws.freeze_panes = "B2"
-    widths(ws, [24, 14])
+    widths(ws, [28, 24])
 
 
 def segments_sheet(wb, root):
@@ -213,6 +250,9 @@ def sensitivity(wb):
         put(ws, f"A{r}", k, F_AIR, typed=True)
         put(ws, f"B{r}", f"=Live!$B$11+A{r}", F_AIR)
         put(ws, f"C{r}", f"=B{r}*Segments!$B$13", F_USD)
+    put(ws, "A12", "Aerospace revenue here is mechanical: deliveries x trailing Aerospace revenue per delivery, "
+                   "services included. These are estimates made before the quarter's release; the Live sheet holds "
+                   "what GD reported for a scored quarter.")
     ws.freeze_panes = "B2"
     widths(ws, [18, 12, 18])
 
@@ -236,7 +276,8 @@ def input_digest(root):
     root = Path(root)
     lines = []
     proc = root / "data/processed"
-    for p in (basis_path(root), root / "results/metrics.json", proc / "segments.csv", proc / "gd_deliveries.csv",
+    for p in (basis_path(root), root / "results/metrics.json", root / "results/holdout.csv", proc / "segments.csv",
+              proc / "gd_deliveries.csv",
               proc / "registry_quarterly.csv", proc / "backlog_2026Q2.csv",
               *sorted(root.glob("results/live/*_score.json"))):
         lines.append(f"{sha256(p.read_bytes())}  {p.relative_to(root)}")
@@ -256,7 +297,9 @@ def build(root="."):
     pred = read_json(basis_path(root))
     wb = Workbook()
     about(wb, snap, chosen)
-    quarters(wb, Y, N, chosen, ends)
+    guidance = {r["quarter"]: float(r["total"]) for r in read_csv(root / "results/holdout.csv")
+                if r["model"] == "guidance"}
+    quarters(wb, Y, N, chosen, ends, guidance)
     summary(wb)
     live_sheet(wb, root, pred)
     segments_sheet(wb, root)

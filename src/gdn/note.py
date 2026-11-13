@@ -12,12 +12,15 @@ from pathlib import Path
 from . import claims as claims_mod
 from . import live, model
 from .estimates import DEFENSE, LABEL, SEGMENTS, basis_path
+from .report import (comparators, even_split, lock_old_events, lock_words, locked_scores, readings_footnote,
+                     split_sentence)
 from .fiscal import Calendar, qrange, shift
 from .files import read_csv, read_json, sha256, write_text
 
 CHROME = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
 TITLE = "General Dynamics (GD): Gulfstream delivery tracker"
-DISCLAIMER = "Student research project. Not investment advice. No rating or price target."
+DISCLAIMER = ("Student research project. Not investment advice. No rating or price target. Not affiliated with General "
+              "Dynamics or Gulfstream.")
 FRAMING = ("The backtest reads a registry copy from {snap}, which had months or years to fill in. It shows how well "
            "the registry tracks Gulfstream deliveries after the fact. Only the locked quarters test whether it "
            "counts them in time.")
@@ -27,7 +30,7 @@ BASE_NAMES = {"guidance": "GD's guidance pace", "seasonal": "the same quarter la
 STUDY_URL = "https://rishabbshankar226.github.io/Defense-Backlog-forecast/"
 PRODUCT_IDS = ["pc-g500-g600-entry-into-service", "pc-g700-first-deliveries", "pc-g800-certification",
                "pc-g800-first-deliveries", "pc-g650-end-of-production", "pc-g280-mid-cabin", "pc-g280-iai",
-               "pc-g400-timing-update"]
+               "pc-g300-replaces-g280", "pc-g280-final-delivery", "pc-g400-timing-update"]
 REPO_URL = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast"
 
 
@@ -104,7 +107,7 @@ def drift_line(h):
     cr = h["coverage_ratio"]
     recent = [cr["by_quarter"][q] for q in ("2025Q4", "2026Q1", "2026Q2") if q in cr["by_quarter"]]
     if len(recent) == 3 and all(x < cr["mean"] for x in recent):
-        return (f" The drift runs the other way: the last three quarters sit at {', '.join(f2(x) for x in recent)} "
+        return (f" The drift runs the other way: the last three held-out quarters sit at {', '.join(f2(x) for x in recent)} "
                 f"against a mean of {f2(cr['mean'])}, so the registry is counting more events per delivery than "
                 "usual, which the ratio's trailing scale absorbs only with a lag.")
     return ""
@@ -172,7 +175,9 @@ def et_time(iso):
 CSS = """
 @font-face { font-family: "IBM Plex Sans Var"; src: url(../site/fonts/ibm-plex-sans-wght.woff2) format("woff2");
   font-weight: 100 700; font-style: normal; }
-@page { size: Letter; margin: 0.6in; }
+@page { size: Letter; margin: 0.6in 0.6in 0.8in;
+  @bottom-center { content: "PAGEFOOT"; font: 400 7.2pt "IBM Plex Sans Var", "Helvetica Neue", Arial, sans-serif;
+    color: #5f5a52; } }
 :root { --ink: #1c1a17; --ink-3: #423e38; --muted: #5f5a52; --line: #c4bfb6; --line-soft: #dedad3;
   --accent: #1d3f6e; --wash: #f1efeb; --surface: #fbfaf8; }
 * { box-sizing: border-box; }
@@ -219,6 +224,27 @@ ol.sources li { margin-bottom: 2pt; word-break: break-word; }
 """
 
 
+def _watch(add, C, Y, seg, btb):
+    """What the street watches on the print: printed only while the release is still ahead."""
+    add("<h2>What the street watches on the print</h2>")
+    ytd = sum(Y[x]["total"] for x in qrange("2026Q1", "2026Q2"))
+    aero_m = seg["Aerospace"]["2026Q2"][1] / seg["Aerospace"]["2026Q2"][0] * 100
+    h1_m = sum(seg["Aerospace"][x][1] for x in ("2026Q1", "2026Q2")) / sum(
+        seg["Aerospace"][x][0] for x in ("2026Q1", "2026Q2")) * 100
+    marine = [pct(seg["Marine Systems"][x][1] / seg["Marine Systems"][x][0] * 100) for x in qrange("2025Q3", "2026Q2")]
+    items = [f"Deliveries against the outlook: GD delivered {ytd} jets in the first half of 2026, against an outlook "
+             "of about 160 for the year." + (C.sup("os-del") if C.has("os-del") else ""),
+             f"The Aerospace margin: {pct(aero_m)} in 2026Q2 and {pct(h1_m)} for the first half, against the "
+             "14.7% GD guided for 2026." + (C.sup("os-margin") if C.has("os-margin") else "")
+             + "".join(" " + C.say(c) for c in C.prefix("os-aero-margin")),
+             f"Book-to-bill: {btb.get('aerospace', 0):.1f} for Aerospace and {btb.get('defense', 0):.1f} for the "
+             "defense segments in 2026Q2.",
+             "Marine Systems margins, 2025Q3 to 2026Q2: " + ", ".join(marine) + "."
+             + "".join(" " + C.say(c) for c in C.prefix("os-marine")),
+             "The G280: " + " ".join(C.say(c) for c in ("os-upside", "pc-g280-israel-supplier") if C.has(c))]
+    add("<ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul>")
+
+
 def build(root="."):
     root = Path(root)
     m = read_json(root / "results/metrics.json")
@@ -240,19 +266,25 @@ def build(root="."):
     pred, lock, score = live_state(root, q)
     pace = model.guidance_pace(q, Y, calls, cal)
     rel = cfg.get("releases", {}).get(q)
-    public = cfg.get("public")
-    lockword = "public lock" if public else "timestamped GitHub release"
     S = est["segments"]
     total_ttm = sum(S[s]["ttm_revenue_usd"] for s in SEGMENTS)
     aero_drift = S["Aerospace"]["drift_usd"]
 
+    foot = f"{DISCLAIMER} {disclosure(root)}".replace("\\", "").replace('"', "'")
     parts = [f"<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>{esc(TITLE)}</title>",
-             f"<style>{CSS}</style></head><body>"]
+             f"<style>{CSS.replace('PAGEFOOT', foot)}</style></head><body>"]
     add = parts.append
 
     # 1. Cover
     add(f"<h1>{esc(TITLE)}</h1>")
-    add(f'<p class="byline">Data as of {pred["snapshot"]}. Rishabb Shankar, <a href="https://rshankar.dev">'
+    scored_lock = bool(score and score.get("locked") and lock)
+    rseg = live.reported_segments(root).get(q) if score else None
+    if scored_lock:
+        dated = (f"Estimate locked from the {pred['snapshot']} registry snapshot; GD reported on {rel}." if rel else
+                 f"Estimate locked from the {pred['snapshot']} registry snapshot; GD has since reported.")
+    else:
+        dated = f"Data as of {pred['snapshot']}."
+    add(f'<p class="byline">{dated} Rishabb Shankar, <a href="https://rshankar.dev">'
         f"rshankar.dev</a>. Model, data and code: <a href=\"{REPO_URL}\">{REPO_URL}</a></p>")
     yago_q = shift(q, -4)
     live_point = (f"My registry estimate for {q} is {f1(pred['nowcast']['total'])} Gulfstream deliveries, with a "
@@ -266,27 +298,57 @@ def build(root="."):
         if outlook - ytd - pred["nowcast"]["total"] > best:
             live_point += (f" With {ytd} delivered in the first half, reaching GD's outlook of about {outlook:.0f} "
                            f"would then take a fourth quarter above {best}, GD's best quarter since 2016.")
-    rel_cite = C.sup("os-release-date") if C.has("os-release-date") else ""
-    if lock:
+    # The release-date claim is cited only while the release is still ahead (F019): citing it here whatever the
+    # state kept an uncited claim in report/claims.json after a score.
+    rel_cite = C.sup("os-release-date") if (C.has("os-release-date") and rel and not score) else ""
+    if scored_lock:
         d, t = et_time(lock["published_at"])
-        live_point += f" I locked it as a {lockword} at {t} ET on {d}."
+        band = "inside" if score["inside_band"] else "outside"
+        live_point = (f"For {q} I locked a registry estimate of {f1(pred['nowcast']['total'])} Gulfstream deliveries, "
+                      f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}{band_held(h)}, as a "
+                      f"{lock_words(cfg, lock['published_at'])}, at {t} ET on {d}. GD reported "
+                      f"{score['reported']['total']}{' on ' + rel if rel else ''}: the lock missed by "
+                      f"{f1(score['ae_total'])} ({score['ape_pct']:.0f}%), {band} the band.")
+        cmp_ = comparators(root, q, score, pred)
+        if cmp_:
+            live_point += (" Other misses for the quarter: "
+                           + ", ".join(f"{lab} ({val}) by {miss}" for lab, val, miss in cmp_) + ".")
+            live_point += stated_shape(root, q) + even_split(root, q, score)
+            live_point += old_events_line(root, pred)
+    elif lock:
+        d, t = et_time(lock["published_at"])
+        live_point += f" I locked it as a {lock_words(cfg, lock['published_at'])}, at {t} ET on {d}."
     elif score:
         live_point += " The quarter missed its lock window, so this estimate was never locked."
-    if score:
         live_point += f" GD reported {score['reported']['total']}"
         if score.get("guidance_pace") is not None:
             live_point += f", against a guidance pace of {f1(score['guidance_pace'])}"
         live_point += "."
     add('<div class="keypoints"><ol>')
-    add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(FRAMING.format(snap=snap))}</li>")
+    split = split_sentence(root)
+    add(f"<li>{esc(headline_sentence(m))}{esc(low_line(m))} {esc(GLOSS)}" + (f" {esc(split)}" if split else "")
+        + f" {esc(FRAMING.format(snap=snap))}</li>")
     add(f"<li>{esc(live_point)}" + (f" GD expects to report on {rel}.{rel_cite}" if rel and not score else "") + "</li>")
-    add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, that estimate "
-        f"implies {bn(est['aerospace_from_nowcast_usd'])} of Aerospace revenue for {q}, against "
-        f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier; scaling last year's quarter by trailing growth gives "
-        f"{bn(aero_drift)} instead. The {mn(est['revenue_per_delivery_usd'])} includes services and Jet Aviation, "
-        f"which do not fall with deliveries, so the delivery-based figure overstates the swing. This is "
-        f"{esc(LABEL)}.</li>")
+    if rseg:
+        add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, the locked "
+            f"estimate implied {bn(est['aerospace_from_nowcast_usd'])} of Aerospace revenue for {q}, and scaling last "
+            f"year's quarter by trailing growth gave {bn(aero_drift)}. GD reported {bn(rseg['Aerospace'][0])}, against "
+            f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier. The {mn(est['revenue_per_delivery_usd'])} includes "
+            "services and Jet Aviation revenue, which a delivery count does not measure. The delivery-based figure is "
+            f"{esc(LABEL)}, and it carried the delivery miss into revenue.</li>")
+    else:
+        add(f"<li>At trailing Aerospace revenue per delivery of {mn(est['revenue_per_delivery_usd'])}, that estimate "
+            f"implies {bn(est['aerospace_from_nowcast_usd'])} of Aerospace revenue for {q}, against "
+            f"{bn(seg['Aerospace']['2025Q3'][0])} a year earlier; scaling last year's quarter by trailing growth gives "
+            f"{bn(aero_drift)} instead. The {mn(est['revenue_per_delivery_usd'])} includes services and Jet Aviation "
+            f"revenue, which a delivery count does not measure. This is {esc(LABEL)}.</li>")
     add("</ol></div>")
+    if score:
+        add('<div class="callout"><p>I made the estimates in this note before GD reported ' + esc(q)
+            + (f" on {rel}" if rel else "")
+            + ". The key points above, the locked-quarter paragraph and Exhibit 8 now carry what GD reported, and I "
+              "have revised other wording since. The estimates in the sections marked \"before the release\" and in "
+              "Exhibit 9, Exhibit 10 and Exhibit 11 are unchanged, so each can be read against the result.</p></div>")
     add(f'<div class="disclaimer"><p>{esc(DISCLAIMER)}</p><p id="disclosure">{esc(disclosure(root))}</p></div>')
 
     # 2. Business overview
@@ -312,10 +374,10 @@ def build(root="."):
 
     # 4. The tracker
     add('<h2>The tracker</h2>')
-    add("<p>I read every Gulfstream jet in the FAA's aircraft registry, including the G280, which the registry "
-        "files under its builder, IAI. For each airframe I take the first sign that it reached a customer: a "
+    add("<p>I read the FAA's aircraft registry for every Gulfstream jet type my scope rule keeps, including the "
+        "G280, which the registry files under its builder, IAI. For each airframe I take the first sign that it reached a customer: a "
         "customer's registration certificate or the cancellation of Gulfstream's own registration for export, "
-        "whichever comes first, within a year of the jet's first airworthiness date. I count those events in each "
+        "whichever comes first, no later than a year after the jet's first airworthiness date. I count those events in each "
         "of GD's fiscal quarters, by cabin, and scale the count by how many deliveries GD reported per registry "
         "event over the four quarters before. That scaled count is the estimate. A design window from 2017Q1 to "
         f"2019Q4 chose the event definition ({chosen}) before I scored the 26 quarters from 2020Q1 to 2026Q2. "
@@ -323,7 +385,9 @@ def build(root="."):
         "already reported that year, spread over the remaining quarters by their usual share of the year; where no "
         "call gave a number, it falls back to the same quarter last year.</p>")
     add(f'<div class="callout"><p>{esc(FRAMING.format(snap=snap))}</p><p><strong>{esc(headline_sentence(m))}'
-        f"</strong>{esc(low_line(m))}</p></div>")
+        f"</strong>{esc(low_line(m))} In that sentence the registry count is the registry estimate, the first row "
+        "of the exhibit below, not the raw registry count in its second. GD's guidance pace is my construction from "
+        "GD's full-year outlook, not a figure GD publishes.</p></div>")
     hrows = []
     for mm in ("ratio", "raw", "guidance", "seasonal", "last"):
         hrows.append([esc(NAMES[mm]), f1(h["mae"][mm]), pct(h["mape"][mm]), f1(h["bias"][mm]),
@@ -357,9 +421,11 @@ def build(root="."):
         f"registry estimate's past-miss band held GD's count in {h['band']['hits']} of 26 held-out quarters "
         f"({pct(h['band']['coverage_pct'])}, against a nominal 80%; 95% interval {pct(h['band']['cp95_pct'][0])} to "
         f"{pct(h['band']['cp95_pct'][1])}).</p>")
-    add(f'<div class="exhibit"><div class="cap">Exhibit 4. GD\'s reported deliveries against the five estimates'
-        f'</div><img src="../output/charts/track_record.png" alt="Line chart of GD\'s reported Gulfstream '
-        f'deliveries by quarter from 2016Q1 to 2026Q2 against the five estimates"></div>')
+    live_tail = (", and each locked live estimate with its past-miss band" if locked_scores(root) else "")
+    add(f'<div class="exhibit"><div class="cap">Exhibit 4. GD\'s reported deliveries against the five backtest '
+        f'estimates{live_tail}</div><img src="../output/charts/track_record.png" alt="Line chart of GD\'s reported '
+        f'Gulfstream deliveries by quarter from 2016Q1, against the five backtest estimates to 2026Q2{live_tail}">'
+        '</div>')
     ea = read_csv(root / "results/holdout.csv")
     ratio_rows = sorted([r for r in ea if r["model"] == "ratio"], key=lambda r: -float(r["ae"]))[:5]
     yrs = by_year(root, chosen)
@@ -378,8 +444,8 @@ def build(root="."):
     tr = h["truncation_mae"]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 5. Average miss by year, aircraft</div>'
         + table(["Year", "Ratio", "Raw", "Guidance", "Seasonal", "Last"], yr_rows)
-        + '<div class="src">No 2021 call stated a full-year number, so guidance in 2021 is the same quarter last '
-          "year.</div>"
+        + '<div class="src">No 2021 call gave a full-year figure that the preregistered rule reads, so guidance in '
+          "2021 is the same quarter last year." + esc(readings_footnote(root)) + "</div>"
         + '</div><div class="exhibit"><div class="cap">Exhibit 6. Registry estimate\'s average miss with each '
           "quarter's events cut early</div>"
         + table(["Days cut", "Average miss"], [[d, f1(tr[d])] for d in ("0", "30", "60", "90")])
@@ -391,18 +457,18 @@ def build(root="."):
     add('<div class="exhibit"><div class="cap">Exhibit 7. The registry estimate\'s miss by quarter and the band '
         'built from earlier misses</div><img src="../output/charts/signed_errors.png" alt="Bar chart of the '
         'registry estimate minus GD\'s count by quarter, with the past-miss band"></div>')
-    add(f"<h3>The live quarter: {q}</h3>")
+    add(f"<h3>The {'locked' if scored_lock else 'live'} quarter: {q}</h3>")
     ev, tr_ = pred["events"], pred["trailing"]
     body = (f"By the {pred['snapshot']} registry snapshot, {ev['large']} large-cabin and {ev['mid']} mid-cabin "
-            f"airframes had a delivery event in {q}'s window ({pred['window_start']} to {pred['window_end']}). Over "
+            f"airframes had a delivery event in {q}'s window (after {pred['window_start']}, through {pred['window_end']}). Over "
             f"the four quarters before, GD reported {tr_['reported']['large']} large-cabin and "
             f"{tr_['reported']['mid']} mid-cabin deliveries against {tr_['registry']['large']} and "
             f"{tr_['registry']['mid']} registry events. Scaled the same way, the estimate is "
             f"{f1(pred['nowcast']['total'])} ({f1(pred['nowcast']['large'])} large, {f1(pred['nowcast']['mid'])} mid), "
-            f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}.")
+            f"with a past-miss band of {f1(pred['band'][0])} to {f1(pred['band'][1])}{band_held(h)}.")
     if lock:
         d, t = et_time(lock["published_at"])
-        body += f" I locked this estimate as a {lockword} at {t} ET on {d}."
+        body += f" I locked this estimate as a {lock_words(cfg, lock['published_at'])}, at {t} ET on {d}."
     elif score:
         body += " This is the build estimate: the quarter missed its lock window, so it was never locked."
     else:
@@ -413,84 +479,105 @@ def build(root="."):
         if age < 20:
             body += (" This snapshot came sooner after the quarter's end than any archived copy the as-of study "
                      "scored, so more of the quarter's registrations may still be missing.")
-    if score:
+    if scored_lock:
+        band = "inside" if score["inside_band"] else "outside"
+        body += (f" GD then reported {score['reported']['total']}: the lock missed by {f1(score['ae_total'])} "
+                 f"({score['ape_pct']:.0f}%), {band} the band.")
+        if score.get("guidance_pace") is not None:
+            body += (f" GD's guidance pace for the quarter had been {f1(score['guidance_pace'])}, a miss of "
+                     f"{f1(score['guidance_ae'])}.")
+        raw = pred["events"]["large"] + pred["events"]["mid"]
+        scale = (tr_["reported"]["large"] + tr_["reported"]["mid"]) / (tr_["registry"]["large"] + tr_["registry"]["mid"])
+        body += (f" The raw count of {raw} events missed by {abs(raw - score['reported']['total'])}; the estimate "
+                 f"came out lower because the four quarters before gave a scale of {f2(scale)} deliveries per event."
+                 + old_events_line(root, pred))
+    elif score:
         body += f" GD then reported {score['reported']['total']}."
         if score.get("guidance_pace") is not None:
             body += f" GD's guidance pace for the quarter had been {f1(score['guidance_pace'])}."
-    add(f"<p>{esc(body)} The band comes from errors measured on a registry file that had years to fill in, so "
-        "at a live lock it is likely too narrow.</p>")
+    add(f"<p>{esc(body)} The band comes from errors measured on a registry file that had months or years to fill in, so "
+        "it may not fit a live lock.</p>")
 
     # 5. Backlog, book-to-bill, estimates
-    add('<h2>Backlog, book-to-bill and the 2026Q3 estimates</h2>')
+    before = ", before the release" if score else ""
+    add(f'<h2>Backlog, book-to-bill and the 2026Q3 estimates{before}</h2>')
     add(f"<p>Aerospace ended 2026Q2 with {bn(S['Aerospace']['backlog_usd'])} of backlog, "
         f"{f2(S['Aerospace']['coverage_years'])} years of its trailing revenue. "
         + (C.say("os-btb") if C.has("os-btb") else
            f"Book-to-bill in 2026Q2 was {btb.get('aerospace', 0):.1f} for Aerospace.") + "</p>")
     erows = []
-    for s in SEGMENTS:
-        a = seg[s]["2025Q3"][0]
-        e = est["aerospace_from_nowcast_usd"] if s == "Aerospace" else S[s]["drift_usd"]
-        erows.append([esc(s + (", from the delivery estimate" if s == "Aerospace" else "")), bn(a), bn(e),
-                      mn(e - a), pct((e - a) / a * 100)])
-    a = seg["Aerospace"]["2025Q3"][0]
-    erows.insert(1, ["Aerospace, drift baseline", bn(a), bn(aero_drift), mn(aero_drift - a),
-                     pct((aero_drift - a) / a * 100)])
     a_tot = sum(seg[s]["2025Q3"][0] for s in SEGMENTS)
-    erows.append(["Total, with Aerospace from the delivery estimate", bn(a_tot), bn(est["revenue_total_usd"]),
-                  mn(est["revenue_total_usd"] - a_tot), pct((est["revenue_total_usd"] - a_tot) / a_tot * 100)])
-    add('<div class="exhibit"><div class="cap">Exhibit 8. 2026Q3 revenue estimates by segment</div>'
-        + table(["Segment", "2025Q3 actual", "2026Q3 estimate", "Change", "Change, %"], erows)
+
+    def erow(name, a, e, r):
+        """Year-ago actual, the estimate, and either its change on the year or, once GD has reported, the miss."""
+        if r is None:
+            return [esc(name), bn(a), bn(e), mn(e - a), pct((e - a) / a * 100)]
+        return [esc(name), bn(a), bn(e), bn(r), mn(e - r), pct((e - r) / r * 100)]
+
+    for s in SEGMENTS:
+        e = est["aerospace_from_nowcast_usd"] if s == "Aerospace" else S[s]["drift_usd"]
+        erows.append(erow(s + (", from the delivery estimate" if s == "Aerospace" else ""), seg[s]["2025Q3"][0], e,
+                          rseg[s][0] if rseg else None))
+    erows.insert(1, erow("Aerospace, drift baseline", seg["Aerospace"]["2025Q3"][0], aero_drift,
+                         rseg["Aerospace"][0] if rseg else None))
+    erows.append(erow("Total, with Aerospace from the delivery estimate", a_tot, est["revenue_total_usd"],
+                      sum(rseg[s][0] for s in SEGMENTS) if rseg else None))
+    if rseg:
+        cap8 = "Exhibit 8. 2026Q3 revenue by segment: the estimates made before the release, and what GD reported"
+        head8 = ["Segment", "2025Q3 actual", "2026Q3 estimate", "GD reported", "Estimate less reported", "Miss, %"]
+        tail8 = (f" GD reported {bn(sum(rseg[s][1] for s in SEGMENTS))} of operating earnings for the four segments "
+                 f"(release {esc(rseg['accn'])}).")
+    else:
+        cap8, tail8 = "Exhibit 8. 2026Q3 revenue estimates by segment", ""
+        head8 = ["Segment", "2025Q3 actual", "2026Q3 estimate", "Change", "Change, %"]
+    add(f'<div class="exhibit"><div class="cap">{cap8}</div>'
+        + table(head8, erows)
         + f'<div class="src">Aerospace from the delivery estimate is {esc(LABEL)}. Aerospace revenue carries '
-          "services and Jet Aviation, and the G700's mix moves revenue per jet. The drift baseline and the defense "
+          "services and Jet Aviation. The drift baseline and the defense "
           "segments use the same quarter last year scaled by trailing growth. Segment operating earnings at "
-          f"trailing margins: {bn(est['operating_earnings_total_usd'])}, Corporate excluded.</div></div>")
+          f"trailing margins: {bn(est['operating_earnings_total_usd'])}, Corporate excluded.{tail8}</div></div>")
     srows = [[f"{x['deliveries_change']:+d}", f1(x["deliveries"]), bn(x["aerospace_revenue_usd"])]
              for x in est["sensitivity"]]
     out_bits = [C.say(c) for c in ("os-del", "os-rev", "os-margin") if C.has(c)]
     add('<div class="two"><div class="exhibit"><div class="cap">Exhibit 9. Aerospace revenue for each delivery '
-        "count</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
-        + "<h3>GD's own outlook for 2026</h3><p>" + " ".join(out_bits)
+        "count: deliveries times trailing revenue per delivery, a mechanical figure"
+        + (", made before the release" if score else "") + "</div>" + table(["Change", "Deliveries", "Aerospace revenue"], srows) + "</div><div>"
+        + ("<h3>GD's outlook for 2026, before the release</h3><p>As of GD's 2026-07-29 call: " if score else
+           "<h3>GD's own outlook for 2026</h3><p>") + " ".join(out_bits)
         + "</p></div></div>")
 
     # 6. Defense segments
-    add("<h2>The defense segments</h2>")
+    add(f"<h2>The defense segments{before}</h2>")
     drows = [[esc(s), bn(S[s]["backlog_usd"]), f2(S[s]["coverage_years"]), bn(S[s]["drift_usd"]),
               pct(S[s]["ttm_margin"] * 100)] for s in DEFENSE]
     add('<div class="exhibit"><div class="cap">Exhibit 10. Defense backlog in years of trailing revenue, and the '
-        "2026Q3 baseline</div>"
+        "2026Q3 baseline" + (", made before the release" if score else "") + "</div>"
         + table(["Segment", "Backlog, 2026Q2", "Coverage, years", "2026Q3 estimate", "Operating margin"], drows)
-        + "</div>")
+        + ('<div class="src">Backlog is as of 2026Q2, the last quarter before these estimates were made. GD\'s 2026Q3 '
+           "release (accession 0000040533-26-000036, Exhibit H) reports Marine Systems backlog of $146.9B, so this "
+           "table is not current.</div>" if score else "") + "</div>")
     add("<p>For the defense segments I use my defense backlog study's best next-quarter baseline. That study "
-        "tested five other defense primes; GD was left out because it stopped tagging backlog in XBRL in 2018. Pooled "
+        "tested five other defense primes; GD was left out because the SEC's XBRL company-facts data holds no "
+        "quarterly GD backlog after 2018Q3. Pooled "
         "across those five, the next-quarter error was 9.9% for a backlog model, 7.3% for the seasonal naive and 6.5% "
         "for the seasonal naive with drift; four quarters out it was 9.4% for backlog, 5.8% for trailing revenue and "
         "6.0% for trailing revenue with drift. So the 2026Q3 defense figures above are the seasonal naive with drift, "
         "and backlog appears as coverage beside them. Applying that study to GD is an assumption: it did not test GD. "
-        f'The study is at <a href="{STUDY_URL}">{STUDY_URL}</a>.</p>')
+        f'The study is at <a href="{STUDY_URL}">{STUDY_URL}</a>; these percentages are from its published data file '
+        "as of 2026-10-13.</p>")
 
-    # 7. What the street watches
-    add("<h2>What the street watches on the print</h2>")
-    ytd = sum(Y[x]["total"] for x in qrange("2026Q1", "2026Q2"))
-    aero_m = seg["Aerospace"]["2026Q2"][1] / seg["Aerospace"]["2026Q2"][0] * 100
-    h1_m = sum(seg["Aerospace"][x][1] for x in ("2026Q1", "2026Q2")) / sum(
-        seg["Aerospace"][x][0] for x in ("2026Q1", "2026Q2")) * 100
-    marine = [pct(seg["Marine Systems"][x][1] / seg["Marine Systems"][x][0] * 100) for x in qrange("2025Q3", "2026Q2")]
-    items = [f"Deliveries against the outlook: GD delivered {ytd} jets in the first half of 2026, against an outlook "
-             "of about 160 for the year." + (C.sup("os-del") if C.has("os-del") else ""),
-             f"The Aerospace margin: {pct(aero_m)} in 2026Q2 and {pct(h1_m)} for the first half, against the "
-             "14.7% GD guided for 2026." + (C.sup("os-margin") if C.has("os-margin") else "")
-             + "".join(" " + C.say(c) for c in C.prefix("os-aero-margin")),
-             f"Book-to-bill: {btb.get('aerospace', 0):.1f} for Aerospace and {btb.get('defense', 0):.1f} for the "
-             "defense segments in 2026Q2.",
-             "Marine Systems margins, 2025Q3 to 2026Q2: " + ", ".join(marine) + "."
-             + "".join(" " + C.say(c) for c in C.prefix("os-marine")),
-             "The G280: " + " ".join(C.say(c) for c in ("os-upside", "pc-g280-israel-supplier") if C.has(c))]
-    add("<ul>" + "".join(f"<li>{i}</li>" for i in items) + "</ul>")
+    # 7. What the street watches: a preview of the print, so it is dropped once GD has reported
+    if not score:
+        _watch(add, C, Y, seg, btb)
 
     # 8. Risks
-    risks = C.prefix("risk-")
+    own = "risk-midcabin-supplier-delay"
+    risks = [cid for cid in C.prefix("risk-") if cid != own]
     if risks:
-        add("<h2>Risks</h2><p>Risks to the business, as GD states them; the limits of my method follow "
+        add("<h2>Risks</h2><p>The risks closest to this tracker are Gulfstream's own, and the product cycle section "
+            "cites them: the planned production break between the last G280 and the G300, and the timing of the "
+            "G400." + (f" A third bears on the mid-cabin count directly: {C.say(own)}" if C.has(own) else "")
+            + " Below are GD's general risk factors, as its filings state them; the limits of my method follow "
             "separately.</p>")
         add('<ul class="tight">' + "".join(f"<li>{C.say(cid)}</li>" for cid in risks) + "</ul>")
 
@@ -521,7 +608,10 @@ def build(root="."):
         + table(["Segment", "Revenue, 4Q to 2026Q2", "Revenue, 4Q to 2025Q2", "Drift, 2026Q3", "Margin, 4Q",
                  "Backlog", "Coverage, years"], seg_rows)
         + table(["Derived", "Value"], derived)
-        + '<div class="src">From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
+        + '<div class="src">The rows "from the estimate" are mechanical: the delivery estimate times trailing '
+          'Aerospace revenue per delivery, services included. '
+        + ("The 2026Q3 figures here are the estimates made before the release; Exhibit 8 has what GD reported. "
+           if score else "") + 'From output/gd_gulfstream_model.xlsx, where every figure above is a live formula over '
           "typed inputs.</div></div>")
 
     # 11. Sources
@@ -539,14 +629,16 @@ def build(root="."):
         link = edgar(where) if kind == "filing" else where
         label = forms.get(where, kinds.get(kind, kind)) if kind == "filing" else kinds.get(kind, kind)
         add(f"<li>{label}, {esc(link)} , retrieved {got}.</li>")
-    accns = sorted({r["accn"] for r in dels.values()} | {r["accn"] for r in read_csv(root / "data/processed/segments.csv")})
+    accns = sorted({r["accn"] for r in dels.values()} | {r["accn"] for r in read_csv(root / "data/processed/segments.csv")}
+                   | {x["accn"] for x in live.scores(root).values()})
     add("<li>GD earnings releases, Exhibit 99.1 to each results 8-K, in these SEC EDGAR folders:"
         '<div class="urls">' + "".join(f"<span>{esc(edgar(a))} </span>" for a in accns) + "</div></li>")
-    newest = live.newest_snapshot(root)
+    # No date here that moves every day: the note then changes only at a lock or a score, and the PDF, which only
+    # a Mac can print, stays in step with it (F008).
     add(f"<li>FAA Releasable Aircraft database, ReleasableAircraft.zip (ACFTREF, MASTER and DEREG), snapshot "
-        f"{snap} for the backtest" + (f", and daily snapshots since, the newest dated {newest}" if newest and
-                                      newest > snap else "") + ".</li>")
-    add("<li>GD earnings calls from 2020-01-29 to 2026-07-29, for the guidance outlooks in data/guidance.csv.</li>")
+        f"{snap} for the backtest" + (f", and snapshot {pred['snapshot']} for the {q} lock" if lock else "") + ".</li>")
+    cd = sorted(r["call_date"] for r in read_csv(root / "data/guidance.csv"))
+    add(f"<li>GD earnings calls from {cd[0]} to {cd[-1]}, for the guidance outlooks in data/guidance.csv.</li>")
     add(f'<li>Repository: <a href="{REPO_URL}">{REPO_URL}</a></li></ol>')
     add("</body></html>")
     text = "\n".join(parts) + "\n"
@@ -559,6 +651,54 @@ def build(root="."):
     return text
 
 
+def old_events_line(root, pred):
+    """What the lock's raw count held: how many of its events sat on airframes at least three years old."""
+    old = lock_old_events(root, pred)
+    if not old:
+        return ""
+    return (f" Of the {old[1]} events in the raw count, {old[0]} were airframes at least three years old by the "
+            "registry's year of manufacture, so the raw count is not a count of new jets.")
+
+
+def used_share(root):
+    """How many counted events sit on airframes at least three years old by the registry's year of manufacture."""
+    root = Path(root)
+    m = read_json(root / "results/metrics.json")
+    e = m["definition"].lower()
+    reg = read_csv(root / "data/processed/registry_quarterly.csv")
+    lo, hi = min(r["window_start"] for r in reg), max(r["window_end"] for r in reg)
+    ev = [r for r in read_csv(root / "data/processed/serials.csv") if r[e] and lo < r[e] <= hi]
+    old = [r for r in ev if r["year_mfr"] and int(r[e][:4]) - int(r["year_mfr"]) >= 3]
+    if not ev:
+        return ""
+    return (f" It is not rare: by the registry's own year of manufacture, {len(old):,} of the {len(ev):,} counted events "
+            f"({len(old) / len(ev) * 100:.1f}%) are airframes at least three years old.")
+
+
+GLOSS = ("Here the registry count is my scaled registry estimate, and GD's guidance pace is my construction from GD's "
+         "full-year outlook, not a figure GD publishes.")
+ORDINAL = {1: "first", 2: "second", 3: "third", 4: "fourth"}
+
+
+def band_held(h):
+    """F113. The band's coverage on the held-out quarters, said wherever the band is shown."""
+    b = h["band"]
+    return f", which held GD's count in {b['hits']} of {b['n']} held-out quarters against a nominal 80%"
+
+
+def stated_shape(root, q):
+    """F115. The latest call in q's year, before q's end, that said q would be among the year's highest quarters."""
+    end = Calendar.load(root).end(q)
+    word = ORDINAL[int(q[5])]
+    hits = [r for r in read_csv(Path(root) / "data/guidance.csv")
+            if r["call_date"][:4] == q[:4] and (end is None or r["call_date"] <= end)
+            and word in r["quote"].lower() and "highest" in r["quote"].lower()]
+    if not hits:
+        return ""
+    r = max(hits, key=lambda x: x["call_date"])
+    return f" On its {r['call_date']} call GD said the {word} quarter would be among the year's highest."
+
+
 def limitations(root):
     """The seven limitations from DECISIONS.md's README list, in plain words."""
     return [
@@ -566,7 +706,7 @@ def limitations(root):
         "so the registry never sees that delivery. Since 2022 the registry's yearly mid-cabin count has stayed within "
         "a few jets of GD's, so G280 exports do not look like a large gap now.",
         "Processing: registry processing can lag by months. The backtest reads events by their stamped date in a "
-        "file that had years to fill in, while a live estimate sees only what has posted.",
+        "file that had months or years to fill in, while a live estimate sees only what has posted.",
         "Military: military and special-mission airframes may never reach the civil registry.",
         "Handover: GD counts a delivery at its own handover, which a registration or cancellation date only "
         "approximates, so an event can land in the next or previous quarter.",
@@ -575,9 +715,14 @@ def limitations(root):
         "first owner's date.",
         "Used jets: a used jet that re-entered the US registry with a fresh airworthiness date, one with no "
         "airworthiness date or year of manufacture, or one whose maker code changed, "
-        "can read as a new delivery.",
-        "Band: the past-miss band comes from errors measured on a finished registry file, so it is likely too "
-        "narrow at a live lock.",
+        "can read as a new delivery." + used_share(root),
+        "Mid-cabin gap: the mid-cabin count rests on the G280 alone, and GD has said G280 deliveries end in 2027 with a "
+        "production break before the G300 (product cycle, above). The method is untested in a quarter with few or no "
+        "mid-cabin deliveries.",
+        "Band: the past-miss band comes from errors measured on a finished registry file, so it may not fit a live lock.",
+        "Scope and holder: the scope rule keeps engine-type codes 4 and 5, and the FAA files one G700 type code under "
+        "another, so those G700s are outside the count until the rule is amended. The holder rule reads registrations "
+        "to Gulfstream's own leasing company as deliveries. The README's Limitations give the size of each.",
         "Audit: in 10 of 30 airframes checked against outside sources (33.3%), the source disagreed with the registry "
         "reading or could not confirm it: five were used jets read as new deliveries, two had an earlier stated "
         "delivery, and three could not be confirmed. All but one source was a registry mirror or aircraft-history "

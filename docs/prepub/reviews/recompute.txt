@@ -1,0 +1,2168 @@
+INDEPENDENT RECOMPUTE
+Subagent: recompute. Run on 2026-11-11 with /usr/bin/python3 (3.9.6), standard library only. scipy is not installed for python3, so the Clopper-Pearson interval is solved by bisection on the exact binomial tail.
+
+COMMANDS (from the repository root; S=~/gdn-prepub/agents/recompute, copies of every script in docs/prepub/recompute/)
+  python3 $S/parta.py docs/prepub/recompute/toy
+  python3 $S/parta.py data/processed --guidance data/guidance.csv --prediction predictions/2026Q3.json --q3-reported 35,5
+  python3 $S/partb.py data/snapshots 2026-10-19 2026-10-29 data/processed predictions/2026Q3.json
+  python3 $S/partb_diag.py data/snapshots 2026-10-19 2026-10-29 data/processed predictions/2026Q3.json
+  python3 $S/assemble.py ~/Desktop/projects/gulfstream-delivery-nowcast
+The last command runs the four above, in that order, after the last edit to any script, and writes this file from their output plus two hand-written note files (notes_head.txt, notes_tail.txt).
+
+WHAT I READ
+  docs/prepub/briefs/_common.md, docs/prepub/briefs/recompute.md, docs/PREREGISTRATION.md, data/processed/gd_deliveries.csv, data/processed/registry_quarterly.csv, data/guidance.csv, predictions/2026Q3.json, data/snapshots/MANIFEST.json (first 60 lines), data/snapshots/2026-10-19/ and data/snapshots/2026-10-29/ (by script), docs/prepub/recompute/toy/.
+  I opened nothing under src/, tools/, results/, tests/, report/, site/, output/, docs/build/, data/snapshots/daily/, no README.md and no other file under docs/. I imported no module of the repository.
+  One disclosure: docs/PREREGISTRATION.md, which the brief told me to read, prints the two design-window MAEs of ratio in its "Chosen definition" section (5.472548294344893 under E1, 5.5807858422376135 under E2). Those are the only project-computed results I saw. My design figures in section 2 agree with them to the 6 decimals I print. Every other figure here is blind.
+
+HOW TO READ THIS FILE
+  One figure per line as key = value. Arithmetic is exact (Python fractions) and converted to float only when printed, to 6 decimals. Nothing is rounded toward any target.
+  "reading A" and "reading B" of the guidance rule are defined under Ambiguities, item A1. Unless a key says otherwise, guidance figures are reading A.
+  Sections 0 to 12 are Part A (processed files only). Sections 13 to 15 are Part B (raw registry subsets). Sections 16 to 23 are extras the brief did not ask for; they come from my own airframe tables.
+
+## Toy check (docs/prepub/recompute/toy, ratio under E1)
+toy.E1.2002Q1.ratio_total = 20.222222
+toy.E1.2002Q1.reported_total = 26.000000
+toy.E1.2002Q1.abs_error = 5.777778
+toy.E1.2002Q2.ratio_total = 37.350000
+toy.E1.2002Q2.reported_total = 30.000000
+toy.E1.2002Q2.abs_error = 7.350000
+toy.E1.2002Q3.ratio_total = 28.230576
+toy.E1.2002Q3.reported_total = 29.000000
+toy.E1.2002Q3.abs_error = 0.769424
+toy.E1.2002Q4.ratio_total = 37.723514
+toy.E1.2002Q4.reported_total = 39.000000
+toy.E1.2002Q4.abs_error = 1.276486
+toy.E1.2003Q1.ratio_total = 32.506266
+toy.E1.2003Q1.reported_total = 30.000000
+toy.E1.2003Q1.abs_error = 2.506266
+toy.E1.n_quarters = 5
+toy.E1.quarters = 2002Q1 to 2003Q1
+toy.E1.mae_2002Q1_to_2003Q1 = 3.535991
+
+## 0. Inputs
+input.folder = data/processed
+input.gd_quarters = 42 (2016Q1 to 2026Q2)
+input.registry_quarters = 42 (2016Q1 to 2026Q2)
+input.gd_rows_where_large_plus_mid_differs_from_total = none
+input.quarters_where_window_end_differs_from_fiscal_end = none
+input.quarters_where_window_start_differs_from_prior_fiscal_end = none
+input.guidance_rows = 27
+
+## 1. Ratio estimate, every computable quarter, E1 and E2
+ratio.E1.2017Q1.large = 30.150943
+ratio.E1.2017Q1.mid = 5.400000
+ratio.E1.2017Q1.total = 35.550943
+ratio.E1.2017Q2.large = 27.483333
+ratio.E1.2017Q2.mid = 7.800000
+ratio.E1.2017Q2.total = 35.283333
+ratio.E1.2017Q3.large = 25.593750
+ratio.E1.2017Q3.mid = 15.600000
+ratio.E1.2017Q3.total = 41.193750
+ratio.E1.2017Q4.large = 15.478261
+ratio.E1.2017Q4.mid = 6.214286
+ratio.E1.2017Q4.total = 21.692547
+ratio.E1.2018Q1.large = 15.468750
+ratio.E1.2018Q1.mid = 6.428571
+ratio.E1.2018Q1.total = 21.897321
+ratio.E1.2018Q2.large = 25.206897
+ratio.E1.2018Q2.mid = 10.000000
+ratio.E1.2018Q2.total = 35.206897
+ratio.E1.2018Q3.large = 20.948276
+ratio.E1.2018Q3.mid = 7.294118
+ratio.E1.2018Q3.total = 28.242394
+ratio.E1.2018Q4.large = 29.454545
+ratio.E1.2018Q4.mid = 9.333333
+ratio.E1.2018Q4.total = 38.787879
+ratio.E1.2019Q1.large = 33.587302
+ratio.E1.2019Q1.mid = 6.823529
+ratio.E1.2019Q1.total = 40.410831
+ratio.E1.2019Q2.large = 32.000000
+ratio.E1.2019Q2.mid = 6.444444
+ratio.E1.2019Q2.total = 38.444444
+ratio.E1.2019Q3.large = 25.609756
+ratio.E1.2019Q3.mid = 11.941176
+ratio.E1.2019Q3.total = 37.550933
+ratio.E1.2019Q4.large = 37.666667
+ratio.E1.2019Q4.mid = 9.600000
+ratio.E1.2019Q4.total = 47.266667
+ratio.E1.2020Q1.large = 20.187500
+ratio.E1.2020Q1.mid = 3.142857
+ratio.E1.2020Q1.total = 23.330357
+ratio.E1.2020Q2.large = 15.455556
+ratio.E1.2020Q2.mid = 3.052632
+ratio.E1.2020Q2.total = 18.508187
+ratio.E1.2020Q3.large = 33.417722
+ratio.E1.2020Q3.mid = 7.941176
+ratio.E1.2020Q3.total = 41.358898
+ratio.E1.2020Q4.large = 29.373494
+ratio.E1.2020Q4.mid = 13.333333
+ratio.E1.2020Q4.total = 42.706827
+ratio.E1.2021Q1.large = 36.818182
+ratio.E1.2021Q1.mid = 1.294118
+ratio.E1.2021Q1.total = 38.112299
+ratio.E1.2021Q2.large = 30.344828
+ratio.E1.2021Q2.mid = 1.375000
+ratio.E1.2021Q2.total = 31.719828
+ratio.E1.2021Q3.large = 20.816327
+ratio.E1.2021Q3.mid = 5.066667
+ratio.E1.2021Q3.total = 25.882993
+ratio.E1.2021Q4.large = 34.723404
+ratio.E1.2021Q4.mid = 6.428571
+ratio.E1.2021Q4.total = 41.151976
+ratio.E1.2022Q1.large = 32.000000
+ratio.E1.2022Q1.mid = 8.727273
+ratio.E1.2022Q1.total = 40.727273
+ratio.E1.2022Q2.large = 18.333333
+ratio.E1.2022Q2.mid = 3.187500
+ratio.E1.2022Q2.total = 21.520833
+ratio.E1.2022Q3.large = 21.673077
+ratio.E1.2022Q3.mid = 8.444444
+ratio.E1.2022Q3.total = 30.117521
+ratio.E1.2022Q4.large = 33.981308
+ratio.E1.2022Q4.mid = 7.272727
+ratio.E1.2022Q4.total = 41.254036
+ratio.E1.2023Q1.large = 14.702703
+ratio.E1.2023Q1.mid = 2.880000
+ratio.E1.2023Q1.total = 17.582703
+ratio.E1.2023Q2.large = 18.208333
+ratio.E1.2023Q2.mid = 8.727273
+ratio.E1.2023Q2.total = 26.935606
+ratio.E1.2023Q3.large = 26.431579
+ratio.E1.2023Q3.mid = 4.629630
+ratio.E1.2023Q3.total = 31.061209
+ratio.E1.2023Q4.large = 29.878788
+ratio.E1.2023Q4.mid = 3.833333
+ratio.E1.2023Q4.total = 33.712121
+ratio.E1.2024Q1.large = 17.432990
+ratio.E1.2024Q1.mid = 5.500000
+ratio.E1.2024Q1.total = 22.932990
+ratio.E1.2024Q2.large = 31.939394
+ratio.E1.2024Q2.mid = 2.863636
+ratio.E1.2024Q2.total = 34.803030
+ratio.E1.2024Q3.large = 27.894737
+ratio.E1.2024Q3.mid = 7.411765
+ratio.E1.2024Q3.total = 35.306502
+ratio.E1.2024Q4.large = 39.692308
+ratio.E1.2024Q4.mid = 8.888889
+ratio.E1.2024Q4.total = 48.581197
+ratio.E1.2025Q1.large = 34.650794
+ratio.E1.2025Q1.mid = 5.727273
+ratio.E1.2025Q1.total = 40.378066
+ratio.E1.2025Q2.large = 35.277778
+ratio.E1.2025Q2.mid = 4.375000
+ratio.E1.2025Q2.total = 39.652778
+ratio.E1.2025Q3.large = 28.160000
+ratio.E1.2025Q3.mid = 4.038462
+ratio.E1.2025Q3.total = 32.198462
+ratio.E1.2025Q4.large = 51.039216
+ratio.E1.2025Q4.mid = 7.360000
+ratio.E1.2025Q4.total = 58.399216
+ratio.E1.2026Q1.large = 37.461078
+ratio.E1.2026Q1.mid = 7.920000
+ratio.E1.2026Q1.total = 45.381078
+ratio.E1.2026Q2.large = 39.698864
+ratio.E1.2026Q2.mid = 5.111111
+ratio.E1.2026Q2.total = 44.809975
+ratio.E2.2017Q1.large = 30.150943
+ratio.E2.2017Q1.mid = 5.400000
+ratio.E2.2017Q1.total = 35.550943
+ratio.E2.2017Q2.large = 27.483333
+ratio.E2.2017Q2.mid = 7.800000
+ratio.E2.2017Q2.total = 35.283333
+ratio.E2.2017Q3.large = 25.593750
+ratio.E2.2017Q3.mid = 15.600000
+ratio.E2.2017Q3.total = 41.193750
+ratio.E2.2017Q4.large = 15.478261
+ratio.E2.2017Q4.mid = 6.214286
+ratio.E2.2017Q4.total = 21.692547
+ratio.E2.2018Q1.large = 15.468750
+ratio.E2.2018Q1.mid = 6.428571
+ratio.E2.2018Q1.total = 21.897321
+ratio.E2.2018Q2.large = 25.206897
+ratio.E2.2018Q2.mid = 10.000000
+ratio.E2.2018Q2.total = 35.206897
+ratio.E2.2018Q3.large = 20.948276
+ratio.E2.2018Q3.mid = 7.294118
+ratio.E2.2018Q3.total = 28.242394
+ratio.E2.2018Q4.large = 29.454545
+ratio.E2.2018Q4.mid = 9.333333
+ratio.E2.2018Q4.total = 38.787879
+ratio.E2.2019Q1.large = 33.587302
+ratio.E2.2019Q1.mid = 6.823529
+ratio.E2.2019Q1.total = 40.410831
+ratio.E2.2019Q2.large = 32.000000
+ratio.E2.2019Q2.mid = 6.444444
+ratio.E2.2019Q2.total = 38.444444
+ratio.E2.2019Q3.large = 25.609756
+ratio.E2.2019Q3.mid = 11.941176
+ratio.E2.2019Q3.total = 37.550933
+ratio.E2.2019Q4.large = 38.965517
+ratio.E2.2019Q4.mid = 9.600000
+ratio.E2.2019Q4.total = 48.565517
+ratio.E2.2020Q1.large = 21.154639
+ratio.E2.2020Q1.mid = 3.142857
+ratio.E2.2020Q1.total = 24.297496
+ratio.E2.2020Q2.large = 15.119565
+ratio.E2.2020Q2.mid = 3.052632
+ratio.E2.2020Q2.total = 18.172197
+ratio.E2.2020Q3.large = 32.592593
+ratio.E2.2020Q3.mid = 7.941176
+ratio.E2.2020Q3.total = 40.533769
+ratio.E2.2020Q4.large = 28.682353
+ratio.E2.2020Q4.mid = 13.333333
+ratio.E2.2020Q4.total = 42.015686
+ratio.E2.2021Q1.large = 36.346154
+ratio.E2.2021Q1.mid = 1.294118
+ratio.E2.2021Q1.total = 37.640271
+ratio.E2.2021Q2.large = 30.344828
+ratio.E2.2021Q2.mid = 1.375000
+ratio.E2.2021Q2.total = 31.719828
+ratio.E2.2021Q3.large = 20.816327
+ratio.E2.2021Q3.mid = 5.066667
+ratio.E2.2021Q3.total = 25.882993
+ratio.E2.2021Q4.large = 35.808511
+ratio.E2.2021Q4.mid = 6.428571
+ratio.E2.2021Q4.total = 42.237082
+ratio.E2.2022Q1.large = 31.692308
+ratio.E2.2022Q1.mid = 8.727273
+ratio.E2.2022Q1.total = 40.419580
+ratio.E2.2022Q2.large = 18.165138
+ratio.E2.2022Q2.mid = 3.187500
+ratio.E2.2022Q2.total = 21.352638
+ratio.E2.2022Q3.large = 21.466667
+ratio.E2.2022Q3.mid = 8.444444
+ratio.E2.2022Q3.total = 29.911111
+ratio.E2.2022Q4.large = 33.666667
+ratio.E2.2022Q4.mid = 7.272727
+ratio.E2.2022Q4.total = 40.939394
+ratio.E2.2023Q1.large = 14.702703
+ratio.E2.2023Q1.mid = 2.880000
+ratio.E2.2023Q1.total = 17.582703
+ratio.E2.2023Q2.large = 18.208333
+ratio.E2.2023Q2.mid = 8.727273
+ratio.E2.2023Q2.total = 26.935606
+ratio.E2.2023Q3.large = 26.431579
+ratio.E2.2023Q3.mid = 4.629630
+ratio.E2.2023Q3.total = 31.061209
+ratio.E2.2023Q4.large = 29.878788
+ratio.E2.2023Q4.mid = 3.833333
+ratio.E2.2023Q4.total = 33.712121
+ratio.E2.2024Q1.large = 17.432990
+ratio.E2.2024Q1.mid = 5.500000
+ratio.E2.2024Q1.total = 22.932990
+ratio.E2.2024Q2.large = 31.939394
+ratio.E2.2024Q2.mid = 2.863636
+ratio.E2.2024Q2.total = 34.803030
+ratio.E2.2024Q3.large = 27.894737
+ratio.E2.2024Q3.mid = 7.411765
+ratio.E2.2024Q3.total = 35.306502
+ratio.E2.2024Q4.large = 39.692308
+ratio.E2.2024Q4.mid = 8.888889
+ratio.E2.2024Q4.total = 48.581197
+ratio.E2.2025Q1.large = 34.650794
+ratio.E2.2025Q1.mid = 5.727273
+ratio.E2.2025Q1.total = 40.378066
+ratio.E2.2025Q2.large = 37.041667
+ratio.E2.2025Q2.mid = 4.375000
+ratio.E2.2025Q2.total = 41.416667
+ratio.E2.2025Q3.large = 29.473684
+ratio.E2.2025Q3.mid = 4.038462
+ratio.E2.2025Q3.total = 33.512146
+ratio.E2.2025Q4.large = 50.611465
+ratio.E2.2025Q4.mid = 7.360000
+ratio.E2.2025Q4.total = 57.971465
+ratio.E2.2026Q1.large = 37.162791
+ratio.E2.2026Q1.mid = 7.920000
+ratio.E2.2026Q1.total = 45.082791
+ratio.E2.2026Q2.large = 38.390110
+ratio.E2.2026Q2.mid = 5.111111
+ratio.E2.2026Q2.total = 43.501221
+
+## 1b. Ratio total, GD count and absolute error, every computable quarter (the toy check reads this block)
+check.E1.2017Q1.ratio_total = 35.550943
+check.E1.2017Q1.reported_total = 30.000000
+check.E1.2017Q1.abs_error = 5.550943
+check.E1.2017Q2.ratio_total = 35.283333
+check.E1.2017Q2.reported_total = 30.000000
+check.E1.2017Q2.abs_error = 5.283333
+check.E1.2017Q3.ratio_total = 41.193750
+check.E1.2017Q3.reported_total = 30.000000
+check.E1.2017Q3.abs_error = 11.193750
+check.E1.2017Q4.ratio_total = 21.692547
+check.E1.2017Q4.reported_total = 30.000000
+check.E1.2017Q4.abs_error = 8.307453
+check.E1.2018Q1.ratio_total = 21.897321
+check.E1.2018Q1.reported_total = 26.000000
+check.E1.2018Q1.abs_error = 4.102679
+check.E1.2018Q2.ratio_total = 35.206897
+check.E1.2018Q2.reported_total = 26.000000
+check.E1.2018Q2.abs_error = 9.206897
+check.E1.2018Q3.ratio_total = 28.242394
+check.E1.2018Q3.reported_total = 27.000000
+check.E1.2018Q3.abs_error = 1.242394
+check.E1.2018Q4.ratio_total = 38.787879
+check.E1.2018Q4.reported_total = 42.000000
+check.E1.2018Q4.abs_error = 3.212121
+check.E1.2019Q1.ratio_total = 40.410831
+check.E1.2019Q1.reported_total = 34.000000
+check.E1.2019Q1.abs_error = 6.410831
+check.E1.2019Q2.ratio_total = 38.444444
+check.E1.2019Q2.reported_total = 31.000000
+check.E1.2019Q2.abs_error = 7.444444
+check.E1.2019Q3.ratio_total = 37.550933
+check.E1.2019Q3.reported_total = 38.000000
+check.E1.2019Q3.abs_error = 0.449067
+check.E1.2019Q4.ratio_total = 47.266667
+check.E1.2019Q4.reported_total = 44.000000
+check.E1.2019Q4.abs_error = 3.266667
+check.E1.2020Q1.ratio_total = 23.330357
+check.E1.2020Q1.reported_total = 23.000000
+check.E1.2020Q1.abs_error = 0.330357
+check.E1.2020Q2.ratio_total = 18.508187
+check.E1.2020Q2.reported_total = 32.000000
+check.E1.2020Q2.abs_error = 13.491813
+check.E1.2020Q3.ratio_total = 41.358898
+check.E1.2020Q3.reported_total = 32.000000
+check.E1.2020Q3.abs_error = 9.358898
+check.E1.2020Q4.ratio_total = 42.706827
+check.E1.2020Q4.reported_total = 40.000000
+check.E1.2020Q4.abs_error = 2.706827
+check.E1.2021Q1.ratio_total = 38.112299
+check.E1.2021Q1.reported_total = 28.000000
+check.E1.2021Q1.abs_error = 10.112299
+check.E1.2021Q2.ratio_total = 31.719828
+check.E1.2021Q2.reported_total = 21.000000
+check.E1.2021Q2.abs_error = 10.719828
+check.E1.2021Q3.ratio_total = 25.882993
+check.E1.2021Q3.reported_total = 31.000000
+check.E1.2021Q3.abs_error = 5.117007
+check.E1.2021Q4.ratio_total = 41.151976
+check.E1.2021Q4.reported_total = 39.000000
+check.E1.2021Q4.abs_error = 2.151976
+check.E1.2022Q1.ratio_total = 40.727273
+check.E1.2022Q1.reported_total = 25.000000
+check.E1.2022Q1.abs_error = 15.727273
+check.E1.2022Q2.ratio_total = 21.520833
+check.E1.2022Q2.reported_total = 22.000000
+check.E1.2022Q2.abs_error = 0.479167
+check.E1.2022Q3.ratio_total = 30.117521
+check.E1.2022Q3.reported_total = 35.000000
+check.E1.2022Q3.abs_error = 4.882479
+check.E1.2022Q4.ratio_total = 41.254036
+check.E1.2022Q4.reported_total = 38.000000
+check.E1.2022Q4.abs_error = 3.254036
+check.E1.2023Q1.ratio_total = 17.582703
+check.E1.2023Q1.reported_total = 21.000000
+check.E1.2023Q1.abs_error = 3.417297
+check.E1.2023Q2.ratio_total = 26.935606
+check.E1.2023Q2.reported_total = 24.000000
+check.E1.2023Q2.abs_error = 2.935606
+check.E1.2023Q3.ratio_total = 31.061209
+check.E1.2023Q3.reported_total = 27.000000
+check.E1.2023Q3.abs_error = 4.061209
+check.E1.2023Q4.ratio_total = 33.712121
+check.E1.2023Q4.reported_total = 39.000000
+check.E1.2023Q4.abs_error = 5.287879
+check.E1.2024Q1.ratio_total = 22.932990
+check.E1.2024Q1.reported_total = 24.000000
+check.E1.2024Q1.abs_error = 1.067010
+check.E1.2024Q2.ratio_total = 34.803030
+check.E1.2024Q2.reported_total = 37.000000
+check.E1.2024Q2.abs_error = 2.196970
+check.E1.2024Q3.ratio_total = 35.306502
+check.E1.2024Q3.reported_total = 28.000000
+check.E1.2024Q3.abs_error = 7.306502
+check.E1.2024Q4.ratio_total = 48.581197
+check.E1.2024Q4.reported_total = 47.000000
+check.E1.2024Q4.abs_error = 1.581197
+check.E1.2025Q1.ratio_total = 40.378066
+check.E1.2025Q1.reported_total = 36.000000
+check.E1.2025Q1.abs_error = 4.378066
+check.E1.2025Q2.ratio_total = 39.652778
+check.E1.2025Q2.reported_total = 38.000000
+check.E1.2025Q2.abs_error = 1.652778
+check.E1.2025Q3.ratio_total = 32.198462
+check.E1.2025Q3.reported_total = 39.000000
+check.E1.2025Q3.abs_error = 6.801538
+check.E1.2025Q4.ratio_total = 58.399216
+check.E1.2025Q4.reported_total = 45.000000
+check.E1.2025Q4.abs_error = 13.399216
+check.E1.2026Q1.ratio_total = 45.381078
+check.E1.2026Q1.reported_total = 38.000000
+check.E1.2026Q1.abs_error = 7.381078
+check.E1.2026Q2.ratio_total = 44.809975
+check.E1.2026Q2.reported_total = 41.000000
+check.E1.2026Q2.abs_error = 3.809975
+check.E1.n_quarters = 38
+check.E1.quarters = 2017Q1 to 2026Q2
+check.E1.mae_all_computable = 5.507338
+check.E2.2017Q1.ratio_total = 35.550943
+check.E2.2017Q1.reported_total = 30.000000
+check.E2.2017Q1.abs_error = 5.550943
+check.E2.2017Q2.ratio_total = 35.283333
+check.E2.2017Q2.reported_total = 30.000000
+check.E2.2017Q2.abs_error = 5.283333
+check.E2.2017Q3.ratio_total = 41.193750
+check.E2.2017Q3.reported_total = 30.000000
+check.E2.2017Q3.abs_error = 11.193750
+check.E2.2017Q4.ratio_total = 21.692547
+check.E2.2017Q4.reported_total = 30.000000
+check.E2.2017Q4.abs_error = 8.307453
+check.E2.2018Q1.ratio_total = 21.897321
+check.E2.2018Q1.reported_total = 26.000000
+check.E2.2018Q1.abs_error = 4.102679
+check.E2.2018Q2.ratio_total = 35.206897
+check.E2.2018Q2.reported_total = 26.000000
+check.E2.2018Q2.abs_error = 9.206897
+check.E2.2018Q3.ratio_total = 28.242394
+check.E2.2018Q3.reported_total = 27.000000
+check.E2.2018Q3.abs_error = 1.242394
+check.E2.2018Q4.ratio_total = 38.787879
+check.E2.2018Q4.reported_total = 42.000000
+check.E2.2018Q4.abs_error = 3.212121
+check.E2.2019Q1.ratio_total = 40.410831
+check.E2.2019Q1.reported_total = 34.000000
+check.E2.2019Q1.abs_error = 6.410831
+check.E2.2019Q2.ratio_total = 38.444444
+check.E2.2019Q2.reported_total = 31.000000
+check.E2.2019Q2.abs_error = 7.444444
+check.E2.2019Q3.ratio_total = 37.550933
+check.E2.2019Q3.reported_total = 38.000000
+check.E2.2019Q3.abs_error = 0.449067
+check.E2.2019Q4.ratio_total = 48.565517
+check.E2.2019Q4.reported_total = 44.000000
+check.E2.2019Q4.abs_error = 4.565517
+check.E2.2020Q1.ratio_total = 24.297496
+check.E2.2020Q1.reported_total = 23.000000
+check.E2.2020Q1.abs_error = 1.297496
+check.E2.2020Q2.ratio_total = 18.172197
+check.E2.2020Q2.reported_total = 32.000000
+check.E2.2020Q2.abs_error = 13.827803
+check.E2.2020Q3.ratio_total = 40.533769
+check.E2.2020Q3.reported_total = 32.000000
+check.E2.2020Q3.abs_error = 8.533769
+check.E2.2020Q4.ratio_total = 42.015686
+check.E2.2020Q4.reported_total = 40.000000
+check.E2.2020Q4.abs_error = 2.015686
+check.E2.2021Q1.ratio_total = 37.640271
+check.E2.2021Q1.reported_total = 28.000000
+check.E2.2021Q1.abs_error = 9.640271
+check.E2.2021Q2.ratio_total = 31.719828
+check.E2.2021Q2.reported_total = 21.000000
+check.E2.2021Q2.abs_error = 10.719828
+check.E2.2021Q3.ratio_total = 25.882993
+check.E2.2021Q3.reported_total = 31.000000
+check.E2.2021Q3.abs_error = 5.117007
+check.E2.2021Q4.ratio_total = 42.237082
+check.E2.2021Q4.reported_total = 39.000000
+check.E2.2021Q4.abs_error = 3.237082
+check.E2.2022Q1.ratio_total = 40.419580
+check.E2.2022Q1.reported_total = 25.000000
+check.E2.2022Q1.abs_error = 15.419580
+check.E2.2022Q2.ratio_total = 21.352638
+check.E2.2022Q2.reported_total = 22.000000
+check.E2.2022Q2.abs_error = 0.647362
+check.E2.2022Q3.ratio_total = 29.911111
+check.E2.2022Q3.reported_total = 35.000000
+check.E2.2022Q3.abs_error = 5.088889
+check.E2.2022Q4.ratio_total = 40.939394
+check.E2.2022Q4.reported_total = 38.000000
+check.E2.2022Q4.abs_error = 2.939394
+check.E2.2023Q1.ratio_total = 17.582703
+check.E2.2023Q1.reported_total = 21.000000
+check.E2.2023Q1.abs_error = 3.417297
+check.E2.2023Q2.ratio_total = 26.935606
+check.E2.2023Q2.reported_total = 24.000000
+check.E2.2023Q2.abs_error = 2.935606
+check.E2.2023Q3.ratio_total = 31.061209
+check.E2.2023Q3.reported_total = 27.000000
+check.E2.2023Q3.abs_error = 4.061209
+check.E2.2023Q4.ratio_total = 33.712121
+check.E2.2023Q4.reported_total = 39.000000
+check.E2.2023Q4.abs_error = 5.287879
+check.E2.2024Q1.ratio_total = 22.932990
+check.E2.2024Q1.reported_total = 24.000000
+check.E2.2024Q1.abs_error = 1.067010
+check.E2.2024Q2.ratio_total = 34.803030
+check.E2.2024Q2.reported_total = 37.000000
+check.E2.2024Q2.abs_error = 2.196970
+check.E2.2024Q3.ratio_total = 35.306502
+check.E2.2024Q3.reported_total = 28.000000
+check.E2.2024Q3.abs_error = 7.306502
+check.E2.2024Q4.ratio_total = 48.581197
+check.E2.2024Q4.reported_total = 47.000000
+check.E2.2024Q4.abs_error = 1.581197
+check.E2.2025Q1.ratio_total = 40.378066
+check.E2.2025Q1.reported_total = 36.000000
+check.E2.2025Q1.abs_error = 4.378066
+check.E2.2025Q2.ratio_total = 41.416667
+check.E2.2025Q2.reported_total = 38.000000
+check.E2.2025Q2.abs_error = 3.416667
+check.E2.2025Q3.ratio_total = 33.512146
+check.E2.2025Q3.reported_total = 39.000000
+check.E2.2025Q3.abs_error = 5.487854
+check.E2.2025Q4.ratio_total = 57.971465
+check.E2.2025Q4.reported_total = 45.000000
+check.E2.2025Q4.abs_error = 12.971465
+check.E2.2026Q1.ratio_total = 45.082791
+check.E2.2026Q1.reported_total = 38.000000
+check.E2.2026Q1.abs_error = 7.082791
+check.E2.2026Q2.ratio_total = 43.501221
+check.E2.2026Q2.reported_total = 41.000000
+check.E2.2026Q2.abs_error = 2.501221
+check.E2.n_quarters = 38
+check.E2.quarters = 2017Q1 to 2026Q2
+check.E2.mae_all_computable = 5.503825
+
+## 2. Design window 2017Q1 to 2019Q4
+design.n = 12
+design.mae.seasonal = 5.000000
+design.mae.last = 3.833333
+design.mae.raw.E1 = 9.416667
+design.mae.ratio.E1 = 5.472548
+design.mae.raw.E2 = 9.333333
+design.mae.ratio.E2 = 5.580786
+design.mae.ratio.E1_minus_E2 = -0.108238
+design.chosen_definition = E1
+design.rule = lower design MAE of ratio, E1 on a tie
+design.quarters_2016Q1_2019Q4_where_E1_and_E2_counts_differ = 2019Q4
+
+## 3. Holdout 2020Q1 to 2026Q2, definition E1, five models
+holdout.n = 26
+holdout.definition = E1
+holdout.n_ex_2020 = 22
+holdout.mae.ratio = 5.523395
+holdout.mape_pct.ratio = 17.914963
+holdout.wape_pct_sumAE_over_sumActual.ratio = 16.895092
+holdout.bias.ratio = 2.235614
+holdout.mae_large.ratio = 4.952923
+holdout.mae_mid.ratio = 2.158404
+holdout.mae_ex_2020.ratio = 5.350927
+holdout.mae.raw = 6.192308
+holdout.mape_pct.raw = 18.451958
+holdout.wape_pct_sumAE_over_sumActual.raw = 18.941176
+holdout.bias.raw = 2.423077
+holdout.mae_large.raw = 5.807692
+holdout.mae_mid.raw = 1.769231
+holdout.mae_ex_2020.raw = 5.818182
+holdout.mae.guidance = 6.917259
+holdout.mape_pct.guidance = 23.186035
+holdout.wape_pct_sumAE_over_sumActual.guidance = 21.158673
+holdout.bias.guidance = 3.382757
+holdout.mae_large.guidance = 5.456608
+holdout.mae_mid.guidance = 2.019450
+holdout.mae_ex_2020.guidance = 7.405505
+holdout.mae.seasonal = 4.615385
+holdout.mape_pct.seasonal = 15.205075
+holdout.wape_pct_sumAE_over_sumActual.seasonal = 14.117647
+holdout.bias.seasonal = -0.615385
+holdout.mae_large.seasonal = 4.153846
+holdout.mae_mid.seasonal = 1.538462
+holdout.mae_ex_2020.seasonal = 4.454545
+holdout.mae.last = 8.807692
+holdout.mape_pct.last = 29.463661
+holdout.wape_pct_sumAE_over_sumActual.last = 26.941176
+holdout.bias.last = 0.115385
+holdout.mae_large.last = 7.923077
+holdout.mae_mid.last = 1.884615
+holdout.mae_ex_2020.last = 8.681818
+holdout.mae.guidance_readingB = 6.683550
+holdout.mape_pct.guidance_readingB = 22.381760
+holdout.wape_pct_sumAE_over_sumActual.guidance_readingB = 20.443801
+holdout.bias.guidance_readingB = 3.252829
+holdout.mae_large.guidance_readingB = 5.263473
+holdout.mae_mid.guidance_readingB = 2.050727
+holdout.mae_ex_2020.guidance_readingB = 7.129305
+holdout.by_quarter.2020Q1 = reported=23.000000 ratio=23.330357 raw=19.000000 guidance=34.793814 seasonal=34.000000 last=44.000000
+holdout.by_quarter.2020Q2 = reported=32.000000 ratio=18.508187 raw=15.000000 guidance=30.508389 seasonal=31.000000 last=23.000000
+holdout.by_quarter.2020Q3 = reported=32.000000 ratio=41.358898 raw=29.000000 guidance=32.642180 seasonal=38.000000 last=32.000000
+holdout.by_quarter.2020Q4 = reported=40.000000 ratio=42.706827 raw=31.000000 guidance=43.000000 seasonal=44.000000 last=32.000000
+holdout.by_quarter.2021Q1 = reported=28.000000 ratio=38.112299 raw=28.000000 guidance=23.000000 seasonal=23.000000 last=40.000000
+holdout.by_quarter.2021Q2 = reported=21.000000 ratio=31.719828 raw=25.000000 guidance=32.000000 seasonal=32.000000 last=28.000000
+holdout.by_quarter.2021Q3 = reported=31.000000 ratio=25.882993 raw=24.000000 guidance=32.000000 seasonal=32.000000 last=21.000000
+holdout.by_quarter.2021Q4 = reported=39.000000 ratio=41.151976 raw=37.000000 guidance=40.000000 seasonal=40.000000 last=31.000000
+holdout.by_quarter.2022Q1 = reported=25.000000 ratio=40.727273 raw=38.000000 guidance=26.603053 seasonal=28.000000 last=39.000000
+holdout.by_quarter.2022Q2 = reported=22.000000 ratio=21.520833 raw=23.000000 guidance=26.727273 seasonal=21.000000 last=25.000000
+holdout.by_quarter.2022Q3 = reported=35.000000 ratio=30.117521 raw=31.000000 guidance=34.267857 seasonal=31.000000 last=22.000000
+holdout.by_quarter.2022Q4 = reported=38.000000 ratio=41.254036 raw=44.000000 guidance=41.000000 seasonal=39.000000 last=35.000000
+holdout.by_quarter.2023Q1 = reported=21.000000 ratio=17.582703 raw=20.000000 guidance=30.109290 seasonal=25.000000 last=38.000000
+holdout.by_quarter.2023Q2 = reported=24.000000 ratio=26.935606 raw=27.000000 guidance=32.068966 seasonal=22.000000 last=21.000000
+holdout.by_quarter.2023Q3 = reported=27.000000 ratio=31.061209 raw=32.000000 guidance=43.074419 seasonal=35.000000 last=24.000000
+holdout.by_quarter.2023Q4 = reported=39.000000 ratio=33.712121 raw=38.000000 guidance=62.000000 seasonal=38.000000 last=27.000000
+holdout.by_quarter.2024Q1 = reported=24.000000 ratio=22.932990 raw=24.000000 guidance=33.828571 seasonal=21.000000 last=39.000000
+holdout.by_quarter.2024Q2 = reported=37.000000 ratio=34.803030 raw=37.000000 guidance=33.014493 seasonal=24.000000 last=24.000000
+holdout.by_quarter.2024Q3 = reported=28.000000 ratio=35.306502 raw=36.000000 guidance=44.052632 seasonal=27.000000 last=37.000000
+holdout.by_quarter.2024Q4 = reported=47.000000 ratio=48.581197 raw=51.000000 guidance=61.000000 seasonal=39.000000 last=28.000000
+holdout.by_quarter.2025Q1 = reported=36.000000 ratio=40.378066 raw=44.000000 guidance=28.610354 seasonal=24.000000 last=47.000000
+holdout.by_quarter.2025Q2 = reported=38.000000 ratio=39.652778 raw=45.000000 guidance=31.858586 seasonal=37.000000 last=36.000000
+holdout.by_quarter.2025Q3 = reported=39.000000 ratio=32.198462 raw=38.000000 guidance=33.014019 seasonal=28.000000 last=38.000000
+holdout.by_quarter.2025Q4 = reported=45.000000 ratio=58.399216 raw=65.000000 guidance=39.500000 seasonal=47.000000 last=39.000000
+holdout.by_quarter.2026Q1 = reported=38.000000 ratio=45.381078 raw=55.000000 guidance=32.000000 seasonal=36.000000 last=45.000000
+holdout.by_quarter.2026Q2 = reported=41.000000 ratio=44.809975 raw=57.000000 guidance=37.277778 seasonal=38.000000 last=38.000000
+
+## 4. Holdout MAE by calendar year
+holdout.year.2020.n = 4
+holdout.year.2020.mae.ratio = 6.471974
+holdout.year.2020.mae.raw = 8.250000
+holdout.year.2020.mae.guidance = 4.231901
+holdout.year.2020.mae.seasonal = 5.500000
+holdout.year.2020.mae.last = 9.500000
+holdout.year.2020.mae.guidance_readingB = 4.231901
+holdout.year.2021.n = 4
+holdout.year.2021.mae.ratio = 7.025277
+holdout.year.2021.mae.raw = 3.250000
+holdout.year.2021.mae.guidance = 4.500000
+holdout.year.2021.mae.seasonal = 4.500000
+holdout.year.2021.mae.last = 9.250000
+holdout.year.2021.mae.guidance_readingB = 4.500000
+holdout.year.2022.n = 4
+holdout.year.2022.mae.ratio = 6.085738
+holdout.year.2022.mae.raw = 6.000000
+holdout.year.2022.mae.guidance = 2.515617
+holdout.year.2022.mae.seasonal = 2.250000
+holdout.year.2022.mae.last = 8.250000
+holdout.year.2022.mae.guidance_readingB = 1.083799
+holdout.year.2023.n = 4
+holdout.year.2023.mae.ratio = 3.925498
+holdout.year.2023.mae.raw = 2.500000
+holdout.year.2023.mae.guidance = 14.063168
+holdout.year.2023.mae.seasonal = 3.750000
+holdout.year.2023.mae.last = 8.750000
+holdout.year.2023.mae.guidance_readingB = 14.063168
+holdout.year.2024.n = 4
+holdout.year.2024.mae.ratio = 3.037920
+holdout.year.2024.mae.raw = 3.000000
+holdout.year.2024.mae.guidance = 10.966678
+holdout.year.2024.mae.seasonal = 6.250000
+holdout.year.2024.mae.last = 14.000000
+holdout.year.2024.mae.guidance_readingB = 13.220301
+holdout.year.2025.n = 4
+holdout.year.2025.mae.ratio = 6.557900
+holdout.year.2025.mae.raw = 9.000000
+holdout.year.2025.mae.guidance = 6.254260
+holdout.year.2025.mae.seasonal = 6.500000
+holdout.year.2025.mae.last = 5.000000
+holdout.year.2025.mae.guidance_readingB = 4.093907
+holdout.year.2026.n = 2
+holdout.year.2026.mae.ratio = 5.595526
+holdout.year.2026.mae.raw = 16.500000
+holdout.year.2026.mae.guidance = 4.861111
+holdout.year.2026.mae.seasonal = 2.500000
+holdout.year.2026.mae.last = 5.000000
+holdout.year.2026.mae.guidance_readingB = 4.500000
+
+## 5. Exact one-sided sign tests (ratio AE lower than the baseline's), Holm at 0.05
+tests.guidance.n_quarters = 26
+tests.guidance.wins = 14
+tests.guidance.losses = 12
+tests.guidance.ties = 0
+tests.guidance.p_one_sided = 0.422509
+tests.guidance.p_one_sided_full = 0.42250949144363403
+tests.seasonal.n_quarters = 26
+tests.seasonal.wins = 11
+tests.seasonal.losses = 15
+tests.seasonal.ties = 0
+tests.seasonal.p_one_sided = 0.836530
+tests.seasonal.p_one_sided_full = 0.8365302085876465
+tests.last.n_quarters = 26
+tests.last.wins = 16
+tests.last.losses = 10
+tests.last.ties = 0
+tests.last.p_one_sided = 0.163470
+tests.last.p_one_sided_full = 0.16346979141235352
+tests.guidance.holm_threshold = 0.025000
+tests.guidance.holm_adjusted_p = 0.845019
+tests.guidance.holm_reject = false
+tests.seasonal.holm_threshold = 0.050000
+tests.seasonal.holm_adjusted_p = 0.845019
+tests.seasonal.holm_reject = false
+tests.last.holm_threshold = 0.016667
+tests.last.holm_adjusted_p = 0.490409
+tests.last.holm_reject = false
+tests.guidance.rel_mae = 0.798495
+tests.seasonal.rel_mae = 1.196736
+tests.last.rel_mae = 0.627110
+tests.win_rate_vs_seasonal_pct = 42.307692
+tests.floatcheck.n_times_sy_over_sn.guidance.wins_losses_ties = 14,12,0
+tests.floatcheck.n_times_sy_over_sn.seasonal.wins_losses_ties = 11,15,0
+tests.floatcheck.n_times_sy_over_sn.last.wins_losses_ties = 16,10,0
+tests.floatcheck.n_times_sy_then_over_sn.guidance.wins_losses_ties = 14,12,0
+tests.floatcheck.n_times_sy_then_over_sn.seasonal.wins_losses_ties = 11,15,0
+tests.floatcheck.n_times_sy_then_over_sn.last.wins_losses_ties = 16,10,0
+# variant: guidance test over the sourced quarters only (reading A)
+tests_variant_sourced_only.guidance.n_quarters = 22
+tests_variant_sourced_only.guidance.wins = 13
+tests_variant_sourced_only.guidance.losses = 9
+tests_variant_sourced_only.guidance.ties = 0
+tests_variant_sourced_only.guidance.p_one_sided = 0.261734
+tests_variant_sourced_only.guidance.p_one_sided_full = 0.2617335319519043
+tests_variant_sourced_only.seasonal.n_quarters = 26
+tests_variant_sourced_only.seasonal.wins = 11
+tests_variant_sourced_only.seasonal.losses = 15
+tests_variant_sourced_only.seasonal.ties = 0
+tests_variant_sourced_only.seasonal.p_one_sided = 0.836530
+tests_variant_sourced_only.seasonal.p_one_sided_full = 0.8365302085876465
+tests_variant_sourced_only.last.n_quarters = 26
+tests_variant_sourced_only.last.wins = 16
+tests_variant_sourced_only.last.losses = 10
+tests_variant_sourced_only.last.ties = 0
+tests_variant_sourced_only.last.p_one_sided = 0.163470
+tests_variant_sourced_only.last.p_one_sided_full = 0.16346979141235352
+tests_variant_sourced_only.guidance.holm_threshold = 0.025000
+tests_variant_sourced_only.guidance.holm_adjusted_p = 0.523467
+tests_variant_sourced_only.guidance.holm_reject = false
+tests_variant_sourced_only.seasonal.holm_threshold = 0.050000
+tests_variant_sourced_only.seasonal.holm_adjusted_p = 0.836530
+tests_variant_sourced_only.seasonal.holm_reject = false
+tests_variant_sourced_only.last.holm_threshold = 0.016667
+tests_variant_sourced_only.last.holm_adjusted_p = 0.490409
+tests_variant_sourced_only.last.holm_reject = false
+tests_variant_sourced_only.guidance.rel_mae = 0.713674
+tests_variant_sourced_only.seasonal.rel_mae = 1.196736
+tests_variant_sourced_only.last.rel_mae = 0.627110
+# variant: guidance by reading B, all 26 quarters with fallback
+tests_variant_readingB.guidance.n_quarters = 26
+tests_variant_readingB.guidance.wins = 13
+tests_variant_readingB.guidance.losses = 13
+tests_variant_readingB.guidance.ties = 0
+tests_variant_readingB.guidance.p_one_sided = 0.577491
+tests_variant_readingB.guidance.p_one_sided_full = 0.577490508556366
+tests_variant_readingB.seasonal.n_quarters = 26
+tests_variant_readingB.seasonal.wins = 11
+tests_variant_readingB.seasonal.losses = 15
+tests_variant_readingB.seasonal.ties = 0
+tests_variant_readingB.seasonal.p_one_sided = 0.836530
+tests_variant_readingB.seasonal.p_one_sided_full = 0.8365302085876465
+tests_variant_readingB.last.n_quarters = 26
+tests_variant_readingB.last.wins = 16
+tests_variant_readingB.last.losses = 10
+tests_variant_readingB.last.ties = 0
+tests_variant_readingB.last.p_one_sided = 0.163470
+tests_variant_readingB.last.p_one_sided_full = 0.16346979141235352
+tests_variant_readingB.guidance.holm_threshold = 0.025000
+tests_variant_readingB.guidance.holm_adjusted_p = 1.000000
+tests_variant_readingB.guidance.holm_reject = false
+tests_variant_readingB.seasonal.holm_threshold = 0.050000
+tests_variant_readingB.seasonal.holm_adjusted_p = 1.000000
+tests_variant_readingB.seasonal.holm_reject = false
+tests_variant_readingB.last.holm_threshold = 0.016667
+tests_variant_readingB.last.holm_adjusted_p = 0.490409
+tests_variant_readingB.last.holm_reject = false
+tests_variant_readingB.guidance.rel_mae = 0.826416
+tests_variant_readingB.seasonal.rel_mae = 1.196736
+tests_variant_readingB.last.rel_mae = 0.627110
+# variant: guidance by reading B, its sourced quarters only
+tests_variant_readingB_sourced_only.guidance.n_quarters = 16
+tests_variant_readingB_sourced_only.guidance.wins = 10
+tests_variant_readingB_sourced_only.guidance.losses = 6
+tests_variant_readingB_sourced_only.guidance.ties = 0
+tests_variant_readingB_sourced_only.guidance.p_one_sided = 0.227249
+tests_variant_readingB_sourced_only.guidance.p_one_sided_full = 0.2272491455078125
+tests_variant_readingB_sourced_only.seasonal.n_quarters = 26
+tests_variant_readingB_sourced_only.seasonal.wins = 11
+tests_variant_readingB_sourced_only.seasonal.losses = 15
+tests_variant_readingB_sourced_only.seasonal.ties = 0
+tests_variant_readingB_sourced_only.seasonal.p_one_sided = 0.836530
+tests_variant_readingB_sourced_only.seasonal.p_one_sided_full = 0.8365302085876465
+tests_variant_readingB_sourced_only.last.n_quarters = 26
+tests_variant_readingB_sourced_only.last.wins = 16
+tests_variant_readingB_sourced_only.last.losses = 10
+tests_variant_readingB_sourced_only.last.ties = 0
+tests_variant_readingB_sourced_only.last.p_one_sided = 0.163470
+tests_variant_readingB_sourced_only.last.p_one_sided_full = 0.16346979141235352
+tests_variant_readingB_sourced_only.guidance.holm_threshold = 0.025000
+tests_variant_readingB_sourced_only.guidance.holm_adjusted_p = 0.490409
+tests_variant_readingB_sourced_only.guidance.holm_reject = false
+tests_variant_readingB_sourced_only.seasonal.holm_threshold = 0.050000
+tests_variant_readingB_sourced_only.seasonal.holm_adjusted_p = 0.836530
+tests_variant_readingB_sourced_only.seasonal.holm_reject = false
+tests_variant_readingB_sourced_only.last.holm_threshold = 0.016667
+tests_variant_readingB_sourced_only.last.holm_adjusted_p = 0.490409
+tests_variant_readingB_sourced_only.last.holm_reject = false
+tests_variant_readingB_sourced_only.guidance.rel_mae = 0.673098
+tests_variant_readingB_sourced_only.seasonal.rel_mae = 1.196736
+tests_variant_readingB_sourced_only.last.rel_mae = 0.627110
+
+## 6. Lag-1 autocorrelation of D = AE(baseline) - AE(ratio), quarter order
+autocorr_lag1.guidance = 0.353072
+autocorr_lag1.guidance.mean_D = 1.393863
+autocorr_lag1.seasonal = -0.191469
+autocorr_lag1.seasonal.mean_D = -0.908011
+autocorr_lag1.last = 0.095244
+autocorr_lag1.last.mean_D = 3.284297
+autocorr_lag1.guidance_sourced_quarters_only_n22 = 0.331645
+autocorr_lag1.guidance_readingB = 0.457893
+
+## 7. Guidance pace
+guidance.2020Q1.source = outlook
+guidance.2020Q1.outlook_used = 150.000000
+guidance.2020Q1.call_date = 2020-01-29
+guidance.2020Q1.ytd_reported = 0.000000
+guidance.2020Q1.share_of_remaining = 0.231959
+guidance.2020Q1.large_share = 0.775510
+guidance.2020Q1.large = 26.982958
+guidance.2020Q1.mid = 7.810856
+guidance.2020Q1.total = 34.793814
+guidance.2020Q1.reported_total = 23.000000
+guidance.2020Q1.abs_error = 11.793814
+guidance.2020Q2.source = outlook
+guidance.2020Q2.outlook_used = 127.500000
+guidance.2020Q2.call_date = 2020-04-29
+guidance.2020Q2.ytd_reported = 23.000000
+guidance.2020Q2.share_of_remaining = 0.291946
+guidance.2020Q2.large_share = 0.786765
+guidance.2020Q2.large = 24.002924
+guidance.2020Q2.mid = 6.505465
+guidance.2020Q2.total = 30.508389
+guidance.2020Q2.reported_total = 32.000000
+guidance.2020Q2.abs_error = 1.491611
+guidance.2020Q3.source = outlook
+guidance.2020Q3.outlook_used = 127.500000
+guidance.2020Q3.call_date = 2020-07-29
+guidance.2020Q3.ytd_reported = 55.000000
+guidance.2020Q3.share_of_remaining = 0.450237
+guidance.2020Q3.large_share = 0.802920
+guidance.2020Q3.large = 26.209050
+guidance.2020Q3.mid = 6.433130
+guidance.2020Q3.total = 32.642180
+guidance.2020Q3.reported_total = 32.000000
+guidance.2020Q3.abs_error = 0.642180
+guidance.2020Q4.source = outlook
+guidance.2020Q4.outlook_used = 130.000000
+guidance.2020Q4.call_date = 2020-10-28
+guidance.2020Q4.ytd_reported = 87.000000
+guidance.2020Q4.share_of_remaining = 1.000000
+guidance.2020Q4.large_share = 0.809160
+guidance.2020Q4.large = 34.793893
+guidance.2020Q4.mid = 8.206107
+guidance.2020Q4.total = 43.000000
+guidance.2020Q4.reported_total = 40.000000
+guidance.2020Q4.abs_error = 3.000000
+guidance.2021Q1.source = fallback_seasonal
+guidance.2021Q1.outlook_used = none
+guidance.2021Q1.call_date = none
+guidance.2021Q1.large = 20.000000
+guidance.2021Q1.mid = 3.000000
+guidance.2021Q1.total = 23.000000
+guidance.2021Q1.reported_total = 28.000000
+guidance.2021Q1.abs_error = 5.000000
+guidance.2021Q2.source = fallback_seasonal
+guidance.2021Q2.outlook_used = none
+guidance.2021Q2.call_date = none
+guidance.2021Q2.large = 26.000000
+guidance.2021Q2.mid = 6.000000
+guidance.2021Q2.total = 32.000000
+guidance.2021Q2.reported_total = 21.000000
+guidance.2021Q2.abs_error = 11.000000
+guidance.2021Q3.source = fallback_seasonal
+guidance.2021Q3.outlook_used = none
+guidance.2021Q3.call_date = none
+guidance.2021Q3.large = 25.000000
+guidance.2021Q3.mid = 7.000000
+guidance.2021Q3.total = 32.000000
+guidance.2021Q3.reported_total = 31.000000
+guidance.2021Q3.abs_error = 1.000000
+guidance.2021Q4.source = fallback_seasonal
+guidance.2021Q4.outlook_used = none
+guidance.2021Q4.call_date = none
+guidance.2021Q4.large = 34.000000
+guidance.2021Q4.mid = 6.000000
+guidance.2021Q4.total = 40.000000
+guidance.2021Q4.reported_total = 39.000000
+guidance.2021Q4.abs_error = 1.000000
+guidance.2022Q1.source = outlook
+guidance.2022Q1.outlook_used = 123.000000
+guidance.2022Q1.call_date = 2022-01-26
+guidance.2022Q1.ytd_reported = 0.000000
+guidance.2022Q1.share_of_remaining = 0.216285
+guidance.2022Q1.large_share = 0.865546
+guidance.2022Q1.large = 23.026172
+guidance.2022Q1.mid = 3.576881
+guidance.2022Q1.total = 26.603053
+guidance.2022Q1.reported_total = 25.000000
+guidance.2022Q1.abs_error = 1.603053
+guidance.2022Q2.source = outlook
+guidance.2022Q2.outlook_used = 123.000000
+guidance.2022Q2.call_date = 2022-01-26
+guidance.2022Q2.ytd_reported = 25.000000
+guidance.2022Q2.share_of_remaining = 0.272727
+guidance.2022Q2.large_share = 0.853448
+guidance.2022Q2.large = 22.810345
+guidance.2022Q2.mid = 3.916928
+guidance.2022Q2.total = 26.727273
+guidance.2022Q2.reported_total = 22.000000
+guidance.2022Q2.abs_error = 4.727273
+guidance.2022Q3.source = outlook
+guidance.2022Q3.outlook_used = 123.000000
+guidance.2022Q3.call_date = 2022-07-27
+guidance.2022Q3.ytd_reported = 47.000000
+guidance.2022Q3.share_of_remaining = 0.450893
+guidance.2022Q3.large_share = 0.837607
+guidance.2022Q3.large = 28.702991
+guidance.2022Q3.mid = 5.564866
+guidance.2022Q3.total = 34.267857
+guidance.2022Q3.reported_total = 35.000000
+guidance.2022Q3.abs_error = 0.732143
+guidance.2022Q4.source = outlook
+guidance.2022Q4.outlook_used = 123.000000
+guidance.2022Q4.call_date = 2022-07-27
+guidance.2022Q4.ytd_reported = 82.000000
+guidance.2022Q4.share_of_remaining = 1.000000
+guidance.2022Q4.large_share = 0.834711
+guidance.2022Q4.large = 34.223140
+guidance.2022Q4.mid = 6.776860
+guidance.2022Q4.total = 41.000000
+guidance.2022Q4.reported_total = 38.000000
+guidance.2022Q4.abs_error = 3.000000
+guidance.2023Q1.source = outlook
+guidance.2023Q1.outlook_used = 145.000000
+guidance.2023Q1.call_date = 2023-01-25
+guidance.2023Q1.ytd_reported = 0.000000
+guidance.2023Q1.share_of_remaining = 0.207650
+guidance.2023Q1.large_share = 0.800000
+guidance.2023Q1.large = 24.087432
+guidance.2023Q1.mid = 6.021858
+guidance.2023Q1.total = 30.109290
+guidance.2023Q1.reported_total = 21.000000
+guidance.2023Q1.abs_error = 9.109290
+guidance.2023Q2.source = outlook
+guidance.2023Q2.outlook_used = 145.000000
+guidance.2023Q2.call_date = 2023-04-26
+guidance.2023Q2.ytd_reported = 21.000000
+guidance.2023Q2.share_of_remaining = 0.258621
+guidance.2023Q2.large_share = 0.793103
+guidance.2023Q2.large = 25.434007
+guidance.2023Q2.mid = 6.634958
+guidance.2023Q2.total = 32.068966
+guidance.2023Q2.reported_total = 24.000000
+guidance.2023Q2.abs_error = 8.068966
+guidance.2023Q3.source = outlook
+guidance.2023Q3.outlook_used = 139.500000
+guidance.2023Q3.call_date = 2023-07-26
+guidance.2023Q3.ytd_reported = 45.000000
+guidance.2023Q3.share_of_remaining = 0.455814
+guidance.2023Q3.large_share = 0.788136
+guidance.2023Q3.large = 33.948482
+guidance.2023Q3.mid = 9.125936
+guidance.2023Q3.total = 43.074419
+guidance.2023Q3.reported_total = 27.000000
+guidance.2023Q3.abs_error = 16.074419
+guidance.2023Q4.source = outlook
+guidance.2023Q4.outlook_used = 134.000000
+guidance.2023Q4.call_date = 2023-10-25
+guidance.2023Q4.ytd_reported = 72.000000
+guidance.2023Q4.share_of_remaining = 1.000000
+guidance.2023Q4.large_share = 0.790909
+guidance.2023Q4.large = 49.036364
+guidance.2023Q4.mid = 12.963636
+guidance.2023Q4.total = 62.000000
+guidance.2023Q4.reported_total = 39.000000
+guidance.2023Q4.abs_error = 23.000000
+guidance.2024Q1.source = outlook
+guidance.2024Q1.outlook_used = 160.000000
+guidance.2024Q1.call_date = 2024-01-24
+guidance.2024Q1.ytd_reported = 0.000000
+guidance.2024Q1.share_of_remaining = 0.211429
+guidance.2024Q1.large_share = 0.801802
+guidance.2024Q1.large = 27.123810
+guidance.2024Q1.mid = 6.704762
+guidance.2024Q1.total = 33.828571
+guidance.2024Q1.reported_total = 24.000000
+guidance.2024Q1.abs_error = 9.828571
+guidance.2024Q2.source = outlook
+guidance.2024Q2.outlook_used = 160.000000
+guidance.2024Q2.call_date = 2024-01-24
+guidance.2024Q2.ytd_reported = 24.000000
+guidance.2024Q2.share_of_remaining = 0.242754
+guidance.2024Q2.large_share = 0.815789
+guidance.2024Q2.large = 26.932876
+guidance.2024Q2.mid = 6.081617
+guidance.2024Q2.total = 33.014493
+guidance.2024Q2.reported_total = 37.000000
+guidance.2024Q2.abs_error = 3.985507
+guidance.2024Q3.source = outlook
+guidance.2024Q3.outlook_used = 160.000000
+guidance.2024Q3.call_date = 2024-07-24
+guidance.2024Q3.ytd_reported = 61.000000
+guidance.2024Q3.share_of_remaining = 0.444976
+guidance.2024Q3.large_share = 0.834646
+guidance.2024Q3.large = 36.768338
+guidance.2024Q3.mid = 7.284293
+guidance.2024Q3.total = 44.052632
+guidance.2024Q3.reported_total = 28.000000
+guidance.2024Q3.abs_error = 16.052632
+guidance.2024Q4.source = outlook
+guidance.2024Q4.outlook_used = 150.000000
+guidance.2024Q4.call_date = 2024-10-23
+guidance.2024Q4.ytd_reported = 89.000000
+guidance.2024Q4.share_of_remaining = 1.000000
+guidance.2024Q4.large_share = 0.843750
+guidance.2024Q4.large = 51.468750
+guidance.2024Q4.mid = 9.531250
+guidance.2024Q4.total = 61.000000
+guidance.2024Q4.reported_total = 47.000000
+guidance.2024Q4.abs_error = 14.000000
+guidance.2025Q1.source = outlook
+guidance.2025Q1.outlook_used = 150.000000
+guidance.2025Q1.call_date = 2025-01-29
+guidance.2025Q1.ytd_reported = 0.000000
+guidance.2025Q1.share_of_remaining = 0.190736
+guidance.2025Q1.large_share = 0.867647
+guidance.2025Q1.large = 24.823690
+guidance.2025Q1.mid = 3.786665
+guidance.2025Q1.total = 28.610354
+guidance.2025Q1.reported_total = 36.000000
+guidance.2025Q1.abs_error = 7.389646
+guidance.2025Q2.source = outlook
+guidance.2025Q2.outlook_used = 150.000000
+guidance.2025Q2.call_date = 2025-01-29
+guidance.2025Q2.ytd_reported = 36.000000
+guidance.2025Q2.share_of_remaining = 0.279461
+guidance.2025Q2.large_share = 0.858108
+guidance.2025Q2.large = 27.338111
+guidance.2025Q2.mid = 4.520475
+guidance.2025Q2.total = 31.858586
+guidance.2025Q2.reported_total = 38.000000
+guidance.2025Q2.abs_error = 6.141414
+guidance.2025Q3.source = outlook
+guidance.2025Q3.outlook_used = 152.500000
+guidance.2025Q3.call_date = 2025-07-23
+guidance.2025Q3.ytd_reported = 74.000000
+guidance.2025Q3.share_of_remaining = 0.420561
+guidance.2025Q3.large_share = 0.859060
+guidance.2025Q3.large = 28.361036
+guidance.2025Q3.mid = 4.652983
+guidance.2025Q3.total = 33.014019
+guidance.2025Q3.reported_total = 39.000000
+guidance.2025Q3.abs_error = 5.985981
+guidance.2025Q4.source = outlook
+guidance.2025Q4.outlook_used = 152.500000
+guidance.2025Q4.call_date = 2025-07-23
+guidance.2025Q4.ytd_reported = 113.000000
+guidance.2025Q4.share_of_remaining = 1.000000
+guidance.2025Q4.large_share = 0.856250
+guidance.2025Q4.large = 33.821875
+guidance.2025Q4.mid = 5.678125
+guidance.2025Q4.total = 39.500000
+guidance.2025Q4.reported_total = 45.000000
+guidance.2025Q4.abs_error = 5.500000
+guidance.2026Q1.source = outlook
+guidance.2026Q1.outlook_used = 160.000000
+guidance.2026Q1.call_date = 2026-01-28
+guidance.2026Q1.ytd_reported = 0.000000
+guidance.2026Q1.share_of_remaining = 0.200000
+guidance.2026Q1.large_share = 0.860759
+guidance.2026Q1.large = 27.544304
+guidance.2026Q1.mid = 4.455696
+guidance.2026Q1.total = 32.000000
+guidance.2026Q1.reported_total = 38.000000
+guidance.2026Q1.abs_error = 6.000000
+guidance.2026Q2.source = outlook
+guidance.2026Q2.outlook_used = 160.000000
+guidance.2026Q2.call_date = 2026-01-28
+guidance.2026Q2.ytd_reported = 38.000000
+guidance.2026Q2.share_of_remaining = 0.305556
+guidance.2026Q2.large_share = 0.856250
+guidance.2026Q2.large = 31.919097
+guidance.2026Q2.mid = 5.358681
+guidance.2026Q2.total = 37.277778
+guidance.2026Q2.reported_total = 41.000000
+guidance.2026Q2.abs_error = 3.722222
+guidance.sourced_quarters = 22
+guidance.fallback_quarters = 2021Q1,2021Q2,2021Q3,2021Q4
+guidance.fallback_to = seasonal (same quarter last year)
+guidance.headline_baseline_is_guidance_at_22_or_more = true
+guidance.mae_sourced.guidance = 7.356760
+guidance.mae_sourced.ratio = 5.250326
+guidance.mae_sourced.seasonal = 4.636364
+guidance.mae_sourced.last = 8.727273
+guidance.mae_sourced.raw = 6.727273
+# reading B (the latest call must itself state the number)
+guidance_readingB.sourced_quarters = 16
+guidance_readingB.fallback_quarters = 2021Q1,2021Q2,2021Q3,2021Q4,2022Q2,2022Q4,2024Q2,2025Q2,2025Q4,2026Q2
+guidance_readingB.headline_baseline_is_guidance_at_22_or_more = false
+guidance_readingB.mae_all26_with_fallback = 6.683550
+guidance_readingB.mae_sourced.guidance = 8.423269
+guidance_readingB.mae_sourced.ratio = 5.669689
+guidance_readingB.mae_sourced.seasonal = 5.062500
+# variant: reading A with w_j as the mean of three within-year shares instead of pooled
+guidance_meanshare.mae_all26_with_fallback = 6.925384
+guidance_meanshare.mae_sourced = 7.366363
+guidance_meanshare.max_abs_difference_in_total_vs_pooled = 0.346246
+guidance.2026Q3.fiscal_end_used = 2026-10-04
+guidance.2026Q3.source = outlook
+guidance.2026Q3.outlook_used = 160.000000
+guidance.2026Q3.call_date = 2026-07-29
+guidance.2026Q3.ytd_reported = 79.000000
+guidance.2026Q3.share_of_remaining = 0.417778
+guidance.2026Q3.large_share = 0.858896
+guidance.2026Q3.large = 29.065031
+guidance.2026Q3.mid = 4.774969
+guidance.2026Q3.total = 33.840000
+guidance_readingB.2026Q3.fiscal_end_used = 2026-10-04
+guidance_readingB.2026Q3.source = outlook
+guidance_readingB.2026Q3.outlook_used = 160.000000
+guidance_readingB.2026Q3.call_date = 2026-07-29
+guidance_readingB.2026Q3.ytd_reported = 79.000000
+guidance_readingB.2026Q3.share_of_remaining = 0.417778
+guidance_readingB.2026Q3.large_share = 0.858896
+guidance_readingB.2026Q3.large = 29.065031
+guidance_readingB.2026Q3.mid = 4.774969
+guidance_readingB.2026Q3.total = 33.840000
+
+## 8. Past-miss band, holdout quarters
+band.2020Q1.n_prior_errors = 12
+band.2020Q1.p10_position = 2
+band.2020Q1.p90_position = 11
+band.2020Q1.p10 = -4.102679
+band.2020Q1.p90 = 9.206897
+band.2020Q1.low = 14.123461
+band.2020Q1.high = 27.433036
+band.2020Q1.reported = 23.000000
+band.2020Q1.hit = hit
+band.2020Q2.n_prior_errors = 13
+band.2020Q2.p10_position = 2
+band.2020Q2.p90_position = 12
+band.2020Q2.p10 = -4.102679
+band.2020Q2.p90 = 9.206897
+band.2020Q2.low = 9.301291
+band.2020Q2.high = 22.610866
+band.2020Q2.reported = 32.000000
+band.2020Q2.hit = miss
+band.2020Q3.n_prior_errors = 14
+band.2020Q3.p10_position = 2
+band.2020Q3.p90_position = 13
+band.2020Q3.p10 = -8.307453
+band.2020Q3.p90 = 9.206897
+band.2020Q3.low = 32.152001
+band.2020Q3.high = 49.666351
+band.2020Q3.reported = 32.000000
+band.2020Q3.hit = miss
+band.2020Q4.n_prior_errors = 15
+band.2020Q4.p10_position = 2
+band.2020Q4.p90_position = 14
+band.2020Q4.p10 = -8.307453
+band.2020Q4.p90 = 9.358898
+band.2020Q4.low = 33.347929
+band.2020Q4.high = 51.014281
+band.2020Q4.reported = 40.000000
+band.2020Q4.hit = hit
+band.2021Q1.n_prior_errors = 16
+band.2021Q1.p10_position = 2
+band.2021Q1.p90_position = 15
+band.2021Q1.p10 = -8.307453
+band.2021Q1.p90 = 9.358898
+band.2021Q1.low = 28.753401
+band.2021Q1.high = 46.419753
+band.2021Q1.reported = 28.000000
+band.2021Q1.hit = miss
+band.2021Q2.n_prior_errors = 17
+band.2021Q2.p10_position = 2
+band.2021Q2.p90_position = 16
+band.2021Q2.p10 = -8.307453
+band.2021Q2.p90 = 10.112299
+band.2021Q2.low = 21.607528
+band.2021Q2.high = 40.027281
+band.2021Q2.reported = 21.000000
+band.2021Q2.hit = miss
+band.2021Q3.n_prior_errors = 18
+band.2021Q3.p10_position = 2
+band.2021Q3.p90_position = 17
+band.2021Q3.p10 = -8.307453
+band.2021Q3.p90 = 10.719828
+band.2021Q3.low = 15.163166
+band.2021Q3.high = 34.190447
+band.2021Q3.reported = 31.000000
+band.2021Q3.hit = hit
+band.2021Q4.n_prior_errors = 19
+band.2021Q4.p10_position = 2
+band.2021Q4.p90_position = 18
+band.2021Q4.p10 = -8.307453
+band.2021Q4.p90 = 10.719828
+band.2021Q4.low = 30.432148
+band.2021Q4.high = 49.459429
+band.2021Q4.reported = 39.000000
+band.2021Q4.hit = hit
+band.2022Q1.n_prior_errors = 20
+band.2022Q1.p10_position = 2
+band.2022Q1.p90_position = 18
+band.2022Q1.p10 = -8.307453
+band.2022Q1.p90 = 10.112299
+band.2022Q1.low = 30.614973
+band.2022Q1.high = 49.034726
+band.2022Q1.reported = 25.000000
+band.2022Q1.hit = miss
+band.2022Q2.n_prior_errors = 21
+band.2022Q2.p10_position = 3
+band.2022Q2.p90_position = 19
+band.2022Q2.p10 = -5.117007
+band.2022Q2.p90 = 10.719828
+band.2022Q2.low = 10.801006
+band.2022Q2.high = 26.637840
+band.2022Q2.reported = 22.000000
+band.2022Q2.hit = hit
+band.2022Q3.n_prior_errors = 22
+band.2022Q3.p10_position = 3
+band.2022Q3.p90_position = 20
+band.2022Q3.p10 = -5.117007
+band.2022Q3.p90 = 10.719828
+band.2022Q3.low = 19.397694
+band.2022Q3.high = 35.234528
+band.2022Q3.reported = 35.000000
+band.2022Q3.hit = hit
+band.2022Q4.n_prior_errors = 23
+band.2022Q4.p10_position = 3
+band.2022Q4.p90_position = 21
+band.2022Q4.p10 = -5.117007
+band.2022Q4.p90 = 10.719828
+band.2022Q4.low = 30.534208
+band.2022Q4.high = 46.371042
+band.2022Q4.reported = 38.000000
+band.2022Q4.hit = hit
+band.2023Q1.n_prior_errors = 24
+band.2023Q1.p10_position = 3
+band.2023Q1.p90_position = 22
+band.2023Q1.p10 = -5.117007
+band.2023Q1.p90 = 10.719828
+band.2023Q1.low = 6.862875
+band.2023Q1.high = 22.699710
+band.2023Q1.reported = 21.000000
+band.2023Q1.hit = hit
+band.2023Q2.n_prior_errors = 25
+band.2023Q2.p10_position = 3
+band.2023Q2.p90_position = 23
+band.2023Q2.p10 = -5.117007
+band.2023Q2.p90 = 10.719828
+band.2023Q2.low = 16.215778
+band.2023Q2.high = 32.052613
+band.2023Q2.reported = 24.000000
+band.2023Q2.hit = hit
+band.2023Q3.n_prior_errors = 26
+band.2023Q3.p10_position = 3
+band.2023Q3.p90_position = 24
+band.2023Q3.p10 = -5.117007
+band.2023Q3.p90 = 10.719828
+band.2023Q3.low = 20.341381
+band.2023Q3.high = 36.178215
+band.2023Q3.reported = 27.000000
+band.2023Q3.hit = hit
+band.2023Q4.n_prior_errors = 27
+band.2023Q4.p10_position = 3
+band.2023Q4.p90_position = 25
+band.2023Q4.p10 = -5.117007
+band.2023Q4.p90 = 10.719828
+band.2023Q4.low = 22.992294
+band.2023Q4.high = 38.829128
+band.2023Q4.reported = 39.000000
+band.2023Q4.hit = miss
+band.2024Q1.n_prior_errors = 28
+band.2024Q1.p10_position = 3
+band.2024Q1.p90_position = 26
+band.2024Q1.p10 = -5.287879
+band.2024Q1.p90 = 10.719828
+band.2024Q1.low = 12.213162
+band.2024Q1.high = 28.220868
+band.2024Q1.reported = 24.000000
+band.2024Q1.hit = hit
+band.2024Q2.n_prior_errors = 29
+band.2024Q2.p10_position = 3
+band.2024Q2.p90_position = 27
+band.2024Q2.p10 = -5.287879
+band.2024Q2.p90 = 10.719828
+band.2024Q2.low = 24.083203
+band.2024Q2.high = 40.090909
+band.2024Q2.reported = 37.000000
+band.2024Q2.hit = hit
+band.2024Q3.n_prior_errors = 30
+band.2024Q3.p10_position = 3
+band.2024Q3.p90_position = 27
+band.2024Q3.p10 = -5.287879
+band.2024Q3.p90 = 10.112299
+band.2024Q3.low = 25.194202
+band.2024Q3.high = 40.594380
+band.2024Q3.reported = 28.000000
+band.2024Q3.hit = hit
+band.2024Q4.n_prior_errors = 31
+band.2024Q4.p10_position = 4
+band.2024Q4.p90_position = 28
+band.2024Q4.p10 = -5.117007
+band.2024Q4.p90 = 10.112299
+band.2024Q4.low = 38.468897
+band.2024Q4.high = 53.698203
+band.2024Q4.reported = 47.000000
+band.2024Q4.hit = hit
+band.2025Q1.n_prior_errors = 32
+band.2025Q1.p10_position = 4
+band.2025Q1.p90_position = 29
+band.2025Q1.p10 = -5.117007
+band.2025Q1.p90 = 10.112299
+band.2025Q1.low = 30.265767
+band.2025Q1.high = 45.495073
+band.2025Q1.reported = 36.000000
+band.2025Q1.hit = hit
+band.2025Q2.n_prior_errors = 33
+band.2025Q2.p10_position = 4
+band.2025Q2.p90_position = 30
+band.2025Q2.p10 = -5.117007
+band.2025Q2.p90 = 10.112299
+band.2025Q2.low = 29.540478
+band.2025Q2.high = 44.769785
+band.2025Q2.reported = 38.000000
+band.2025Q2.hit = hit
+band.2025Q3.n_prior_errors = 34
+band.2025Q3.p10_position = 4
+band.2025Q3.p90_position = 31
+band.2025Q3.p10 = -5.117007
+band.2025Q3.p90 = 10.112299
+band.2025Q3.low = 22.086162
+band.2025Q3.high = 37.315468
+band.2025Q3.reported = 39.000000
+band.2025Q3.hit = miss
+band.2025Q4.n_prior_errors = 35
+band.2025Q4.p10_position = 4
+band.2025Q4.p90_position = 32
+band.2025Q4.p10 = -5.287879
+band.2025Q4.p90 = 10.112299
+band.2025Q4.low = 48.286916
+band.2025Q4.high = 63.687094
+band.2025Q4.reported = 45.000000
+band.2025Q4.hit = miss
+band.2026Q1.n_prior_errors = 36
+band.2026Q1.p10_position = 4
+band.2026Q1.p90_position = 33
+band.2026Q1.p10 = -5.287879
+band.2026Q1.p90 = 10.719828
+band.2026Q1.low = 34.661250
+band.2026Q1.high = 50.668957
+band.2026Q1.reported = 38.000000
+band.2026Q1.hit = hit
+band.2026Q2.n_prior_errors = 37
+band.2026Q2.p10_position = 4
+band.2026Q2.p90_position = 34
+band.2026Q2.p10 = -5.287879
+band.2026Q2.p90 = 10.719828
+band.2026Q2.low = 34.090147
+band.2026Q2.high = 50.097854
+band.2026Q2.reported = 41.000000
+band.2026Q2.hit = hit
+band.hits = 18
+band.n = 26
+band.coverage_pct = 69.230769
+band.cp95_low_pct = 48.210356
+band.cp95_high_pct = 85.674000
+# variant: position computed as math.ceil(float(p) * n) instead of the exact ceiling
+band_floatceil.hits = 18
+band_floatceil.n = 26
+band_floatceil.coverage_pct = 69.230769
+band_floatceil.cp95_low_pct = 48.210356
+band_floatceil.cp95_high_pct = 85.674000
+band.nominal_coverage_pct_P10_to_P90 = 80.000000
+band.misses_above_band = 2020Q2,2023Q4,2025Q3
+band.misses_below_band = 2020Q3,2021Q1,2021Q2,2022Q1,2025Q4
+band_errors.2017Q1 = 5.550943
+band_errors.2017Q2 = 5.283333
+band_errors.2017Q3 = 11.193750
+band_errors.2017Q4 = -8.307453
+band_errors.2018Q1 = -4.102679
+band_errors.2018Q2 = 9.206897
+band_errors.2018Q3 = 1.242394
+band_errors.2018Q4 = -3.212121
+band_errors.2019Q1 = 6.410831
+band_errors.2019Q2 = 7.444444
+band_errors.2019Q3 = -0.449067
+band_errors.2019Q4 = 3.266667
+band_errors.2020Q1 = 0.330357
+band_errors.2020Q2 = -13.491813
+band_errors.2020Q3 = 9.358898
+band_errors.2020Q4 = 2.706827
+band_errors.2021Q1 = 10.112299
+band_errors.2021Q2 = 10.719828
+band_errors.2021Q3 = -5.117007
+band_errors.2021Q4 = 2.151976
+band_errors.2022Q1 = 15.727273
+band_errors.2022Q2 = -0.479167
+band_errors.2022Q3 = -4.882479
+band_errors.2022Q4 = 3.254036
+band_errors.2023Q1 = -3.417297
+band_errors.2023Q2 = 2.935606
+band_errors.2023Q3 = 4.061209
+band_errors.2023Q4 = -5.287879
+band_errors.2024Q1 = -1.067010
+band_errors.2024Q2 = -2.196970
+band_errors.2024Q3 = 7.306502
+band_errors.2024Q4 = 1.581197
+band_errors.2025Q1 = 4.378066
+band_errors.2025Q2 = 1.652778
+band_errors.2025Q3 = -6.801538
+band_errors.2025Q4 = 13.399216
+band_errors.2026Q1 = 7.381078
+band_errors.2026Q2 = 3.809975
+
+## 9. Deliveries per registry event (reported total / registry total, E1)
+coverage_ratio.2016Q1 = 2.333333
+coverage_ratio.2016Q2 = 2.250000
+coverage_ratio.2016Q3 = 1.933333
+coverage_ratio.2016Q4 = 1.400000
+coverage_ratio.2017Q1 = 1.578947
+coverage_ratio.2017Q2 = 1.500000
+coverage_ratio.2017Q3 = 1.250000
+coverage_ratio.2017Q4 = 2.000000
+coverage_ratio.2018Q1 = 1.857143
+coverage_ratio.2018Q2 = 1.181818
+coverage_ratio.2018Q3 = 1.421053
+coverage_ratio.2018Q4 = 1.680000
+coverage_ratio.2019Q1 = 1.259259
+coverage_ratio.2019Q2 = 1.107143
+coverage_ratio.2019Q3 = 1.407407
+coverage_ratio.2019Q4 = 1.257143
+coverage_ratio.2020Q1 = 1.210526
+coverage_ratio.2020Q2 = 2.133333
+coverage_ratio.2020Q3 = 1.103448
+coverage_ratio.2020Q4 = 1.290323
+coverage_ratio.2021Q1 = 1.000000
+coverage_ratio.2021Q2 = 0.840000
+coverage_ratio.2021Q3 = 1.291667
+coverage_ratio.2021Q4 = 1.054054
+coverage_ratio.2022Q1 = 0.657895
+coverage_ratio.2022Q2 = 0.956522
+coverage_ratio.2022Q3 = 1.129032
+coverage_ratio.2022Q4 = 0.863636
+coverage_ratio.2023Q1 = 1.050000
+coverage_ratio.2023Q2 = 0.888889
+coverage_ratio.2023Q3 = 0.843750
+coverage_ratio.2023Q4 = 1.026316
+coverage_ratio.2024Q1 = 1.000000
+coverage_ratio.2024Q2 = 1.000000
+coverage_ratio.2024Q3 = 0.777778
+coverage_ratio.2024Q4 = 0.921569
+coverage_ratio.2025Q1 = 0.818182
+coverage_ratio.2025Q2 = 0.844444
+coverage_ratio.2025Q3 = 1.026316
+coverage_ratio.2025Q4 = 0.692308
+coverage_ratio.2026Q1 = 0.690909
+coverage_ratio.2026Q2 = 0.719298
+coverage_ratio.base_window = 2017Q1 to 2025Q2
+coverage_ratio.base_n = 34
+coverage_ratio.mean = 1.182391
+coverage_ratio.sd_sample = 0.351582
+coverage_ratio.sd_population_for_reference = 0.346373
+coverage_ratio.mean_plus_2sd = 1.885554
+coverage_ratio.mean_minus_2sd = 0.479227
+coverage_ratio.watch.2025Q3 = 1.026316 above_mean_plus_2sd=false below_mean_minus_2sd=false z=-0.443922
+coverage_ratio.watch.2025Q4 = 0.692308 above_mean_plus_2sd=false below_mean_minus_2sd=false z=-1.393937
+coverage_ratio.watch.2026Q1 = 0.690909 above_mean_plus_2sd=false below_mean_minus_2sd=false z=-1.397915
+coverage_ratio.watch.2026Q2 = 0.719298 above_mean_plus_2sd=false below_mean_minus_2sd=false z=-1.317168
+coverage_ratio.flags_above_mean_plus_2sd = none
+# inverse: registry events per delivery by calendar year (pooled: sum of events / sum of deliveries)
+events_per_delivery.2016.n_quarters = 4
+events_per_delivery.2016.total = 0.520661
+events_per_delivery.2016.mid = 0.370370
+events_per_delivery.2016.large = 0.563830
+events_per_delivery.2016.sums = events_total=63 deliveries_total=121 events_mid=10 deliveries_mid=27
+events_per_delivery_mean_of_quarters.2016.total = 0.526136
+events_per_delivery_mean_of_quarters.2016.mid = 0.377976
+events_per_delivery.2017.n_quarters = 4
+events_per_delivery.2017.total = 0.650000
+events_per_delivery.2017.mid = 0.466667
+events_per_delivery.2017.large = 0.711111
+events_per_delivery.2017.sums = events_total=78 deliveries_total=120 events_mid=14 deliveries_mid=30
+events_per_delivery_mean_of_quarters.2017.total = 0.650000
+events_per_delivery_mean_of_quarters.2017.mid = 0.452381
+events_per_delivery.2018.n_quarters = 4
+events_per_delivery.2018.total = 0.661157
+events_per_delivery.2018.mid = 0.586207
+events_per_delivery.2018.large = 0.684783
+events_per_delivery.2018.sums = events_total=80 deliveries_total=121 events_mid=17 deliveries_mid=29
+events_per_delivery_mean_of_quarters.2018.total = 0.670889
+events_per_delivery_mean_of_quarters.2018.mid = 0.586310
+events_per_delivery.2019.n_quarters = 4
+events_per_delivery.2019.total = 0.795918
+events_per_delivery.2019.mid = 0.636364
+events_per_delivery.2019.large = 0.842105
+events_per_delivery.2019.sums = events_total=117 deliveries_total=147 events_mid=21 deliveries_mid=33
+events_per_delivery_mean_of_quarters.2019.total = 0.800831
+events_per_delivery_mean_of_quarters.2019.mid = 0.628968
+events_per_delivery.2020.n_quarters = 4
+events_per_delivery.2020.total = 0.740157
+events_per_delivery.2020.mid = 0.772727
+events_per_delivery.2020.large = 0.733333
+events_per_delivery.2020.sums = events_total=94 deliveries_total=127 events_mid=17 deliveries_mid=22
+events_per_delivery_mean_of_quarters.2020.total = 0.744022
+events_per_delivery_mean_of_quarters.2020.mid = 0.761905
+events_per_delivery.2021.n_quarters = 4
+events_per_delivery.2021.total = 0.957983
+events_per_delivery.2021.mid = 0.687500
+events_per_delivery.2021.large = 1.000000
+events_per_delivery.2021.sums = events_total=114 deliveries_total=119 events_mid=11 deliveries_mid=16
+events_per_delivery_mean_of_quarters.2021.total = 0.978347
+events_per_delivery_mean_of_quarters.2021.mid = 0.645833
+events_per_delivery.2022.n_quarters = 4
+events_per_delivery.2022.total = 1.133333
+events_per_delivery.2022.mid = 1.041667
+events_per_delivery.2022.large = 1.156250
+events_per_delivery.2022.sums = events_total=136 deliveries_total=120 events_mid=25 deliveries_mid=24
+events_per_delivery_mean_of_quarters.2022.total = 1.152266
+events_per_delivery_mean_of_quarters.2022.mid = 1.060714
+events_per_delivery.2023.n_quarters = 4
+events_per_delivery.2023.total = 1.054054
+events_per_delivery.2023.mid = 0.909091
+events_per_delivery.2023.large = 1.089888
+events_per_delivery.2023.sums = events_total=117 deliveries_total=111 events_mid=20 deliveries_mid=22
+events_per_delivery_mean_of_quarters.2023.total = 1.059231
+events_per_delivery_mean_of_quarters.2023.mid = 0.913690
+events_per_delivery.2024.n_quarters = 4
+events_per_delivery.2024.total = 1.088235
+events_per_delivery.2024.mid = 1.222222
+events_per_delivery.2024.large = 1.067797
+events_per_delivery.2024.sums = events_total=148 deliveries_total=136 events_mid=22 deliveries_mid=18
+events_per_delivery_mean_of_quarters.2024.total = 1.092705
+events_per_delivery_mean_of_quarters.2024.mid = 1.316667
+events_per_delivery.2025.n_quarters = 4
+events_per_delivery.2025.total = 1.215190
+events_per_delivery.2025.mid = 1.136364
+events_per_delivery.2025.large = 1.227941
+events_per_delivery.2025.sums = events_total=192 deliveries_total=158 events_mid=25 deliveries_mid=22
+events_per_delivery_mean_of_quarters.2025.total = 1.206309
+events_per_delivery_mean_of_quarters.2025.mid = 1.208333
+events_per_delivery.2026.n_quarters = 2
+events_per_delivery.2026.total = 1.417722
+events_per_delivery.2026.mid = 1.153846
+events_per_delivery.2026.large = 1.469697
+events_per_delivery.2026.sums = events_total=112 deliveries_total=79 events_mid=15 deliveries_mid=13
+events_per_delivery_mean_of_quarters.2026.total = 1.418806
+events_per_delivery_mean_of_quarters.2026.mid = 1.142857
+
+## 10. Five holdout quarters with the largest absolute error of ratio
+top_miss.1 = 2022Q1 estimate=40.727273 reported=25.000000 signed_error=15.727273 abs_error=15.727273
+top_miss.2 = 2020Q2 estimate=18.508187 reported=32.000000 signed_error=-13.491813 abs_error=13.491813
+top_miss.3 = 2025Q4 estimate=58.399216 reported=45.000000 signed_error=13.399216 abs_error=13.399216
+top_miss.4 = 2021Q2 estimate=31.719828 reported=21.000000 signed_error=10.719828 abs_error=10.719828
+top_miss.5 = 2021Q1 estimate=38.112299 reported=28.000000 signed_error=10.112299 abs_error=10.112299
+top_miss.6_for_reference = 2020Q3 abs_error=9.358898
+
+## 11. 2026Q3 score
+score.quarter = 2026Q3
+score.prediction_sha256 = 3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23
+score.prediction_bytes = 532
+score.prediction_has_crlf = false
+score.prediction_ends_with_newline = true
+score.snapshot = 2026-10-29
+score.definition = E1
+score.made_utc = 2026-10-29T05:51:22Z
+score.reported.large = 35
+score.reported.mid = 5
+score.reported.total = 40
+score.locked.large = 26.203209
+score.locked.mid = 5.750000
+score.locked.total = 31.953209
+score.locked.large_plus_mid_minus_total = 0.000000
+score.signed_error_total = -8.046791
+score.ae_total = 8.046791
+score.ape_pct = 20.116979
+score.ae_large = 8.796791
+score.ae_mid = 0.750000
+score.band_low = 21.233381
+score.band_high = 37.241087
+score.inside_band = false
+score.reported_minus_band_high = 2.758913
+score.lock_arithmetic.large_from_its_events_and_trailing = 26.203209
+score.lock_arithmetic.mid_from_its_events_and_trailing = 5.750000
+score.lock_arithmetic.total_from_its_events_and_trailing = 31.953209
+score.trailing_reported_large_from_gd_file = 140.000000
+score.trailing_reported_mid_from_gd_file = 23.000000
+score.trailing_registry_large_from_processed_file_backtest_snapshot = 187.000000
+score.trailing_registry_mid_from_processed_file_backtest_snapshot = 28.000000
+score.seasonal_total = 39.000000
+score.seasonal_ae = 1.000000
+score.last_total = 41.000000
+score.last_ae = 1.000000
+score.raw_events_total_in_lock = 42
+score.raw_ae = 2
+score.guidance_pace.large = 29.065031
+score.guidance_pace.mid = 4.774969
+score.guidance_pace.total = 33.840000
+score.guidance_ae = 6.160000
+score.band_rebuilt_from_processed_errors.exact_ceiling = n=38 p10_position=4 p90_position=35 p10=-5.287879 p90=10.719828 low=21.233381 high=37.241087
+score.band_rebuilt_from_processed_errors.float_ceiling = n=38 p10_position=4 p90_position=35 p10=-5.287879 p90=10.719828 low=21.233381 high=37.241087
+
+## 12. GD averages
+gd.mean_quarterly_deliveries_2020Q1_2026Q2 = 32.692308
+gd.sum_deliveries_2020Q1_2026Q2 = 850.000000
+gd.mean_quarterly_large_2020Q1_2026Q2 = 27.423077
+gd.mean_quarterly_mid_2020Q1_2026Q2 = 5.269231
+gd.2025Q3.large = 33.000000
+gd.2025Q3.mid = 6.000000
+gd.2025Q3.total = 39.000000
+gd.year_total.2016 = 121 (4 quarters)
+gd.year_total.2017 = 120 (4 quarters)
+gd.year_total.2018 = 121 (4 quarters)
+gd.year_total.2019 = 147 (4 quarters)
+gd.year_total.2020 = 127 (4 quarters)
+gd.year_total.2021 = 119 (4 quarters)
+gd.year_total.2022 = 120 (4 quarters)
+gd.year_total.2023 = 111 (4 quarters)
+gd.year_total.2024 = 136 (4 quarters)
+gd.year_total.2025 = 158 (4 quarters)
+gd.year_total.2026 = 79 (2 quarters)
+
+## 13. Backtest snapshot 2026-10-19: airframe table and counts
+b13.parse.acftref_in_scope_codes = 54
+b13.parse.acftref_out_of_scope_codes_in_subset = none
+b13.parse.acftref_rows = 54
+b13.parse.dereg_blank_serial = 0
+b13.parse.dereg_has_yearmfr = True
+b13.parse.dereg_out_of_scope_rows = 0
+b13.parse.dereg_rows = 1296
+b13.parse.field_count_mismatch_lines = 0
+b13.parse.master_blank_serial = 0
+b13.parse.master_has_yearmfr = True
+b13.parse.master_out_of_scope_rows = 0
+b13.parse.master_rows = 2821
+b13.parse.unparseable_nonblank_dates = none
+b13.airframes = 4053
+b13.airframes.large = 3443
+b13.airframes.mid = 610
+b13.airframes.with_e1 = 1702
+b13.airframes.with_e2 = 1728
+b13.airframes.with_e1.large = 1438
+b13.airframes.with_e1.mid = 264
+b13.airframes.with_e1_in_2016Q1_2026Q2 = 1251
+b13.airframes.with_e2_in_2016Q1_2026Q2 = 1260
+b13.airframes.e1_differs_from_e2 = 26
+b13.airframes.held_by_gulfstream = 270
+b13.airframes.held_by_gulfstream_with_neither_event = 270
+b13.airframes.with_bound = 3667
+b13.airframes.bound_from_year_mfr_only = 4
+b13.airframes.no_bound = 386
+b13.airframes.customer_cert_dropped_by_bound = 1879
+b13.airframes.more_than_one_code = 63
+b13.cells_compared = 168
+b13.cells_that_differ = 0
+b13.count.2016Q1 = e1_large=10 e1_mid=2 e2_large=10 e2_mid=2
+b13.count.2016Q2 = e1_large=13 e1_mid=3 e2_large=13 e2_mid=3
+b13.count.2016Q3 = e1_large=13 e1_mid=2 e2_large=13 e2_mid=2
+b13.count.2016Q4 = e1_large=17 e1_mid=3 e2_large=17 e2_mid=3
+b13.count.2017Q1 = e1_large=17 e1_mid=2 e2_large=17 e2_mid=2
+b13.count.2017Q2 = e1_large=17 e1_mid=3 e2_large=17 e2_mid=3
+b13.count.2017Q3 = e1_large=18 e1_mid=6 e2_large=18 e2_mid=6
+b13.count.2017Q4 = e1_large=12 e1_mid=3 e2_large=12 e2_mid=3
+b13.count.2018Q1 = e1_large=11 e1_mid=3 e2_large=11 e2_mid=3
+b13.count.2018Q2 = e1_large=17 e1_mid=5 e2_large=17 e2_mid=5
+b13.count.2018Q3 = e1_large=15 e1_mid=4 e2_large=15 e2_mid=4
+b13.count.2018Q4 = e1_large=20 e1_mid=5 e2_large=20 e2_mid=5
+b13.count.2019Q1 = e1_large=23 e1_mid=4 e2_large=23 e2_mid=4
+b13.count.2019Q2 = e1_large=24 e1_mid=4 e2_large=24 e2_mid=4
+b13.count.2019Q3 = e1_large=20 e1_mid=7 e2_large=20 e2_mid=7
+b13.count.2019Q4 = e1_large=29 e1_mid=6 e2_large=30 e2_mid=6
+b13.count.2020Q1 = e1_large=17 e1_mid=2 e2_large=18 e2_mid=2
+b13.count.2020Q2 = e1_large=13 e1_mid=2 e2_large=13 e2_mid=2
+b13.count.2020Q3 = e1_large=24 e1_mid=5 e2_large=24 e2_mid=5
+b13.count.2020Q4 = e1_large=23 e1_mid=8 e2_large=23 e2_mid=8
+b13.count.2021Q1 = e1_large=27 e1_mid=1 e2_large=27 e2_mid=1
+b13.count.2021Q2 = e1_large=24 e1_mid=1 e2_large=24 e2_mid=1
+b13.count.2021Q3 = e1_large=20 e1_mid=4 e2_large=20 e2_mid=4
+b13.count.2021Q4 = e1_large=32 e1_mid=5 e2_large=33 e2_mid=5
+b13.count.2022Q1 = e1_large=32 e1_mid=6 e2_large=32 e2_mid=6
+b13.count.2022Q2 = e1_large=20 e1_mid=3 e2_large=20 e2_mid=3
+b13.count.2022Q3 = e1_large=23 e1_mid=8 e2_large=23 e2_mid=8
+b13.count.2022Q4 = e1_large=36 e1_mid=8 e2_large=36 e2_mid=8
+b13.count.2023Q1 = e1_large=17 e1_mid=3 e2_large=17 e2_mid=3
+b13.count.2023Q2 = e1_large=19 e1_mid=8 e2_large=19 e2_mid=8
+b13.count.2023Q3 = e1_large=27 e1_mid=5 e2_large=27 e2_mid=5
+b13.count.2023Q4 = e1_large=34 e1_mid=4 e2_large=34 e2_mid=4
+b13.count.2024Q1 = e1_large=19 e1_mid=5 e2_large=19 e2_mid=5
+b13.count.2024Q2 = e1_large=34 e1_mid=3 e2_large=34 e2_mid=3
+b13.count.2024Q3 = e1_large=30 e1_mid=6 e2_large=30 e2_mid=6
+b13.count.2024Q4 = e1_large=43 e1_mid=8 e2_large=43 e2_mid=8
+b13.count.2025Q1 = e1_large=37 e1_mid=7 e2_large=37 e2_mid=7
+b13.count.2025Q2 = e1_large=40 e1_mid=5 e2_large=42 e2_mid=5
+b13.count.2025Q3 = e1_large=33 e1_mid=5 e2_large=35 e2_mid=5
+b13.count.2025Q4 = e1_large=57 e1_mid=8 e2_large=58 e2_mid=8
+b13.count.2026Q1 = e1_large=46 e1_mid=9 e2_large=47 e2_mid=9
+b13.count.2026Q2 = e1_large=51 e1_mid=6 e2_large=51 e2_mid=6
+b13.sum_2016Q1_2026Q2.E1 = large=1054 mid=197
+b13.sum_2016Q1_2026Q2.E2 = large=1063 mid=197
+b13.e1_in_window_by_source = {'customer_cert': 972, 'export_cancel': 279}
+b13.e1_in_window_with_no_airworthiness_date = 75
+b13.e1_in_window_with_no_bound_at_all = 75
+
+## 14. Lock snapshot 2026-10-29: rebuild of the 2026Q3 prediction
+b14.parse.acftref_in_scope_codes = 55
+b14.parse.acftref_out_of_scope_codes_in_subset = none
+b14.parse.acftref_rows = 55
+b14.parse.dereg_blank_serial = 0
+b14.parse.dereg_has_yearmfr = True
+b14.parse.dereg_out_of_scope_rows = 0
+b14.parse.dereg_rows = 1298
+b14.parse.field_count_mismatch_lines = 0
+b14.parse.master_blank_serial = 0
+b14.parse.master_has_yearmfr = True
+b14.parse.master_out_of_scope_rows = 0
+b14.parse.master_rows = 2822
+b14.parse.unparseable_nonblank_dates = none
+b14.airframes = 4056
+b14.airframes.with_e1 = 1707
+b14.new_in_scope_codes_vs_backtest = 398012B(GULFSTREAM|G280)
+b14.window_start = mine=2026-07-05 theirs=2026-07-05 match
+b14.window_end = mine=2026-10-04 theirs=2026-10-04 match
+b14.window_start_equals_2026Q2_fiscal_end = true
+b14.events.large = mine=35 theirs=35 match
+b14.events.mid = mine=7 theirs=7 match
+b14.trailing.registry.large = mine=187 theirs=187 match
+b14.trailing.registry.mid = mine=28 theirs=28 match
+b14.trailing.reported.large = mine=140 theirs=140 match
+b14.trailing.reported.mid = mine=23 theirs=23 match
+b14.nowcast.large = mine=26.203209 theirs=26.203209 match (abs difference 0.000e+00)
+b14.nowcast.mid = mine=5.750000 theirs=5.750000 match (abs difference 0.000e+00)
+b14.nowcast.total = mine=31.953209 theirs=31.953209 match (abs difference 0.000e+00)
+b14.events.E2_for_reference = large=35 mid=7
+b14.events_from_backtest_snapshot_2026-10-19_for_reference = large=35 mid=6
+b14.band.lock_snapshot_counts = n=38 p10_position=4 p90_position=35 p10=-5.287879 p90=10.719828 low=21.233381 high=37.241087
+b14.band.lock_snapshot_counts.low = mine=21.233381 theirs=21.233381 match (abs difference 0.000e+00)
+b14.band.lock_snapshot_counts.high = mine=37.241087 theirs=37.241087 match (abs difference 0.000e+00)
+b14.band.backtest_snapshot_counts_my_rebuild = n=38 p10_position=4 p90_position=35 p10=-5.287879 p90=10.719828 low=21.233381 high=37.241087
+b14.band.backtest_snapshot_counts_my_rebuild.low = mine=21.233381 theirs=21.233381 match (abs difference 0.000e+00)
+b14.band.backtest_snapshot_counts_my_rebuild.high = mine=37.241087 theirs=37.241087 match (abs difference 0.000e+00)
+b14.band.processed_file_counts = n=38 p10_position=4 p90_position=35 p10=-5.287879 p90=10.719828 low=21.233381 high=37.241087
+b14.band.processed_file_counts.low = mine=21.233381 theirs=21.233381 match (abs difference 0.000e+00)
+b14.band.processed_file_counts.high = mine=37.241087 theirs=37.241087 match (abs difference 0.000e+00)
+b14.count_changed_between_snapshots.2019Q3.E1.large = 2026-10-19=20 2026-10-29=19
+b14.count_changed_between_snapshots.2019Q3.E2.large = 2026-10-19=20 2026-10-29=19
+b14.count_changed_between_snapshots.2019Q4.E1.large = 2026-10-19=29 2026-10-29=28
+b14.count_changed_between_snapshots.2019Q4.E2.large = 2026-10-19=30 2026-10-29=29
+b14.count_changed_between_snapshots.2024Q4.E1.mid = 2026-10-19=8 2026-10-29=7
+b14.count_changed_between_snapshots.2024Q4.E2.mid = 2026-10-19=8 2026-10-29=7
+b14.past_quarter_cells_changed_between_snapshots = 6
+b14.events.first_date = 2026-07-07
+b14.events.last_date = 2026-09-29
+b14.events.by_model.G-1159A = 1 (large)
+b14.events.by_model.G-IV = 1 (large)
+b14.events.by_model.GULFSTREAM_G150 = 1 (mid)
+b14.events.by_model.GULFSTREAM_G280 = 6 (mid)
+b14.events.by_model.GV-SP_(G550) = 1 (large)
+b14.events.by_model.GVI_(G650ER) = 1 (large)
+b14.events.by_model.GVII-G500 = 7 (large)
+b14.events.by_model.GVII-G600 = 7 (large)
+b14.events.by_model.GVIII-G700 = 13 (large)
+b14.events.by_model.GVIII-G800 = 4 (large)
+b14.events.by_source = {'customer_cert': 27, 'export_cancel': 15}
+b14.pipeline_held_by_gulfstream_with_neither_event = 264
+b14.pipeline.550 = 1
+b14.pipeline.G-IV = 2
+b14.pipeline.G-V = 2
+b14.pipeline.GIV-X_(G450) = 6
+b14.pipeline.GULFSTREAM_G280 = 7
+b14.pipeline.GV-SP_(G550) = 4
+b14.pipeline.GVI = 1
+b14.pipeline.GVII-G400 = 5
+b14.pipeline.GVII-G500 = 56
+b14.pipeline.GVII-G600 = 51
+b14.pipeline.GVIII-G700 = 54
+b14.pipeline.GVIII-G800 = 75
+
+## 15. Models in the backtest airframe table
+b15.model.05637SM = mfr=GULFSTREAM AEROSPACE CORP | model=GVII-G600 | cabin_by_rule=large | airframes=23 | e1_in_2016Q1_2026Q2=19 | e2_in_2016Q1_2026Q2=19 | -
+b15.model.3970108 = mfr=GULFSTREAM AMERICAN CORP. | model=G-1159 | cabin_by_rule=large | airframes=49 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3970109 = mfr=GULFSTREAM AMERICAN CORP. | model=G-1159A | cabin_by_rule=large | airframes=86 | e1_in_2016Q1_2026Q2=5 | e2_in_2016Q1_2026Q2=5 | -
+b15.model.3970250 = mfr=GULFSTREAM AEROSPACE | model=550 | cabin_by_rule=large | airframes=1 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980050 = mfr=GULFSTREAM AEROSPACE CORP | model=GVI (G650ER) | cabin_by_rule=large | airframes=440 | e1_in_2016Q1_2026Q2=293 | e2_in_2016Q1_2026Q2=297 | -
+b15.model.3980100 = mfr=GULFSTREAM AEROSPACE | model=G-1159A | cabin_by_rule=large | airframes=107 | e1_in_2016Q1_2026Q2=8 | e2_in_2016Q1_2026Q2=8 | -
+b15.model.3980101 = mfr=GULFSTREAM AEROSPACE | model=GV-SP | cabin_by_rule=large | airframes=11 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980110 = mfr=GULFSTREAM AEROSPACE | model=G1159B | cabin_by_rule=large | airframes=36 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980115 = mfr=GULFSTREAM AEROSPACE | model=G-IV | cabin_by_rule=large | airframes=519 | e1_in_2016Q1_2026Q2=31 | e2_in_2016Q1_2026Q2=31 | -
+b15.model.3980116 = mfr=GULFSTREAM AEROSPACE | model=G-V | cabin_by_rule=large | airframes=203 | e1_in_2016Q1_2026Q2=17 | e2_in_2016Q1_2026Q2=17 | -
+b15.model.3980119 = mfr=GULFSTREAM AEROSPACE | model=GIV-X | cabin_by_rule=large | airframes=10 | e1_in_2016Q1_2026Q2=2 | e2_in_2016Q1_2026Q2=2 | -
+b15.model.3980120 = mfr=GULFSTREAM AEROSPACE CORP | model=G-1159 | cabin_by_rule=large | airframes=6 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980121 = mfr=GULFSTREAM AEROSPACE CORP | model=GVI | cabin_by_rule=large | airframes=40 | e1_in_2016Q1_2026Q2=4 | e2_in_2016Q1_2026Q2=4 | -
+b15.model.3980125 = mfr=GULFSTREAM AEROSPACE CORP | model=GVII-G400 | cabin_by_rule=large | airframes=5 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.398012A = mfr=GULFSTREAM | model=GII | cabin_by_rule=large | airframes=1 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980200 = mfr=GULFSTREAM AEROSPACE | model=G-III | cabin_by_rule=large | airframes=5 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980202 = mfr=GULFSTREAM AEROSPACE | model=GULFSTREAM 200 | cabin_by_rule=large | airframes=3 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | LARGE_BY_RULE_BUT_MID_TYPE_BY_NAME
+b15.model.3980203 = mfr=GULFSTREAM AEROSPACE | model=GV-SP (G550) | cabin_by_rule=large | airframes=560 | e1_in_2016Q1_2026Q2=99 | e2_in_2016Q1_2026Q2=100 | -
+b15.model.3980204 = mfr=GULFSTREAM AEROSPACE | model=G-IV (G400) | cabin_by_rule=large | airframes=12 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980205 = mfr=GULFSTREAM AEROSPACE | model=GIV-X (G450) | cabin_by_rule=large | airframes=349 | e1_in_2016Q1_2026Q2=41 | e2_in_2016Q1_2026Q2=41 | -
+b15.model.3980206 = mfr=GULFSTREAM AEROSPACE | model=G-IV (G350) | cabin_by_rule=large | airframes=4 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980207 = mfr=GULFSTREAM AEROSPACE | model=G-IV (G300) | cabin_by_rule=large | airframes=2 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980208 = mfr=GULFSTREAM AEROSPACE | model=GV-SP (G500) | cabin_by_rule=large | airframes=8 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980209 = mfr=GULFSTREAM AEROSPACE LP | model=G150 | cabin_by_rule=mid | airframes=2 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980210 = mfr=GULFSTREAM AEROSPACECORP | model=G-IIB | cabin_by_rule=large | airframes=1 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980211 = mfr=GULFSTREAM AEROSPACE LP | model=GULFSTREAM 200 | cabin_by_rule=large | airframes=5 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | LARGE_BY_RULE_BUT_MID_TYPE_BY_NAME
+b15.model.3980214 = mfr=GULFSTREAM AEROSPACE CORP | model=GVI (G650) | cabin_by_rule=large | airframes=118 | e1_in_2016Q1_2026Q2=57 | e2_in_2016Q1_2026Q2=57 | -
+b15.model.3980218 = mfr=IAI LTD | model=GULFSTREAM G280 | cabin_by_rule=mid | airframes=73 | e1_in_2016Q1_2026Q2=31 | e2_in_2016Q1_2026Q2=31 | -
+b15.model.3980219 = mfr=GULFSTREAM AEROSPACE CORP | model=GVII-G600 | cabin_by_rule=large | airframes=244 | e1_in_2016Q1_2026Q2=165 | e2_in_2016Q1_2026Q2=165 | -
+b15.model.3980220 = mfr=GULFSTREAM AEROSPACE | model=GIV-X (G350) | cabin_by_rule=large | airframes=7 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980221 = mfr=GULFSTREAM AEROSPACE CORP | model=GVIII-G700 | cabin_by_rule=large | airframes=177 | e1_in_2016Q1_2026Q2=100 | e2_in_2016Q1_2026Q2=102 | -
+b15.model.3980225 = mfr=GULFSTREAM AEROSPACE CORP | model=GVII-G500 | cabin_by_rule=large | airframes=167 | e1_in_2016Q1_2026Q2=94 | e2_in_2016Q1_2026Q2=94 | -
+b15.model.3980226 = mfr=GULFSTREAM AEROSPACE CORP | model=GVII-G500 | cabin_by_rule=large | airframes=86 | e1_in_2016Q1_2026Q2=59 | e2_in_2016Q1_2026Q2=59 | -
+b15.model.3980295 = mfr=GULFSTREAM AEROSPACE CORP | model=GV-SP (G550) | cabin_by_rule=large | airframes=43 | e1_in_2016Q1_2026Q2=24 | e2_in_2016Q1_2026Q2=26 | -
+b15.model.3980321 = mfr=GULFSTREAM AEROSPACE CORP | model=GVIII-G800 | cabin_by_rule=large | airframes=111 | e1_in_2016Q1_2026Q2=29 | e2_in_2016Q1_2026Q2=29 | -
+b15.model.3980398 = mfr=GULFSTREAM AEROSPACE | model=C-20A | cabin_by_rule=large | airframes=1 | e1_in_2016Q1_2026Q2=1 | e2_in_2016Q1_2026Q2=1 | -
+b15.model.3980401 = mfr=GULFSTREAM AEROSPACE LP | model=GALAXY | cabin_by_rule=large | airframes=1 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | LARGE_BY_RULE_BUT_MID_TYPE_BY_NAME
+b15.model.3980402 = mfr=GULFSTREAM AEROSPACE LP | model=G100 | cabin_by_rule=mid | airframes=3 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.3980404 = mfr=GULFSTREAM AEROSPACE LP | model=GULFSTREAM 100 | cabin_by_rule=large | airframes=2 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | LARGE_BY_RULE_BUT_MID_TYPE_BY_NAME
+b15.model.4500106 = mfr=ISRAEL AEROSPACE INDUSTRIESLTD | model=GULFSTREAM G150 | cabin_by_rule=mid | airframes=43 | e1_in_2016Q1_2026Q2=3 | e2_in_2016Q1_2026Q2=3 | -
+b15.model.4500107 = mfr=ISRAEL AEROSPACE IND LTD | model=GULFSTREAM 200 | cabin_by_rule=mid | airframes=29 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.4500304 = mfr=ISRAEL AIRCRAFT INDUSTRIES | model=GULFSTREAM G150 | cabin_by_rule=mid | airframes=14 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.4500308 = mfr=ISRAEL AIRCRAFT INDUSTRIES | model=GULFSTREAM 200 | cabin_by_rule=mid | airframes=140 | e1_in_2016Q1_2026Q2=7 | e2_in_2016Q1_2026Q2=7 | -
+b15.model.4500314 = mfr=IAI LTD | model=GULFSTREAM G280 | cabin_by_rule=mid | airframes=265 | e1_in_2016Q1_2026Q2=142 | e2_in_2016Q1_2026Q2=142 | -
+b15.model.4500400 = mfr=IAI LTD | model=GULFSTREAM 200 | cabin_by_rule=mid | airframes=1 | e1_in_2016Q1_2026Q2=0 | e2_in_2016Q1_2026Q2=0 | -
+b15.model.4500401 = mfr=IAI LTD | model=GULFSTREAM G150 | cabin_by_rule=mid | airframes=40 | e1_in_2016Q1_2026Q2=13 | e2_in_2016Q1_2026Q2=13 | -
+b15.flagged_models = 4
+b15.flagged_airframes = 11
+b15.flagged_airframes_with_e1_in_2016Q1_2026Q2 = 0
+b15.flagged_airframes_with_e2_in_2016Q1_2026Q2 = 0
+b15.in_scope_codes_that_are_no_airframes_first_code = 3980117,3980118,3980212,3980213,3980304,3980403,4500309,4500312
+
+## 15x. Diagnostics outside the list (backtest snapshot)
+b15x.serial_under_two_prefixes.140 = 450 GULFSTREAM 200 cabin=mid e1=None e2=None ; 398 G1159B cabin=large e1=None e2=None ; 397 G-1159 cabin=large e1=None e2=None
+b15x.serial_under_two_prefixes.2009 = 450 GULFSTREAM G280 cabin=mid e1=2026-05-26 e2=2026-05-26 ; 398 GULFSTREAM G280 cabin=mid e1=2012-08-01 e2=2012-08-01
+b15x.serial_under_two_prefixes.207 = 450 GULFSTREAM 200 cabin=mid e1=None e2=None ; 398 GULFSTREAM 200 cabin=large e1=None e2=None
+b15x.serial_under_two_prefixes.322 = 398 G150 cabin=mid e1=2018-05-22 e2=2018-05-22 ; 397 G-1159A cabin=large e1=None e2=None ; 450 GULFSTREAM G150 cabin=mid e1=2016-06-28 e2=2016-06-28
+b15x.serials_under_two_prefixes_with_same_type_digits = 4
+b15x.of_which_both_airframes_have_e1_in_2016Q1_2026Q2 = 1
+b15x.serials_under_more_than_one_prefix_any_type = 105
+b15x.serials_with_e1_in_window_under_two_prefixes_any_type = 1
+b15x.two_events_same_serial.322 = 398 G150 e1=2018-05-22 ; 450 GULFSTREAM G150 e1=2016-06-28
+b15x.owner_names_containing_GULFSTREAM_not_starting_GULFSTREAM_AEROSPACE = 17
+b15x.owner_name.GULFSTREAM_LEASING_LLC = 11
+b15x.owner_name.GULFSTREAM_AREOSPACE_CORP = 3
+b15x.owner_name.HARDESTY-GULFSTREAM_LLC = 1
+b15x.owner_name.GULFSTREAM_IV-SP_MSN_1206_N26DJ_LLC = 1
+b15x.owner_name.GULFSTREAM_GIV-1411_LLC = 1
+b15x.owner_name.GULFSTREAM_500_N313WA_LLC = 1
+b15x.owner_name.GULFSTREAM_FLIGHT_HOLDINGS_LLC = 1
+b15x.owner_name.GULFSTREAM_V_563_LLC = 1
+b15x.owner_name.SDL_GULFSTREAM_LLC = 1
+b15x.owner_name.GULFSTREAM_GV-530_LLC = 1
+b15x.owner_name.GY_GULFSTREAM_LLC = 1
+b15x.owner_name.GULFSTREAM_GIVSP_1495_LLC = 1
+b15x.gulfstream_held_name.GULFSTREAM_AEROSPACE_CORP = 739
+b15x.gulfstream_held_name.GULFSTREAM_AEROSPACE_CORPORATION = 35
+b15x.gulfstream_held_name.GULFSTREAM_AEROSPACE_LLC = 23
+b15x.gulfstream_held_name.GULFSTREAM_AEROSPACE_LP = 1
+b15x.gulfstream_held_name.GULFSTREAM_AEROSPACE_COCRP = 1
+b15x.e1_in_window_airframes_with_a_blank_name_record = 112
+b15x.e1_by_event_calendar_year.2016 = events=63 from_customer_cert=44 from_export_cancel=19
+b15x.e1_by_event_calendar_year.2017 = events=78 from_customer_cert=53 from_export_cancel=25
+b15x.e1_by_event_calendar_year.2018 = events=80 from_customer_cert=57 from_export_cancel=23
+b15x.e1_by_event_calendar_year.2019 = events=117 from_customer_cert=92 from_export_cancel=25
+b15x.e1_by_event_calendar_year.2020 = events=94 from_customer_cert=80 from_export_cancel=14
+b15x.e1_by_event_calendar_year.2021 = events=114 from_customer_cert=91 from_export_cancel=23
+b15x.e1_by_event_calendar_year.2022 = events=136 from_customer_cert=110 from_export_cancel=26
+b15x.e1_by_event_calendar_year.2023 = events=117 from_customer_cert=95 from_export_cancel=22
+b15x.e1_by_event_calendar_year.2024 = events=148 from_customer_cert=116 from_export_cancel=32
+b15x.e1_by_event_calendar_year.2025 = events=192 from_customer_cert=152 from_export_cancel=40
+b15x.e1_by_event_calendar_year.2026 = events=112 from_customer_cert=82 from_export_cancel=30
+
+## 22. Extra to item 15: records under codes whose model name is a mid-cabin type but whose maker is not IAI/ISRAEL
+b22.code.3980202 = mfr=GULFSTREAM AEROSPACE | model=GULFSTREAM 200 | cabin_by_rule=large | airframes_with_this_first_code=3
+b22.code.3980211 = mfr=GULFSTREAM AEROSPACE LP | model=GULFSTREAM 200 | cabin_by_rule=large | airframes_with_this_first_code=5
+b22.code.3980213 = mfr=GULFSTREAM AEROSPACE LP | model=200 | cabin_by_rule=large | airframes_with_this_first_code=0
+b22.code.3980304 = mfr=GULFSTREAM AEROSPACE | model=GALAXY GSTREAM 200 | cabin_by_rule=large | airframes_with_this_first_code=0
+b22.code.3980401 = mfr=GULFSTREAM AEROSPACE LP | model=GALAXY | cabin_by_rule=large | airframes_with_this_first_code=1
+b22.code.3980403 = mfr=GULFSTREAM AEROSPACE | model=ASTRA SPX | cabin_by_rule=large | airframes_with_this_first_code=0
+b22.code.3980404 = mfr=GULFSTREAM AEROSPACE LP | model=GULFSTREAM 100 | cabin_by_rule=large | airframes_with_this_first_code=2
+b22.records_in_MASTER = 3980202=2 3980211=3 3980213=0 3980304=0 3980401=0 3980403=0 3980404=1
+b22.records_in_DEREG = 3980202=1 3980211=2 3980213=0 3980304=0 3980401=1 3980403=0 3980404=1
+
+## 16. Extra, not in the list: truncation table from my backtest airframe table (E1)
+b16.truncation_mae.0 = 5.523395
+b16.truncation_events_kept_holdout.0 = 913
+b16.truncation_mae.30 = 13.468241
+b16.truncation_events_kept_holdout.30 = 502
+b16.truncation_mae.60 = 22.928680
+b16.truncation_events_kept_holdout.60 = 257
+b16.truncation_mae.90 = 31.671910
+b16.truncation_events_kept_holdout.90 = 29
+b16.holdout_mae_ratio_from_my_counts = 5.523395
+b16.design_mae_ratio_E1_from_my_counts = 5.472548
+b16.design_mae_ratio_E2_from_my_counts = 5.580786
+
+## 17. Extra, not in the list: E1 events of airframes with no bound (no airworthiness date and no year), backtest snapshot
+b17.e1_events_2016Q1_2026Q2 = 1251
+b17.e1_events_no_bound = 75
+b17.e1_events_no_bound.by_source = {'customer_cert': 49, 'export_cancel': 26}
+b17.e1_events_no_bound.by_cabin = {'mid': 27, 'large': 48}
+b17.e1_events_no_bound.model.GULFSTREAM_G280 = 27
+b17.e1_events_no_bound.model.G-IV = 13
+b17.e1_events_no_bound.model.G-1159A = 8
+b17.e1_events_no_bound.model.GVIII-G700 = 7
+b17.e1_events_no_bound.model.G-V = 5
+b17.e1_events_no_bound.model.GVII-G600 = 5
+b17.e1_events_no_bound.model.GVI_(G650ER) = 4
+b17.e1_events_no_bound.model.GVII-G500 = 2
+b17.e1_events_no_bound.model.C-20A = 1
+b17.e1_events_no_bound.model.G-1159 = 1
+b17.e1_events_no_bound.model.G1159B = 1
+b17.e1_events_no_bound.model.GVIII-G800 = 1
+b17.e1_events_no_bound.year.2016 = 2 (2016Q1=0 2016Q2=0 2016Q3=1 2016Q4=1)
+b17.e1_events_no_bound.year.2017 = 4 (2017Q1=0 2017Q2=3 2017Q3=0 2017Q4=1)
+b17.e1_events_no_bound.year.2018 = 3 (2018Q1=0 2018Q2=1 2018Q3=1 2018Q4=1)
+b17.e1_events_no_bound.year.2019 = 9 (2019Q1=2 2019Q2=1 2019Q3=5 2019Q4=1)
+b17.e1_events_no_bound.year.2020 = 7 (2020Q1=1 2020Q2=0 2020Q3=2 2020Q4=4)
+b17.e1_events_no_bound.year.2021 = 6 (2021Q1=0 2021Q2=1 2021Q3=2 2021Q4=3)
+b17.e1_events_no_bound.year.2022 = 6 (2022Q1=3 2022Q2=0 2022Q3=1 2022Q4=2)
+b17.e1_events_no_bound.year.2023 = 5 (2023Q1=1 2023Q2=1 2023Q3=1 2023Q4=2)
+b17.e1_events_no_bound.year.2024 = 8 (2024Q1=2 2024Q2=2 2024Q3=1 2024Q4=3)
+b17.e1_events_no_bound.year.2025 = 11 (2025Q1=4 2025Q2=2 2025Q3=0 2025Q4=5)
+b17.e1_events_no_bound.year.2026 = 14 (2026Q1=5 2026Q2=9)
+b17.model_events.05637SM = model=GVII-G600 | e1_events=19 | no_bound=1 | from_export_cancel=3 | first_event_year=2019 | last_event_year=2024
+b17.model_events.3970108 = model=G-1159 | e1_events=1 | no_bound=1 | from_export_cancel=0 | first_event_year=2020 | last_event_year=2020
+b17.model_events.3970109 = model=G-1159A | e1_events=5 | no_bound=3 | from_export_cancel=0 | first_event_year=2016 | last_event_year=2020
+b17.model_events.3980050 = model=GVI (G650ER) | e1_events=293 | no_bound=4 | from_export_cancel=103 | first_event_year=2016 | last_event_year=2026
+b17.model_events.3980100 = model=G-1159A | e1_events=8 | no_bound=5 | from_export_cancel=0 | first_event_year=2017 | last_event_year=2021
+b17.model_events.3980101 = model=GV-SP | e1_events=1 | no_bound=0 | from_export_cancel=0 | first_event_year=2022 | last_event_year=2022
+b17.model_events.3980110 = model=G1159B | e1_events=1 | no_bound=1 | from_export_cancel=0 | first_event_year=2025 | last_event_year=2025
+b17.model_events.3980115 = model=G-IV | e1_events=31 | no_bound=13 | from_export_cancel=0 | first_event_year=2017 | last_event_year=2026
+b17.model_events.3980116 = model=G-V | e1_events=17 | no_bound=5 | from_export_cancel=0 | first_event_year=2016 | last_event_year=2026
+b17.model_events.3980119 = model=GIV-X | e1_events=2 | no_bound=0 | from_export_cancel=0 | first_event_year=2022 | last_event_year=2025
+b17.model_events.3980120 = model=G-1159 | e1_events=1 | no_bound=0 | from_export_cancel=0 | first_event_year=2018 | last_event_year=2018
+b17.model_events.3980121 = model=GVI | e1_events=4 | no_bound=0 | from_export_cancel=0 | first_event_year=2017 | last_event_year=2026
+b17.model_events.3980203 = model=GV-SP (G550) | e1_events=99 | no_bound=0 | from_export_cancel=13 | first_event_year=2016 | last_event_year=2026
+b17.model_events.3980204 = model=G-IV (G400) | e1_events=1 | no_bound=0 | from_export_cancel=0 | first_event_year=2018 | last_event_year=2018
+b17.model_events.3980205 = model=GIV-X (G450) | e1_events=41 | no_bound=0 | from_export_cancel=3 | first_event_year=2016 | last_event_year=2025
+b17.model_events.3980209 = model=G150 | e1_events=1 | no_bound=0 | from_export_cancel=0 | first_event_year=2018 | last_event_year=2018
+b17.model_events.3980214 = model=GVI (G650) | e1_events=57 | no_bound=0 | from_export_cancel=27 | first_event_year=2016 | last_event_year=2026
+b17.model_events.3980218 = model=GULFSTREAM G280 | e1_events=31 | no_bound=2 | from_export_cancel=1 | first_event_year=2017 | last_event_year=2025
+b17.model_events.3980219 = model=GVII-G600 | e1_events=165 | no_bound=4 | from_export_cancel=31 | first_event_year=2020 | last_event_year=2026
+b17.model_events.3980220 = model=GIV-X (G350) | e1_events=1 | no_bound=0 | from_export_cancel=0 | first_event_year=2020 | last_event_year=2020
+b17.model_events.3980221 = model=GVIII-G700 | e1_events=100 | no_bound=7 | from_export_cancel=51 | first_event_year=2024 | last_event_year=2026
+b17.model_events.3980225 = model=GVII-G500 | e1_events=94 | no_bound=1 | from_export_cancel=16 | first_event_year=2018 | last_event_year=2026
+b17.model_events.3980226 = model=GVII-G500 | e1_events=59 | no_bound=1 | from_export_cancel=7 | first_event_year=2022 | last_event_year=2026
+b17.model_events.3980295 = model=GV-SP (G550) | e1_events=24 | no_bound=0 | from_export_cancel=6 | first_event_year=2019 | last_event_year=2024
+b17.model_events.3980321 = model=GVIII-G800 | e1_events=29 | no_bound=1 | from_export_cancel=4 | first_event_year=2025 | last_event_year=2026
+b17.model_events.3980398 = model=C-20A | e1_events=1 | no_bound=1 | from_export_cancel=0 | first_event_year=2018 | last_event_year=2018
+b17.model_events.4500106 = model=GULFSTREAM G150 | e1_events=3 | no_bound=0 | from_export_cancel=0 | first_event_year=2016 | last_event_year=2022
+b17.model_events.4500308 = model=GULFSTREAM 200 | e1_events=7 | no_bound=0 | from_export_cancel=0 | first_event_year=2018 | last_event_year=2025
+b17.model_events.4500314 = model=GULFSTREAM G280 | e1_events=142 | no_bound=25 | from_export_cancel=14 | first_event_year=2016 | last_event_year=2026
+b17.model_events.4500401 = model=GULFSTREAM G150 | e1_events=13 | no_bound=0 | from_export_cancel=0 | first_event_year=2016 | last_event_year=2025
+
+## 18. Extra, not in the list: every E1 event of 2026Q3 in the lock snapshot 2026-10-29
+b18.event.01 = e1=2026-07-07 | cabin=large | model=GV-SP (G550) | key=398-5260 | source=customer_cert | first_airworthiness=2026-07-23 | year_mfr=2009 | bound=2027-07-23 | records=1
+b18.event.02 = e1=2026-07-10 | cabin=large | model=GVII-G600 | key=398-73209 | source=export_cancel | first_airworthiness=2026-02-16 | year_mfr=2026 | bound=2027-02-16 | records=1
+b18.event.03 = e1=2026-07-13 | cabin=large | model=GVII-G500 | key=398-72190 | source=customer_cert | first_airworthiness=2026-03-10 | year_mfr=2026 | bound=2027-03-10 | records=1
+b18.event.04 = e1=2026-07-13 | cabin=mid | model=GULFSTREAM G280 | key=450-2325 | source=export_cancel | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.05 = e1=2026-07-14 | cabin=large | model=G-IV | key=398-1335 | source=customer_cert | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.06 = e1=2026-07-16 | cabin=large | model=GVIII-G800 | key=398-88033 | source=export_cancel | first_airworthiness=2026-03-07 | year_mfr=2026 | bound=2027-03-07 | records=1
+b18.event.07 = e1=2026-07-16 | cabin=mid | model=GULFSTREAM G280 | key=450-2322 | source=customer_cert | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.08 = e1=2026-07-27 | cabin=large | model=GVII-G500 | key=398-72193 | source=customer_cert | first_airworthiness=2026-04-19 | year_mfr=2026 | bound=2027-04-19 | records=1
+b18.event.09 = e1=2026-07-28 | cabin=large | model=G-1159A | key=398-445 | source=customer_cert | first_airworthiness=2026-07-15 | year_mfr=1984 | bound=2027-07-15 | records=1
+b18.event.10 = e1=2026-07-28 | cabin=large | model=GVI (G650ER) | key=398-6206 | source=customer_cert | first_airworthiness=2026-08-05 | year_mfr=2016 | bound=2027-08-05 | records=1
+b18.event.11 = e1=2026-07-31 | cabin=large | model=GVII-G600 | key=398-73212 | source=customer_cert | first_airworthiness=2026-03-25 | year_mfr=2026 | bound=2027-03-25 | records=1
+b18.event.12 = e1=2026-08-03 | cabin=large | model=GVII-G500 | key=398-72192 | source=export_cancel | first_airworthiness=2026-04-03 | year_mfr=2026 | bound=2027-04-03 | records=1
+b18.event.13 = e1=2026-08-03 | cabin=mid | model=GULFSTREAM G280 | key=450-2326 | source=export_cancel | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.14 = e1=2026-08-04 | cabin=large | model=GVIII-G700 | key=398-87118 | source=customer_cert | first_airworthiness=2026-03-06 | year_mfr=2006 | bound=2027-03-06 | records=1
+b18.event.15 = e1=2026-08-10 | cabin=large | model=GVIII-G700 | key=398-87114 | source=customer_cert | first_airworthiness=2026-06-11 | year_mfr=2026 | bound=2027-06-11 | records=1
+b18.event.16 = e1=2026-08-10 | cabin=large | model=GVIII-G700 | key=398-87120 | source=export_cancel | first_airworthiness=2026-03-20 | year_mfr=2026 | bound=2027-03-20 | records=1
+b18.event.17 = e1=2026-08-14 | cabin=large | model=GVIII-G700 | key=398-87039 | source=customer_cert | first_airworthiness=2026-03-21 | year_mfr=2024 | bound=2027-03-21 | records=1
+b18.event.18 = e1=2026-08-14 | cabin=large | model=GVIII-G700 | key=398-87121 | source=customer_cert | first_airworthiness=2026-03-26 | year_mfr=2026 | bound=2027-03-26 | records=1
+b18.event.19 = e1=2026-08-17 | cabin=large | model=GVIII-G700 | key=398-87115 | source=customer_cert | first_airworthiness=2026-02-28 | year_mfr=2026 | bound=2027-02-28 | records=1
+b18.event.20 = e1=2026-08-21 | cabin=large | model=GVII-G600 | key=398-73211 | source=export_cancel | first_airworthiness=2026-03-16 | year_mfr=2026 | bound=2027-03-16 | records=1
+b18.event.21 = e1=2026-08-24 | cabin=large | model=GVIII-G700 | key=398-87092 | source=customer_cert | first_airworthiness=2025-09-14 | year_mfr=2025 | bound=2026-09-14 | records=1
+b18.event.22 = e1=2026-08-25 | cabin=large | model=GVII-G600 | key=398-73214 | source=export_cancel | first_airworthiness=2026-04-14 | year_mfr=2026 | bound=2027-04-14 | records=1
+b18.event.23 = e1=2026-08-26 | cabin=mid | model=GULFSTREAM G150 | key=450-311 | source=customer_cert | first_airworthiness=2026-09-02 | year_mfr=2014 | bound=2027-09-02 | records=1
+b18.event.24 = e1=2026-08-28 | cabin=large | model=GVII-G500 | key=398-72136 | source=customer_cert | first_airworthiness=2026-01-09 | year_mfr=2024 | bound=2027-01-09 | records=1
+b18.event.25 = e1=2026-08-28 | cabin=large | model=GVIII-G700 | key=398-87125 | source=export_cancel | first_airworthiness=2026-04-25 | year_mfr=2026 | bound=2027-04-25 | records=1
+b18.event.26 = e1=2026-08-28 | cabin=large | model=GVIII-G800 | key=398-88037 | source=customer_cert | first_airworthiness=2026-04-29 | year_mfr=2026 | bound=2027-04-29 | records=1
+b18.event.27 = e1=2026-09-01 | cabin=large | model=GVIII-G800 | key=398-88038 | source=export_cancel | first_airworthiness=2026-05-07 | year_mfr=2026 | bound=2027-05-07 | records=1
+b18.event.28 = e1=2026-09-07 | cabin=large | model=GVIII-G700 | key=398-87126 | source=customer_cert | first_airworthiness=2026-06-03 | year_mfr=2026 | bound=2027-06-03 | records=1
+b18.event.29 = e1=2026-09-09 | cabin=large | model=GVIII-G800 | key=398-88036 | source=customer_cert | first_airworthiness=2026-04-07 | year_mfr=2026 | bound=2027-04-07 | records=1
+b18.event.30 = e1=2026-09-11 | cabin=mid | model=GULFSTREAM G280 | key=450-2324 | source=customer_cert | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.31 = e1=2026-09-15 | cabin=large | model=GVIII-G700 | key=398-87101 | source=export_cancel | first_airworthiness=2025-10-22 | year_mfr=2025 | bound=2026-10-22 | records=1
+b18.event.32 = e1=2026-09-18 | cabin=large | model=GVIII-G700 | key=398-87128 | source=customer_cert | first_airworthiness=2026-05-13 | year_mfr=2026 | bound=2027-05-13 | records=1
+b18.event.33 = e1=2026-09-18 | cabin=mid | model=GULFSTREAM G280 | key=450-2328 | source=customer_cert | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.34 = e1=2026-09-22 | cabin=large | model=GVII-G500 | key=398-72195 | source=customer_cert | first_airworthiness=2026-05-07 | year_mfr=2026 | bound=2027-05-07 | records=1
+b18.event.35 = e1=2026-09-22 | cabin=large | model=GVII-G600 | key=398-73213 | source=customer_cert | first_airworthiness=2026-04-03 | year_mfr=2026 | bound=2027-04-03 | records=1
+b18.event.36 = e1=2026-09-23 | cabin=large | model=GVII-G500 | key=398-72194 | source=customer_cert | first_airworthiness=2026-05-04 | year_mfr=2026 | bound=2027-05-04 | records=1
+b18.event.37 = e1=2026-09-24 | cabin=large | model=GVIII-G700 | key=398-87127 | source=export_cancel | first_airworthiness=2026-05-19 | year_mfr=2026 | bound=2027-05-19 | records=1
+b18.event.38 = e1=2026-09-25 | cabin=large | model=GVII-G600 | key=398-73215 | source=customer_cert | first_airworthiness=2026-04-21 | year_mfr=2026 | bound=2027-04-21 | records=1
+b18.event.39 = e1=2026-09-28 | cabin=mid | model=GULFSTREAM G280 | key=450-2329 | source=customer_cert | first_airworthiness=None | year_mfr=None | bound=None | records=1
+b18.event.40 = e1=2026-09-29 | cabin=large | model=GVII-G500 | key=398-72198 | source=export_cancel | first_airworthiness=2026-06-12 | year_mfr=2026 | bound=2027-06-12 | records=1
+b18.event.41 = e1=2026-09-29 | cabin=large | model=GVII-G600 | key=398-73217 | source=export_cancel | first_airworthiness=2026-05-12 | year_mfr=2026 | bound=2027-05-12 | records=1
+b18.event.42 = e1=2026-09-29 | cabin=large | model=GVIII-G700 | key=398-87123 | source=export_cancel | first_airworthiness=2026-04-16 | year_mfr=2026 | bound=2027-04-16 | records=1
+b18.events = 42
+b18.events_no_bound = 7
+b18.events_no_bound.large = 1
+b18.events_no_bound.mid = 6
+b18.events_with_bound.large = 34
+b18.events_with_bound.mid = 1
+
+## 19. Extra, not in the list: the same serial counted under two maker prefixes (backtest snapshot)
+b19.airframe.450-2009 = model=GULFSTREAM G280 | cabin=mid | records=1 | first_airworthiness=None | year_mfr=None | bound=None | customer_cert=2026-05-26 | export_cancel=None | e1=2026-05-26 | e1_quarter=2026Q2
+b19.airframe.398-2009 = model=GULFSTREAM G280 | cabin=mid | records=1 | first_airworthiness=None | year_mfr=None | bound=None | customer_cert=2012-08-01 | export_cancel=None | e1=2012-08-01 | e1_quarter=None
+b19.airframe.450-322 = model=GULFSTREAM G150 | cabin=mid | records=1 | first_airworthiness=2016-06-30 | year_mfr=2016 | bound=2017-06-30 | customer_cert=2016-06-28 | export_cancel=None | e1=2016-06-28 | e1_quarter=2016Q2
+b19.airframe.398-322 = model=G150 | cabin=mid | records=1 | first_airworthiness=2018-05-30 | year_mfr=2016 | bound=2019-05-30 | customer_cert=2018-05-22 | export_cancel=None | e1=2018-05-22 | e1_quarter=2018Q2
+
+## 20. Extra, not in the list: airframes whose E1 changed between the two snapshots
+b20.e1_changed.398-4166 = model=GIV-X (G450) | 2026-10-19: e1=2019-09-16 customer_cert=2019-09-16 | 2026-10-29: e1=None customer_cert=2026-10-27 bound=2020-08-15
+b20.e1_changed.398-6379 = model=GVI (G650ER) | 2026-10-19: e1=2019-12-23 customer_cert=None | 2026-10-29: e1=None customer_cert=2026-10-20 bound=2020-03-15
+b20.e1_changed.450-2053 = model=GULFSTREAM G280 | 2026-10-19: e1=2024-12-16 customer_cert=2024-12-16 | 2026-10-29: e1=None customer_cert=2026-10-24 bound=2025-12-17
+b20.e1_changed.450-311 = model=GULFSTREAM G150 | 2026-10-19: e1=None customer_cert=2026-08-26 | 2026-10-29: e1=2026-08-26 customer_cert=2026-08-26 bound=2027-09-02
+
+## 21. Extra, not in the list: E1 events by the airframe's age at the event (event year minus year_mfr), backtest snapshot
+b21.e1_events = 1251
+b21.e1_events.new_0_to_2_years = 929 (large=791 mid=138)
+b21.e1_events.old_3plus_years = 246 (large=214 mid=32)
+b21.e1_events.year_unknown = 76 (large=49 mid=27)
+b21.e1_events.old_3plus_years_share_pct = 19.664269
+b21.e1_events.year_unknown_share_pct = 6.075140
+b21.e1_events.new_0_to_2_years_share_pct = 74.260592
+b21.fiscal_year.2016 = events=63 new_0_to_2_years=53 old_3plus_years=8 year_unknown=2 gd_reported=121
+b21.fiscal_year.2017 = events=78 new_0_to_2_years=61 old_3plus_years=13 year_unknown=4 gd_reported=120
+b21.fiscal_year.2018 = events=80 new_0_to_2_years=60 old_3plus_years=17 year_unknown=3 gd_reported=121
+b21.fiscal_year.2019 = events=117 new_0_to_2_years=86 old_3plus_years=22 year_unknown=9 gd_reported=147
+b21.fiscal_year.2020 = events=94 new_0_to_2_years=66 old_3plus_years=21 year_unknown=7 gd_reported=127
+b21.fiscal_year.2021 = events=114 new_0_to_2_years=83 old_3plus_years=25 year_unknown=6 gd_reported=119
+b21.fiscal_year.2022 = events=136 new_0_to_2_years=96 old_3plus_years=34 year_unknown=6 gd_reported=120
+b21.fiscal_year.2023 = events=117 new_0_to_2_years=89 old_3plus_years=23 year_unknown=5 gd_reported=111
+b21.fiscal_year.2024 = events=148 new_0_to_2_years=117 old_3plus_years=23 year_unknown=8 gd_reported=136
+b21.fiscal_year.2025 = events=192 new_0_to_2_years=144 old_3plus_years=36 year_unknown=12 gd_reported=158
+b21.fiscal_year.2026 = events=112 new_0_to_2_years=74 old_3plus_years=24 year_unknown=14 gd_reported=79
+b21.old_3plus_years.model.GV-SP_(G550) = 69
+b21.old_3plus_years.model.GVI_(G650ER) = 32
+b21.old_3plus_years.model.GIV-X_(G450) = 30
+b21.old_3plus_years.model.GVI_(G650) = 20
+b21.old_3plus_years.model.G-IV = 17
+b21.old_3plus_years.model.GULFSTREAM_G280 = 16
+b21.old_3plus_years.model.G-V = 12
+b21.old_3plus_years.model.GVII-G500 = 10
+b21.old_3plus_years.model.GULFSTREAM_G150 = 9
+b21.old_3plus_years.model.GULFSTREAM_200 = 7
+b21.old_3plus_years.model.G-1159A = 5
+b21.old_3plus_years.model.GVII-G600 = 5
+b21.old_3plus_years.model.GVI = 4
+b21.old_3plus_years.model.GVIII-G700 = 3
+b21.old_3plus_years.model.GIV-X = 2
+b21.old_3plus_years.model.G-1159 = 1
+b21.old_3plus_years.model.G-IV_(G400) = 1
+b21.old_3plus_years.model.GIV-X_(G350) = 1
+b21.old_3plus_years.model.GV-SP = 1
+b21.old_3plus_years.model.GVIII-G800 = 1
+b21.lock_quarter_2026Q3.new_0_to_2_years = 30 (large=30 mid=0)
+b21.lock_quarter_2026Q3.old_3plus_years = 5 (large=4 mid=1)
+b21.lock_quarter_2026Q3.year_unknown = 7 (large=1 mid=6)
+b21.lock_quarter_old.398-5260 = model=GV-SP (G550) year_mfr=2009 first_airworthiness=2026-07-23 e1=2026-07-07 cabin=large
+b21.lock_quarter_old.398-445 = model=G-1159A year_mfr=1984 first_airworthiness=2026-07-15 e1=2026-07-28 cabin=large
+b21.lock_quarter_old.398-6206 = model=GVI (G650ER) year_mfr=2016 first_airworthiness=2026-08-05 e1=2026-07-28 cabin=large
+b21.lock_quarter_old.398-87118 = model=GVIII-G700 year_mfr=2006 first_airworthiness=2026-03-06 e1=2026-08-04 cabin=large
+b21.lock_quarter_old.450-311 = model=GULFSTREAM G150 year_mfr=2014 first_airworthiness=2026-09-02 e1=2026-08-26 cabin=mid
+
+## 23. README reading of the bound (one calendar year) against the preregistration's (365 days), backtest snapshot
+b23.changed.398-6177.E1 = 365_days=None calendar_year=2016-03-31 first_airworthiness=2015-03-31
+b23.changed.398-6177.E2 = 365_days=None calendar_year=2016-03-31 first_airworthiness=2015-03-31
+b23.airframe_definition_pairs_that_change = 2
+b23.quarter_cells_2016Q1_2026Q2_touched = 2
+b23.cell_touched.2016Q1.E1.large = 1
+b23.cell_touched.2016Q1.E2.large = 1
+b23.design_mae_ratio.E1.calendar_year_bound = 5.426019
+b23.design_mae_ratio.E1.365_day_bound = 5.472548
+b23.design_mae_ratio.E2.calendar_year_bound = 5.534257
+b23.design_mae_ratio.E2.365_day_bound = 5.580786
+b23.holdout_mae_ratio_E1.calendar_year_bound = 5.523395
+b23.band_hits.calendar_year_bound = 18
+b23.holdout_mae_ratio_E1.365_day_bound = 5.523395
+b23.band_hits.365_day_bound = 18
+
+## What matched between my rebuild and the project's stored inputs (Part B)
+
+match.item13 = all 168 cells of data/processed/registry_quarterly.csv (42 quarters x E1/E2 x large/mid) equal my counts from data/snapshots/2026-10-19/. Zero differences.
+match.item13.airframes = 4053 airframes; 1702 have an E1 date (1728 an E2 date); 3443 are large and 610 mid by the preregistered cabin rule.
+match.item14 = every value of predictions/2026Q3.json that I rebuilt from data/snapshots/2026-10-29/ equals the file: events 35 large and 7 mid, trailing registry 187 and 28, trailing reported 140 and 23, nowcast 26.203209 + 5.750000 = 31.953209, band 21.233381 to 37.241087.
+match.item15 = four models are large by the rule and mid-cabin types by name (two GULFSTREAM 200 codes, GALAXY, GULFSTREAM 100): 11 airframes, none with an E1 or E2 date in 2016Q1 to 2026Q2. The misclassification touches no count in the window.
+match.windows = every window_end in registry_quarterly.csv equals the quarter's fiscal_end in gd_deliveries.csv, and every window_start equals the prior quarter's fiscal_end.
+
+## Ambiguities
+
+A1. Which call supplies the guidance outlook. HEADLINE-SENSITIVE.
+  The preregistration says "the latest GD earnings call, dated on or before q's fiscal end, that stated a number for it". The README text in my brief says "the full-year outlook from GD's latest call".
+  Reading A (my primary): the latest call among those that stated a number. A call that only confirms the outlook is skipped and the earlier number stands.
+    sourced quarters 22; fallback quarters 2021Q1, 2021Q2, 2021Q3, 2021Q4 (they fall back to same quarter last year).
+    holdout MAE of guidance 6.917259; MAE over its 22 sourced quarters 7.356760 (ratio 5.250326, seasonal 4.636364 over the same 22).
+  Reading B: the latest call on or before the fiscal end must itself state the number; when it does not, the quarter has no outlook.
+    sourced quarters 16; fallback adds 2022Q2, 2022Q4, 2024Q2, 2025Q2, 2025Q4, 2026Q2.
+    holdout MAE of guidance 6.683550; MAE over its 16 sourced quarters 8.423269 (ratio 5.669689, seasonal 5.062500 over the same 16).
+  Why it matters: the headline rule names guidance first only at 22 or more sourced quarters. Reading A gives exactly 22, the minimum. Reading B gives 16, and seasonal would lead the headline. Under either reading Holm rejects nothing.
+  For 2026Q3 both readings give the same pace: outlook 160 from the 2026-07-29 call, 33.840000.
+
+A2. Which quarters the sign test against guidance covers ("over the holdout quarters both score").
+  All 26, the four fallback quarters scoring as seasonal (my primary): wins 14, losses 12, ties 0, p 0.422509, relative MAE 0.798495.
+  Only the 22 sourced quarters: wins 13, losses 9, ties 0, p 0.261734, relative MAE 0.713674.
+  Holm rejects nothing either way. Lag-1 autocorrelation of the differences: 0.353072 over 26, 0.331645 over the 22 (which treats 2020Q4 and 2022Q1 as neighbours).
+
+A3. The quarter shares w_j, "pooled over years t-3 to t-1".
+  Pooled sums (my primary): holdout MAE of guidance 6.917259.
+  Mean of the three within-year shares: 6.925384. The largest change in any quarter's total is 0.346246.
+
+A4. "Mean absolute percentage error (percent of GD's reported total)".
+  Mean of each quarter's AE / reported x 100, the preregistration's APE (my primary): ratio 17.914963, raw 18.451958, guidance 23.186035, seasonal 15.205075, last 29.463661.
+  Sum of AE over sum of reported: ratio 16.895092, raw 18.941176, guidance 21.158673, seasonal 14.117647, last 26.941176.
+
+A5. The bound: README against preregistration.
+  README: the date "must fall within a year of the airframe's first airworthiness date". Preregistration: first airworthiness "plus 365 days". They differ when a 29 February lies between.
+  One airframe changes: G650 serial 6177, first airworthiness 2015-03-31, event 2016-03-31 (366 days). Under the README wording 2016Q1 large is 11, not 10, for E1 and E2.
+  Effect: design MAE of ratio 5.426019 (E1) and 5.534257 (E2) instead of 5.472548 and 5.580786; E1 is still chosen. Holdout MAE (5.523395) and band hits (18) do not change. The processed file follows the 365-day rule.
+
+A6. Fixed-width fallback in section 3.3: "cut the line at the header line's comma positions".
+  Taken literally this cannot work: the header line is not padded to the data lines' field widths. Moot here: in both snapshots no line of ACFTREF, MASTER or DEREG has a field count different from its header's, and no line holds a double quote.
+
+A7. Which counts feed the 38 past errors of the live band.
+  Section 3.5 says every count comes from the snapshot the prediction names, the past quarters' included. I built the band three ways: past counts from the lock snapshot (2026-10-29), from my rebuild of the backtest snapshot (2026-10-19), and from the processed file. All three give P10 -5.287879 and P90 10.719828, so the band is 21.233381 to 37.241087 each way. Six past-quarter cells do differ between the two snapshots (see O3); they do not move the two percentile elements.
+
+A8. Nearest-rank position, ceiling of p x n.
+  Exact integer ceiling against math.ceil on floats: identical for every n in use (12 to 38). Moot.
+
+A9. Events per delivery "by calendar year".
+  I group by the fiscal quarter's year label. Pooled (sum of events over sum of deliveries) is my primary; the mean of the quarterly ratios is printed beside it. 2026 holds two quarters only.
+
+A10. Standard deviation in the coverage-drift check: sample (n - 1), as the preregistration says; the population figure is printed for reference. Holm compares p <= alpha / (m - i + 1); no p-value sits on a threshold. The five largest misses have no ties.
+
+## Observations outside the list (facts my commands printed; the main session decides what they mean)
+
+O1. The baseline that wins. On holdout MAE, same quarter last year is the best of the five: 4.615385, against 5.523395 for ratio (relative MAE 1.196736; ratio wins 11 of 26, loses 15). Ratio is ahead of guidance pace (6.917259) and last quarter (8.807692) on MAE, but Holm rejects for none, so by the headline rule nothing may be called a beat. Ratio's bias is +2.235614 jets; its MAE by year runs from 3.037920 (2024) to 7.025277 (2021).
+
+O2. Used jets inside the count. By the registry's own YEAR MFR, 246 of the 1251 E1 events in 2016Q1 to 2026Q2 belong to airframes three or more years old at the event (large 214, mid 32); 76 more have no year. 929 are zero to two years old. By model the 246 include GV-SP (G550) 69, GVI (G650ER) 32, GIV-X (G450) 30, GVI (G650) 20, G-IV 17, G-V 12. Section 21 has the table by year. Some of the 246 may be true first deliveries of older test or demonstrator airframes (GVII-G500 10, GVII-G600 5, GVIII-G700 3); I cannot tell those apart from the registry.
+  In the locked quarter, 2026Q3, 5 of the 42 events are three or more years old by YEAR MFR: G550 serial 5260 (2009), G-1159A serial 445 (1984), G650ER serial 6206 (2016), G150 serial 311 (2014), and G700 serial 87118 (year reads 2006, which I take to be a data-entry error: its serial sits among the 2026 G700s, 87114 to 87128). A sixth, G-IV serial 1335, has no year and no airworthiness date, so no bound applies. For 5260, 445, 6206 and 311 the registry's AIR WORTH DATE is in July to September 2026, within weeks of the new certificate, so the bound does not exclude them. That is consistent with a used jet getting a new airworthiness date when it enters or re-enters the US registry; I did not check the FAA's definition of the field.
+  In fairness to the README sentence "which keeps out renewed certificates and most used jets": the bound drops the customer certificate of 1879 airframes (section 13), so "most" holds as worded. What the sentence leaves out is that 246 of the 1251 counted events (19.664269 percent), plus 76 of unknown year (6.075140 percent), are still airframes three or more years old by the registry's own year of manufacture.
+  Defensible version: "The bound keeps out renewed certificates and most used jets, but not all: about one counted event in five is an airframe at least three years old, most often a used jet that got a new airworthiness date."
+
+O3. A later registry copy also loses old events. Between the 2026-10-19 and 2026-10-29 snapshots, three past E1 events vanished: G450 serial 4166 (2019Q3), G650ER serial 6379 (2019Q4) and G280 serial 2053 (2024Q4). In the later snapshot each carries a customer certificate dated 2026-10-20 to 2026-10-27, past its bound, and the earlier event date no longer comes out of the records. One event appeared: G150 serial 311 in 2026Q3; in the earlier snapshot its 2026-08-26 certificate fell outside the bound, in the later one the airframe carries an airworthiness date of 2026-09-02 and the event counts. Six past-quarter cells changed in ten days (section 14).
+  In the backtest snapshot, registry events per reported delivery rise almost every year: 0.520661 (2016), 0.650000, 0.661157, 0.795918, 0.740157, 0.957983, 1.133333, 1.054054, 1.088235, 1.215190 (2025), 1.417722 (2026, two quarters). From 2022 on the registry shows more "first" events than GD reported deliveries.
+  So the framing "a registry copy that had months or years to fill in" is half the picture: the copy also had years to lose first registrations as jets changed hands. The counts for old quarters are lower than a snapshot taken at the time would have shown; I cannot say by how much from two snapshots ten days apart.
+
+O4. The coverage-drift flag is one-sided. Mean of deliveries per event over 2017Q1 to 2025Q2 is 1.182391, sample SD 0.351582, threshold 1.885554; none of 2025Q3 to 2026Q2 exceeds it, so no flag. The last three quarters sit below the mean by 1.393937, 1.397915 and 1.317168 SD (0.692308, 0.690909, 0.719298). The rule cannot flag a fall.
+
+O5. The same airframe under two maker prefixes. G150 serial 322 is counted in 2016Q2 (prefix 450, certificate 2016-06-28) and again in 2018Q2 (prefix 398, certificate 2018-05-22): one spurious mid-cabin event in the design window. G280 serial 2009 has a 2012-08-01 event under prefix 398 and a 2026-05-26 event under prefix 450, whose one record has no airworthiness date and no year: an airframe first registered to a customer in 2012 is one of the six mid-cabin events of 2026Q2. 105 serials appear under more than one prefix; my type check flags four of them (section 15x) and these two are the ones that put an event in the window.
+
+O6. The 2026Q3 score in context. Locked 31.953209 against GD's 40: miss 8.046791, 20.116979 percent, GD's count 2.758913 above the band's top (37.241087). The raw event count in the lock was 42 (miss 2). Guidance pace 33.840000 (miss 6.160000). Same quarter last year 39 and last quarter 41 (miss 1 each). The lock's large-cabin miss is 8.796791 and its mid-cabin miss 0.750000. sha256 of the file's bytes: 3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23 (532 bytes, LF, ends with a newline).
+
+O7. The E1 against E2 choice rests on one cell. Across 2016Q1 to 2019Q4 the two definitions differ only in 2019Q4 large (29 against 30). Over 2016Q1 to 2026Q2 they differ by nine events (large 1054 against 1063, mid 197 both).
+
+O8. The band undercovers. 18 of 26 holdout quarters fall inside a P10 to P90 band (69.230769 percent against a nominal 80; Clopper-Pearson 48.210356 to 85.674000). Misses above the band: 2020Q2, 2023Q4, 2025Q3. Misses below: 2020Q3, 2021Q1, 2021Q2, 2022Q1, 2025Q4. The locked 2026Q3 is a ninth miss, above.
+
+O9. Truncation table (extra, section 16), from my own airframe table: ratio's holdout MAE is 5.523395 at 0 days, 13.468241 at 30, 22.928680 at 60 and 31.671910 at 90. The events kept fall from 913 to 502, 257 and 29: the quarter's events are bunched at its end.
+
+## Candidate findings for the main session (IDs for reference)
+
+I may not open the public surfaces, so I cannot give file:line or confirm what each surface says. Severities are my suggestion, conditional on the wording the main session finds.
+
+RECOMPUTE-1 = S2 (S1 if any surface says or implies the count holds new deliveries only). Used jets in the count: O2, sections 18 and 21. Surface: the README's "The count" paragraph as quoted in my brief.
+RECOMPUTE-2 = S2. A later registry copy loses old events as well as gaining late ones: O3, sections 9, 14 and 20. Surface: every place that says the backtest copy "had months or years to fill in".
+RECOMPUTE-3 = S2 (S1 if a surface presents guidance as the lead baseline without saying the count of sourced quarters is exactly the minimum of 22 and depends on carrying an earlier call's number forward). A1.
+RECOMPUTE-4 = S2 if the surfaces do not say plainly that same quarter last year has the lowest holdout MAE (4.615385 against 5.523395) and that the band covers 18 of 26 (69.230769 percent against a nominal 80). O1, O8.
+RECOMPUTE-5 = S2. The coverage-drift check flags only a rise; the last three quarters fell by about 1.3 to 1.4 SD and print no flag. O4.
+RECOMPUTE-6 = S3. README says "within a year" of first airworthiness, the preregistration says 365 days; one cell differs (2016Q1 large, 11 against 10), design MAE 5.426019 against 5.472548, nothing in the holdout moves. A5.
+RECOMPUTE-7 = S3. Two airframes counted under two maker prefixes: G150 serial 322 (a second event in 2018Q2, design window) and G280 serial 2009 (first registered to a customer in 2012, counted again in 2026Q2). O5.
+RECOMPUTE-8 = S3. The cabin rule files four mid-cabin models as large (GULFSTREAM 200 twice, GALAXY, GULFSTREAM 100; 11 airframes); none has an event in 2016Q1 to 2026Q2, so no figure moves. Section 15.
+no_finding.1 = registry_quarterly.csv reproduces exactly from the 2026-10-19 subset (168 of 168 cells).
+no_finding.2 = predictions/2026Q3.json reproduces exactly from the 2026-10-29 subset (events, trailing sums, nowcast, band).
+no_finding.3 = the design-window choice of E1 reproduces (5.472548 against 5.580786).
+
+## Could not compute
+
+none_of_items_1_to_15_skipped = true
+not_checked.1 = whether the lock release's notes carry the sha256 above (I did not open the release; the main session can compare).
+not_checked.2 = whether gd_deliveries.csv matches GD's filings, whether guidance.csv's quotes and numbers match the calls, and GD's 2026Q3 count (35, 5, 40), which I took from the brief.
+not_checked.3 = the dollar estimate, the as-of study, the daily tables under data/snapshots/daily/, and the six other stored snapshots (2026-10-23 to 2026-10-28).
+not_checked.4 = the fixed-width fallback path of section 3.3: no line in either snapshot triggers it, so it has no effect to measure.
+not_checked.5 = how many old events the registry has lost in total (O3); two snapshots ten days apart show the mechanism, not the size.
+toy.guidance = skipped, as the brief says (the toy folder has no guidance file); sections 2 to 12 need the 2017Q1 to 2026Q2 windows and print "skipped" on the toy data.

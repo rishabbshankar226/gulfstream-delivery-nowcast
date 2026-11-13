@@ -7,11 +7,11 @@
     reported: "GD reported",
     ratio: "Registry estimate",
     raw: "Raw registry count",
-    guidance: "GD's guidance pace",
+    guidance: "Pace built from GD's outlook",
     seasonal: "Same quarter last year",
     last: "Last quarter"
   };
-  var BASE = { guidance: "GD's guidance pace", seasonal: "the same quarter last year", last: "last quarter" };
+  var BASE = { guidance: "the pace I built from GD's outlook", seasonal: "the same quarter last year", last: "last quarter" };
   var DASH = { reported: [], ratio: [], raw: [7, 4], guidance: [10, 4, 2, 4], seasonal: [5, 4], last: [2, 3] };
   var WIDTH = { reported: 3, ratio: 2.4, raw: 1.6, guidance: 1.6, seasonal: 1.6, last: 1.8 };
   var reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -89,7 +89,8 @@
         ": off by " + f1(h.mae.ratio) + " jets a quarter on average, when GD delivers about " +
         whole(typicalCount()) + ", against " + f1(h.mae[b[0]]) + " for " + BASE[b[0]] + ".";
     } else {
-      s = "Off by " + f1(h.mae.ratio) + " jets a quarter on average, when GD delivers about " +
+      s = "Over " + h.n + " held-out quarters the registry estimate was off by " + f1(h.mae.ratio) +
+        " jets a quarter on average, when GD delivers about " +
         whole(typicalCount()) + ", against " + f1(h.mae[base]) + " for " + BASE[base] +
         ". The difference is not statistically distinguishable.";
     }
@@ -110,30 +111,50 @@
     return data.live.length ? data.live[data.live.length - 1] : null;
   }
 
+  // A lock is public only if the repository was already public on the day its release was published.
+  function lockWords(L) {
+    return (data.public && data.public_since && L.lock.published_at.slice(0, 10) >= data.public_since) ?
+      "public GitHub release" : "timestamped GitHub release, made while the repository was private";
+  }
+
+  function dayAfter(d) {
+    return new Date(new Date(d + "T12:00:00Z").getTime() + 86400000).toISOString().slice(0, 10);
+  }
+
   function liveCard() {
     var L = current();
     if (!L) { text($("live-status"), "No live quarter"); return; }
     var pred = L.locked || L.latest || L.build;
     var status;
-    if (L.score) status = "Scored";
+    var scoredLock = !!(L.score && L.score.locked && L.lock);
+    var band = scoredLock ? (L.score.inside_band ? "inside" : "outside") + " the band" : "";
+    if (scoredLock) status = "Scored: missed by " + f1(L.score.ae_total) + ", " + band;
+    else if (L.score) status = "Scored";
     else if (L.lock) status = "Locked " + etTime(L.lock.published_at);
     else status = "Provisional";
     text($("live-status"), L.quarter + " · " + status);
     text($("live-figure"), f1(pred.nowcast.total));
-    text($("live-band"), "Band of past misses: " + f1(pred.band[0]) + " to " + f1(pred.band[1]) + " deliveries.");
+    if ($("live-unit")) text($("live-unit"), L.lock ? "deliveries, locked estimate" : "deliveries, estimated");
+    var hb = data.metrics.holdout.band;
+    text($("live-band"), "Band of past misses: " + f1(pred.band[0]) + " to " + f1(pred.band[1]) + " deliveries. " +
+      "It held GD's count in " + hb.hits + " of " + hb.n + " held-out quarters, against a nominal 80%.");
     var facts = $("live-facts");
     facts.textContent = "";
     function fact(k, v) { facts.appendChild(el("dt", null, k)); facts.appendChild(el("dd", null, v)); }
     var latest = L.latest || pred;
-    fact("Registrations so far", latest.events.large + " large-cabin, " + latest.events.mid + " mid-cabin (snapshot " + latest.snapshot + ")");
-    fact("Quarter window", latest.window_start + " to " + latest.window_end);
-    if (L.guidance_pace !== null) fact("GD's guidance pace", f1(L.guidance_pace) + " deliveries");
+    fact(L.score ? "Registrations in the quarter" : "Registrations so far",
+      latest.events.large + " large-cabin, " + latest.events.mid + " mid-cabin (snapshot " + latest.snapshot + ")");
+    // The window opens the day after the last quarter's fiscal end.
+    fact("Quarter window", dayAfter(latest.window_start) + " to " + latest.window_end);
+    if (L.guidance_pace !== null) fact("Pace I built from GD's outlook", f1(L.guidance_pace) + " deliveries" +
+      (L.score && L.score.guidance_ae !== null ? " (missed by " + f1(L.score.guidance_ae) + ")" : ""));
     fact("GD's typical quarter", "about " + whole(typicalCount()) + " deliveries since 2020");
     var qi = data.quarters.indexOf(L.quarter);
     var yago = data.quarters.indexOf(String(Number(L.quarter.slice(0, 4)) - 1) + L.quarter.slice(4));
-    if (yago >= 0) fact("Same quarter last year", data.reported.total[yago] + " deliveries");
+    if (yago >= 0) fact("Same quarter last year", data.reported.total[yago] + " deliveries" +
+      (L.score ? " (missed by " + Math.abs(data.reported.total[yago] - L.score.reported.total) + ")" : ""));
     if (L.release_date) {
-      fact("GD reports", L.release_date);
+      fact(L.score ? "GD reported on" : "GD reports", L.release_date);
       if (!L.lock && L.score) fact("Lock", "none: the quarter missed its lock window");
       else if (!L.lock) {
         var eve = new Date(L.release_date + "T12:00:00Z");
@@ -143,12 +164,12 @@
     }
     if (L.score) {
       fact("GD reported", String(L.score.reported.total) + " deliveries");
-      if (L.score.locked) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries");
+      if (scoredLock) fact("Miss of the locked estimate", f1(L.score.ae_total) + " deliveries (" + Math.round(L.score.ape_pct) + "%), " + band);
     }
-    var note = L.lock ? "Locked as a timestamped GitHub release; the file's sha256 is in the release notes." :
+    var note = L.lock ? "Locked as a " + lockWords(L) + ", on " + etTime(L.lock.published_at) + "; the file's sha256 is in the release notes." :
       L.score ? "Not locked: the quarter missed its lock window, so this is the build estimate, shown beside GD's count." :
       "Provisional: the estimate locks on GitHub the day before GD reports, from the newest stored registry snapshot, and stays on this page whether it hits or misses.";
-    note += " The band comes from misses measured on a finished registry file, so it is likely too narrow for a live quarter.";
+    note += " The band comes from misses measured on a finished registry file, so it may not fit a live quarter.";
     text($("live-note"), note);
   }
 
@@ -199,7 +220,7 @@
       sets.push({
         label: NAME[m], data: data.backtest[m], borderColor: css("--s-" + m), backgroundColor: css("--s-" + m),
         borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1,
-        hidden: narrow.matches && (m === "raw" || m === "seasonal" || m === "last")
+        hidden: narrow.matches && (m === "raw" || m === "last")
       });
     });
     var opts = baseOptions("Aircraft delivered per quarter", "Fiscal quarter");
@@ -260,7 +281,7 @@
     var rows = data.path[L.quarter];
     box.classList.toggle("tall", rows.length >= 3);
     text($("path-sub"), (rows.length === 1 ? "One snapshot so far (" + rows[0].date + ")." :
-      rows.length + " snapshots so far, " + rows[0].date + " to " + rows[rows.length - 1].date + ".") +
+      rows.length + (L.score ? " snapshots, " : " snapshots so far, ") + rows[0].date + " to " + rows[rows.length - 1].date + ".") +
       " A point posts with each day's registry snapshot, with the band of past misses around it" +
       (L.lock ? "; the diamond marks the locked estimate." : L.score ? "; the quarter missed its lock window." :
         "; the estimate locks the day before GD reports."));
@@ -278,7 +299,7 @@
         pointRadius: 4, pointHoverRadius: 6, tension: 0, spanGaps: true, order: 1 }
     ];
     if (L.guidance_pace !== null) {
-      sets.push({ type: "line", label: "GD's guidance pace", data: labels.map(function () { return L.guidance_pace; }), borderColor: css("--s-guidance"),
+      sets.push({ type: "line", label: "Pace built from GD's outlook", data: labels.map(function () { return L.guidance_pace; }), borderColor: css("--s-guidance"),
         borderDash: DASH.guidance, borderWidth: 1.6, pointRadius: 0, order: 2 });
     }
     if (L.locked && L.lock) {
@@ -303,7 +324,7 @@
     var lastTot = rows[rows.length - 1].nowcast_total;
     $("c-path").setAttribute("aria-label", "Chart of the " + L.quarter + " estimate by registry snapshot date: latest " + f1(lastTot) +
       " deliveries with a band of past misses from " + f1(lastTot - below) + " to " + f1(lastTot + above) +
-      (L.guidance_pace !== null ? ", against GD's guidance pace of " + f1(L.guidance_pace) : "") + ". The table below lists every snapshot.");
+      (L.guidance_pace !== null ? ", against the pace I built from GD's outlook, " + f1(L.guidance_pace) : "") + ". The table below lists every snapshot.");
     table("t-path", "The " + L.quarter + " estimate by snapshot date", ["Snapshot", "Large-cabin registrations", "Mid-cabin registrations", "Estimate", "Band low", "Band high"],
       rows.map(function (r) {
         return { cells: [r.date, String(r.events_large), String(r.events_mid), f1(r.nowcast_total), f1(r.nowcast_total - below), f1(r.nowcast_total + above)] };
@@ -320,7 +341,8 @@
     var all = names.reduce(function (s, n) { return s + p[n]; }, 0);
     text($("pipe-sub"), "Jets registered to Gulfstream itself with no delivery event yet, at the " + data.pipeline_snapshot +
       " snapshot: " + all + " in all. They include aircraft in flight test, in completion and taken back for resale, " +
-      "and registrations Gulfstream holds for jets with no airworthiness date yet, so this is not a count of jets awaiting delivery.");
+      "and registrations Gulfstream holds for jets with no airworthiness date yet, so this is not a count of jets awaiting delivery. " +
+      "It leaves out the G700s the FAA files under a type code my scope rule does not keep.");
     $("pipe-box").style.height = Math.max(220, names.length * 30 + 90) + "px";
     var opts = baseOptions("Aircraft", "Aircraft on Gulfstream's own registration");
     opts.indexAxis = "y";
@@ -360,7 +382,7 @@
     var g = h.guidance;
     ul.appendChild(el("li", null, "GD stated a numeric delivery outlook covering " + g.sourced + " of the " + h.n +
       " test quarters; the other " + g.fallback_quarters.length + " (" + g.fallback_quarters.join(", ") +
-      ") fall back to the same quarter last year."));
+      ") fall back to the same quarter last year. The guidance pace is my construction from GD's full-year outlook, not a figure GD publishes; the README gives two other readings of GD's calls and what each does to this comparison."));
     var band = h.band;
     ul.appendChild(el("li", null, "The band of past misses held GD's count in " + band.hits + " of " + band.n +
       " test quarters (" + pct(band.coverage_pct) + ", against a nominal 80%; 95% interval " + pct(band.cp95_pct[0]) + " to " + pct(band.cp95_pct[1]) + ")."));
@@ -371,11 +393,11 @@
       "Recent quarters where the registry counted unusually few jets per GD delivery: " + cr.flags.join(", ") + "." :
       "The preregistered check looks for quarters from 2025Q3 to 2026Q2 where the registry counted unusually few jets per GD delivery; none is flagged.") +
       (below ? " The drift runs the other way: GD delivered " + recent.map(function (x) { return x.toFixed(2); }).join(", ") +
-        " jets per registry event in the last three quarters, against an average of " + cr.mean.toFixed(2) +
+        " jets per registry event in the last three held-out quarters, against an average of " + cr.mean.toFixed(2) +
         ", so the registry is counting more registrations per delivery than usual." : "")));
     var tr = h.truncation_mae;
     table("t-trunc", "Average miss when each test quarter's registrations are cut early, against " + f1(h.mae.guidance) +
-      " for GD's guidance pace on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
+      " for the pace I built from GD's outlook on the same quarters", ["Days cut before the quarter ends", "Average miss, deliveries"],
       ["0", "30", "60", "90"].map(function (d) { return { cells: [d, f1(tr[d])] }; }));
   }
 
@@ -383,27 +405,41 @@
   function estimates() {
     var e = data.estimates, S = e.segments;
     var rows = [];
-    function row(name, actual, est, cls) {
-      rows.push({ cls: cls, cells: [name, usdB(actual), usdB(est), usdM(est - actual), pct((est - actual) / actual * 100)] });
+    var SEGS = ["Aerospace", "Marine Systems", "Combat Systems", "Technologies"];
+    // What GD reported for the target quarter, once it has: the estimates were made before the release.
+    var R = (data.reported_segments || {})[e.target] || null;
+    function row(name, actual, est, rep, cls) {
+      rows.push({ cls: cls, cells: R ?
+        [name, usdB(actual), usdB(est), usdB(rep), usdM(est - rep), pct((est - rep) / rep * 100)] :
+        [name, usdB(actual), usdB(est), usdM(est - actual), pct((est - actual) / actual * 100)] });
     }
     function q3(s) { return S[s].drift_usd * S[s].ttm_revenue_prior_usd / S[s].ttm_revenue_usd; }
-    row("Aerospace, delivery estimate", q3("Aerospace"), e.aerospace_from_nowcast_usd, "emph");
-    row("Aerospace, growth rule", q3("Aerospace"), S.Aerospace.drift_usd);
-    ["Marine Systems", "Combat Systems", "Technologies"].forEach(function (s) { row(s, q3(s), S[s].drift_usd); });
-    var a = ["Aerospace", "Marine Systems", "Combat Systems", "Technologies"].reduce(function (t, s) { return t + q3(s); }, 0);
-    row("Total, four segments", a, e.revenue_total_usd, "emph");
-    table("t-est", e.target + " revenue by segment against the year-ago quarter", ["Segment", "Year-ago quarter", "Estimate", "Change", "Change, %"], rows);
+    function rep(s) { return R ? R[s].revenue_usd : null; }
+    row("Aerospace, delivery estimate", q3("Aerospace"), e.aerospace_from_nowcast_usd, rep("Aerospace"), "emph");
+    row("Aerospace, growth rule", q3("Aerospace"), S.Aerospace.drift_usd, rep("Aerospace"));
+    ["Marine Systems", "Combat Systems", "Technologies"].forEach(function (s) { row(s, q3(s), S[s].drift_usd, rep(s)); });
+    var a = SEGS.reduce(function (t, s) { return t + q3(s); }, 0);
+    row("Total, four segments", a, e.revenue_total_usd, R ? SEGS.reduce(function (t, s) { return t + rep(s); }, 0) : null, "emph");
+    if (R) table("t-est", e.target + " revenue by segment: the estimates made before the release, and what GD reported",
+      ["Segment", "Year-ago quarter", "Estimate", "GD reported", "Estimate less reported", "Miss, %"], rows);
+    else table("t-est", e.target + " revenue by segment against the year-ago quarter", ["Segment", "Year-ago quarter", "Estimate", "Change", "Change, %"], rows);
     var yq = String(Number(e.target.slice(0, 4)) - 1) + e.target.slice(4);
     var yi = data.quarters.indexOf(yq);
     var below = yi < 0 || e.nowcast_total < data.reported.total[yi];
-    text($("est-why"), "The delivery estimate of " + f1(e.nowcast_total) + (below ? " sits below the " : " sits above the ") +
+    var why = R ?
+      "Before GD reported, the delivery estimate of " + f1(e.nowcast_total) + (below ? " sat below the " : " sat above the ") +
+      (yi >= 0 ? data.reported.total[yi] + " " : "") + "deliveries of " + yq + ", and each delivery carried about " +
+      usdM(e.revenue_per_delivery_usd) + " of Aerospace revenue, so the delivery-based figure " + (below ? "fell" : "rose") +
+      ". GD reported " + usdB(R.Aerospace.revenue_usd) + " of Aerospace revenue. That " :
+      "The delivery estimate of " + f1(e.nowcast_total) + (below ? " sits below the " : " sits above the ") +
       (yi >= 0 ? data.reported.total[yi] + " " : "") + "deliveries of " + yq + ", and each delivery carries about " +
       usdM(e.revenue_per_delivery_usd) + " of Aerospace revenue, so the delivery-based figure " + (below ? "falls" : "rises") +
-      ". That " + usdM(e.revenue_per_delivery_usd) + " includes services and Jet Aviation, which do not move with deliveries, " +
-      "so the delivery-based figure overstates the swing. The growth row instead scales " +
+      ". That ";
+    text($("est-why"), why + usdM(e.revenue_per_delivery_usd) + " includes services and Jet Aviation revenue, which a delivery " +
+      "count does not measure. The growth row instead scales " +
       yq + "'s Aerospace revenue by the last four quarters' growth.");
     var ya = q3("Aerospace");
-    table("t-sens", "Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
+    table("t-sens", "Made before the release: Aerospace revenue for each delivery count, at " + usdM(e.revenue_per_delivery_usd) + " a delivery, against " +
       usdB(ya) + " in the year-ago quarter", ["Deliveries", "Aerospace revenue", "Change on the year-ago quarter"],
       e.sensitivity.map(function (s) {
         return { cls: s.deliveries_change === 0 ? "emph" : null, cells: [f1(s.deliveries), usdB(s.aerospace_revenue_usd), usdM(s.aerospace_revenue_usd - ya)] };

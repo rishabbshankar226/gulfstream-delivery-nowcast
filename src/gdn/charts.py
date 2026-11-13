@@ -28,7 +28,7 @@ STYLE = {
     "last": dict(color=GREY_L, lw=2.2, ls=(0, (1.5, 2.5))),
 }
 NAMES = {"reported": "GD reported", "ratio": "Registry estimate (ratio)", "raw": "Raw registry count",
-         "guidance": "GD guidance pace", "seasonal": "Same quarter last year", "last": "Last quarter"}
+         "guidance": "Pace built from GD's outlook", "seasonal": "Same quarter last year", "last": "Last quarter"}
 QS = qrange("2016Q1", "2026Q2")
 SOURCE = ("Source: GD earnings releases on SEC EDGAR; FAA aircraft registry snapshot {snap}; GD earnings calls; "
           "author's calculations. Rishabb Shankar, rshankar.dev")
@@ -47,13 +47,13 @@ def _fig():
     return fig, fig.add_axes([0.075, 0.15, 0.9, 0.66])
 
 
-def _finish(fig, ax, title, ylabel, snap, xlabel="Fiscal quarter"):
+def _finish(fig, ax, title, ylabel, snap, xlabel="Fiscal quarter", source=None):
     fig.text(0.075, 0.935, title, fontsize=22, fontweight="bold", va="center")
     ax.set_ylabel(ylabel)
     ax.set_xlabel(xlabel)
     ax.yaxis.grid(True, color=GRID, lw=1)
     ax.set_axisbelow(True)
-    fig.text(0.075, 0.025, SOURCE.format(snap=snap), fontsize=13, color=MUTED)
+    fig.text(0.075, 0.025, source or SOURCE.format(snap=snap), fontsize=13, color=MUTED)
 
 
 def _quarter_axis(ax, qs):
@@ -85,8 +85,35 @@ def series(root):
     return out
 
 
+LOCKED = "Locked, with band"
+
+
+def locked_points(root):
+    """F117. [(quarter, locked estimate, (band low, band high), GD's count)] for each quarter that was locked and then
+    scored, in order. The track chart draws them after the backtest, so the image a reader sees first shows the live
+    record too. A quarter that missed its lock window, or is locked but not yet scored, has no point."""
+    from . import live
+    root = Path(root)
+    out = []
+    for q, s in sorted(live.scores(root).items(), key=lambda kv: qidx(kv[0])):
+        p = root / "predictions" / f"{q}.json"
+        if s.get("locked") and s.get("nowcast") and p.exists() and qidx(q) > qidx(QS[-1]):
+            lo, hi = read_json(p)["band"]
+            out.append((q, s["nowcast"]["total"], (lo, hi), s["reported"]["total"]))
+    return out
+
+
+def track_quarters(root):
+    """The track chart's x axis: the backtest quarters, then every quarter through the last scored lock."""
+    pts = locked_points(root)
+    return QS + (qrange(QS[-1], pts[-1][0])[1:] if pts else [])
+
+
 def track_record(root, snap):
     rep = {r["quarter"]: int(r["total"]) for r in read_csv(Path(root) / "data/processed/gd_deliveries.csv")}
+    pts = locked_points(root)
+    qs = track_quarters(root)
+    rep.update({q: n for q, _, _, n in pts})
     s = series(root)
     fig, ax = _fig()
     ax.axvspan(QS.index("2017Q1") - 0.5, QS.index("2019Q4") + 0.5, color="#423e38", alpha=0.07, lw=0)
@@ -95,15 +122,27 @@ def track_record(root, snap):
     for m in ("last", "seasonal", "guidance", "raw", "ratio"):
         xs = [QS.index(q) for q in QS if q in s[m]]
         ax.plot(xs, [s[m][QS[i]] for i in xs], label=NAMES[m], **STYLE[m])
-    ax.plot(range(len(QS)), [rep[q] for q in QS], label=NAMES["reported"], **STYLE["reported"])
-    _quarter_axis(ax, QS)
-    ax.set_ylim(0, max(max(rep.values()), max(max(v.values()) for v in s.values())) * 1.12)
+    xr = [i for i, q in enumerate(qs) if q in rep]
+    ax.plot(xr, [rep[qs[i]] for i in xr], label=NAMES["reported"], **STYLE["reported"])
+    top = max(max(rep.values()), max(max(v.values()) for v in s.values()))
+    if pts:
+        ax.axvspan(len(QS) - 0.5, len(qs) - 0.5, color=ACCENT, alpha=0.08, lw=0)
+        ax.text(len(qs) - 0.55, 3, "Locked", fontsize=15, color=MUTED, ha="right")
+        for i, (q, est, (lo, hi), _) in enumerate(pts):
+            ax.errorbar([qs.index(q)], [est], yerr=[[est - lo], [hi - est]], fmt="D", color=ACCENT, ms=12,
+                        capsize=7, lw=2.4, mfc=ACCENT, mec=INK, label=LOCKED if i == 0 else None, zorder=5)
+        top = max(top, max(hi for _, _, (_, hi), _ in pts))
+    _quarter_axis(ax, qs)
+    ax.set_ylim(0, top * 1.12)
     h, lab = ax.get_legend_handles_labels()
-    order = [lab.index(NAMES[m]) for m in ("reported", "ratio", "raw", "guidance", "seasonal", "last")]
+    keys = ("reported", "ratio", "raw", "guidance", "seasonal", "last")
+    order = [lab.index(NAMES[m]) for m in keys] + ([lab.index(LOCKED)] if pts else [])
     ax.legend([h[i] for i in order], [lab[i] for i in order], loc="lower left", bbox_to_anchor=(0, 1.0),
-              ncol=3, frameon=False, handlelength=3.2)
-    _finish(fig, ax, "Gulfstream deliveries by quarter: GD's count against five estimates",
-            "Aircraft delivered per quarter", snap)
+              ncol=4 if pts else 3, frameon=False, handlelength=3.2 if not pts else 2.6,
+              columnspacing=2.0 if not pts else 1.2)
+    title = ((f"GD's Gulfstream deliveries against five backtest estimates and the live lock{'s' if len(pts) > 1 else ''}")
+             if pts else "Gulfstream deliveries by quarter: GD's count against five estimates")
+    _finish(fig, ax, title, "Aircraft delivered per quarter", snap)
     _save(fig, root, "track_record.png")
 
 
@@ -195,7 +234,7 @@ def nowcast_path(root, snap):
                 ms=8, capsize=6, elinewidth=1.6, ecolor=ACCENT_2, label=f"{q} estimate, with its past-miss band")
     pace = model.guidance_pace(q, live.reported_history(root), model.load_guidance(root), Calendar.load(root))
     if pace:
-        ax.axhline(pace["total"], color=GREY_D, lw=2, ls=(0, (9, 3, 2, 3)), label="GD guidance pace for the quarter")
+        ax.axhline(pace["total"], color=GREY_D, lw=2, ls=(0, (9, 3, 2, 3)), label="Pace built from GD's outlook, for the quarter")
     pred_p = Path(root) / "predictions" / f"{q}.json"
     if (lv / f"{q}_lock.json").exists() and pred_p.exists():
         pr = read_json(pred_p)
@@ -207,22 +246,73 @@ def nowcast_path(root, snap):
     right = max(dates[-1], dt.date.fromisoformat(rel) if rel else dates[-1]) + dt.timedelta(days=2)
     if rel:
         ax.axvline(dt.date.fromisoformat(rel), color=AXIS, lw=1.4, ls=(0, (2, 2)))
-        ax.text(dt.date.fromisoformat(rel), 2, f" GD reports {rel}", fontsize=15, color=MUTED, ha="right")
+        said = "GD reported" if (lv / f"{q}_score.json").exists() else "GD reports"
+        ax.text(dt.date.fromisoformat(rel), 2, f" {said} {rel}", fontsize=15, color=MUTED, ha="right")
     ax.set_xlim(left, right)
     ax.xaxis.set_major_locator(mdates.DayLocator(interval=4))
     ax.xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m-%d"))
     top = max([x + above for x in tot] + ([pace["total"]] if pace else []))
     ax.set_ylim(0, top * 1.2)
     ax.legend(loc="lower left", bbox_to_anchor=(0, 1.0), frameon=False, ncol=3)
+    # This chart plots one point per daily snapshot, so its source line names those, not the backtest snapshot.
+    source = (f"Source: GD earnings releases (SEC); FAA registry snapshots {rows[0]['date']} to "
+              f"{rows[-1]['date']}; GD earnings calls; author's calculations. Rishabb Shankar, rshankar.dev")
     _finish(fig, ax, f"The {q} estimate by registry snapshot date", "Estimated deliveries (aircraft)", snap,
-            "Snapshot date")
+            "Snapshot date", source=source)
     _save(fig, root, "nowcast_path.png")
 
 
-def run(root="."):
-    snap = read_json(Path(root) / "data/snapshots/MANIFEST.json")["backtest"]
+CHARTS = ("track_record.png", "coverage.png", "signed_errors.png", "nowcast_path.png")
+STAMP = "output/charts/inputs.sha256"
+
+
+def input_digest(root):
+    """One line per input the four charts read, so the daily job redraws them only when one changes (a lock, a
+    score, a new path row for the featured quarter) and a PNG is not rewritten for nothing."""
+    from .files import sha256
+    root = Path(root)
+    lv = root / "results/live"
+    files = [root / "results/design.csv", root / "results/holdout.csv", root / "results/metrics.json",
+             root / "data/processed/gd_deliveries.csv", root / "data/processed/registry_quarterly.csv",
+             root / "data/guidance.csv", root / "config/calendar.json", root / "data/snapshots/MANIFEST.json"]
+    paths = sorted(lv.glob("*_path.csv"), key=lambda x: qidx(x.name[:6]))
+    if paths:
+        q = featured_path(paths).name.split("_")[0]
+        files += [lv / f"{q}_path.csv", lv / f"{q}_latest.json", lv / f"{q}_lock.json", lv / f"{q}_score.json",
+                  root / "predictions" / f"{q}.json"]
+    files += sorted(lv.glob("*_score.json"))
+    files += [root / "predictions" / f"{p.name[:6]}.json" for p in sorted(lv.glob("*_score.json"))]
+    lines = [f"{sha256(p.read_bytes())}  {p.relative_to(root)}" for p in dict.fromkeys(files) if p.exists()]
+    lines.append(f"{sha256(Path(__file__).read_bytes())}  src/gdn/charts.py")
+    return "\n".join(lines) + "\n"
+
+
+PREVIEW = "site/preview.png"
+
+
+def _preview(root):
+    """The dashboard's link-preview image (og:image): a copy of the track-record chart, kept under site/ so Pages
+    serves it and redrawn whenever the chart is."""
+    src, dst = Path(root) / "output/charts/track_record.png", Path(root) / PREVIEW
+    if src.exists() and (not dst.exists() or dst.read_bytes() != src.read_bytes()):
+        dst.write_bytes(src.read_bytes())
+
+
+def run(root=".", force=False):
+    from .files import write_text
+    root = Path(root)
+    digest = input_digest(root)
+    stamp = root / STAMP
+    if not force and stamp.exists() and stamp.read_text() == digest and \
+            all((root / "output/charts" / n).exists() for n in CHARTS):
+        print("chart inputs unchanged; kept")
+        _preview(root)
+        return 0
+    snap = read_json(root / "data/snapshots/MANIFEST.json")["backtest"]
     track_record(root, snap)
     coverage(root, snap)
     signed_errors(root, snap)
     nowcast_path(root, snap)
+    write_text(stamp, digest)
+    _preview(root)
     return 0

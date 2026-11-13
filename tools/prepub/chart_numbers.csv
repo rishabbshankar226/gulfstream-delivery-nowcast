@@ -1,0 +1,46 @@
+file,value,label,field,fmt,note
+output/charts/dashboard.png,26,dashboard screenshot: lead sentence count of held-out quarters,m.holdout.n,f0,read from the image
+output/charts/dashboard.png,5.5,dashboard screenshot: lead sentence average miss of the registry estimate,m.holdout.mae.ratio,f1,read from the image
+output/charts/dashboard.png,6.9,dashboard screenshot: lead sentence average miss of GD's guidance pace,m.holdout.mae.guidance,f1,read from the image
+output/charts/dashboard.png,4.6,dashboard screenshot: same quarter last year missed by less,m.holdout.mae.seasonal,f1,read from the image
+output/charts/dashboard.png,33,dashboard screenshot: GD delivers about 33 a quarter,typical,f0,read from the image
+output/charts/dashboard.png,2026-10-19,dashboard screenshot: registry copy date,snap.backtest,date,read from the image
+output/charts/dashboard.png,Scored,dashboard screenshot: live quarter status for 2026Q3,status.2026Q3,str,the image reads SCORED: MISSED BY 8.0 OUTSIDE THE BAND
+output/charts/dashboard.png,8.0,dashboard screenshot: status line and facts row miss of the locked estimate,live.2026Q3.score.ae_total,f1,read from the image
+output/charts/dashboard.png,20,dashboard screenshot: miss of the locked estimate in percent,live.2026Q3.score.ape_pct,f0,read from the image (retaken 2026-11-11 after the wording changes)
+output/charts/dashboard.png,32.0,dashboard screenshot: locked estimate for 2026Q3,live.2026Q3.pred.nowcast.total,f1,read from the image
+output/charts/dashboard.png,21.2,dashboard screenshot: band of past misses low,live.2026Q3.pred.band.0,f1,read from the image
+output/charts/dashboard.png,37.2,dashboard screenshot: band of past misses high,live.2026Q3.pred.band.1,f1,read from the image
+output/charts/dashboard.png,35,dashboard screenshot: registrations in the quarter large cabin,live.2026Q3.latest.events.large,f0,read from the image
+output/charts/dashboard.png,7,dashboard screenshot: registrations in the quarter mid cabin,live.2026Q3.latest.events.mid,f0,read from the image
+output/charts/dashboard.png,2026-10-30,dashboard screenshot: snapshot date of the registrations,live.2026Q3.latest.snapshot,date,read from the image
+output/charts/dashboard.png,2026-07-06,dashboard screenshot: quarter window opens,live.2026Q3.pred.window_open,date,read from the image
+output/charts/dashboard.png,2026-10-04,dashboard screenshot: quarter window ends,live.2026Q3.pred.window_end,date,read from the image
+output/charts/dashboard.png,33.8,dashboard screenshot: GD's guidance pace,live.2026Q3.score.guidance_pace,f1,read from the image
+output/charts/dashboard.png,6.2,dashboard screenshot: guidance pace missed by,live.2026Q3.score.guidance_ae,f1,read from the image
+output/charts/dashboard.png,39,dashboard screenshot: same quarter last year deliveries,cmp.2026Q3.yago,f0,read from the image
+output/charts/dashboard.png,1,dashboard screenshot: same quarter last year missed by,cmp.2026Q3.yago_miss,f0,read from the image
+output/charts/dashboard.png,2026-10-30,dashboard screenshot: GD reported on,cal.release.2026Q3,date,read from the image
+output/charts/dashboard.png,40,dashboard screenshot: GD reported deliveries,live.2026Q3.score.reported.total,f0,read from the image
+output/charts/dashboard.png,2026-10-29,dashboard screenshot: lock date in the note under the card,live.2026Q3.lock.et_date,date,read from the image
+output/charts/dashboard.png,01:51,dashboard screenshot: lock time ET in the note under the card,live.2026Q3.lock.et_time,str,read from the image
+output/charts/dashboard.png,12,dashboard screenshot: snapshots in the estimate's path,path.2026Q3.n,f0,read from the image
+output/charts/dashboard.png,2026-10-19,dashboard screenshot: first snapshot of the path,path.2026Q3.first,date,read from the image
+output/charts/dashboard.png,2026-10-30,dashboard screenshot: last snapshot of the path,path.2026Q3.last,date,read from the image
+output/charts/track_record.png,2026-10-19,track record chart: source line registry snapshot date,snap.backtest,date,read from the image
+output/charts/track_record.png,5,track record chart: title says five estimates,const.n_models,f0,read from the image
+output/charts/coverage.png,2026-10-19,coverage chart: source line registry snapshot date,snap.backtest,date,read from the image
+output/charts/coverage.png,1.18,coverage chart: dashed mean line of GD deliveries per registry event,m.holdout.coverage_ratio.mean,f2,position read by eye against the axis
+output/charts/coverage.png,1.89,coverage chart: dotted line at the mean plus two standard deviations,cov.mean_plus_2sd,f2,position read by eye against the axis
+output/charts/signed_errors.png,2026-10-19,signed errors chart: source line registry snapshot date,snap.backtest,date,read from the image
+output/charts/nowcast_path.png,40,path chart: GD reported line,live.2026Q3.score.reported.total,f0,position read by eye against the axis
+output/charts/nowcast_path.png,33.8,path chart: GD guidance pace line,live.2026Q3.score.guidance_pace,f1,position read by eye against the axis
+output/charts/nowcast_path.png,2026-10-29,path chart: date of the locked estimate diamond,live.2026Q3.pred.snapshot,date,read from the image
+output/charts/nowcast_path.png,32.0,path chart: locked estimate diamond,live.2026Q3.pred.nowcast.total,f1,position read by eye against the axis
+output/charts/nowcast_path.png,2026-10-30,path chart: GD reported annotation date,cal.release.2026Q3,date,read from the image
+output/charts/nowcast_path.png,2026-10-19,path chart: source line first snapshot,path.2026Q3.first,date,read from the image
+output/charts/nowcast_path.png,2026-10-30,path chart: source line last snapshot,path.2026Q3.last,date,read from the image
+output/charts/track_record.png,32.0,track record chart: the 2026Q3 locked estimate (diamond),live.2026Q3.pred.nowcast.total,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,21.2,track record chart: the 2026Q3 lock's band low (lower whisker),live.2026Q3.pred.band.0,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,37.2,track record chart: the 2026Q3 lock's band high (upper whisker),live.2026Q3.pred.band.1,f1,read by eye off the axis (round 4)
+output/charts/track_record.png,40,track record chart: GD's reported 2026Q3 count (end of the black line),live.2026Q3.score.reported.total,f0,read by eye off the axis (round 4)

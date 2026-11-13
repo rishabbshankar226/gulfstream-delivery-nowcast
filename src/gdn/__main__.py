@@ -11,11 +11,13 @@ STAGES = {
     "design": ("model", "run_design"),
     "holdout": ("model", "run_holdout"),
     "errors": ("errors", "run"),
+    "sensitivity": ("sensitivity", "run"),
     "build": ("live", "run_build"),
     "snapshot": ("live", "run_snapshot"),
     "nowcast": ("live", "run_nowcast"),
     "lock": ("live", "run_lock"),
     "score": ("live", "run_score"),
+    "reported": ("live", "run_reported"),
     "estimates": ("estimates", "run"),
     "workbook": ("workbook", "run"),
     "charts": ("charts", "run"),
@@ -43,7 +45,7 @@ def main(argv=None):
     kw = {}
     if a.stage == "data":
         kw["network"] = not a.offline
-    if a.stage in ("build", "snapshot", "nowcast", "lock", "score", "daily"):
+    if a.stage in ("build", "snapshot", "nowcast", "lock", "score", "reported", "daily"):
         kw["now"] = a.now
         kw["offline"] = a.offline
     if a.stage == "daily":

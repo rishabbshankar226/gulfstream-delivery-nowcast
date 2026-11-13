@@ -1,0 +1,104 @@
+
+## What matched between my rebuild and the project's stored inputs (Part B)
+
+match.item13 = all 168 cells of data/processed/registry_quarterly.csv (42 quarters x E1/E2 x large/mid) equal my counts from data/snapshots/2026-10-19/. Zero differences.
+match.item13.airframes = 4053 airframes; 1702 have an E1 date (1728 an E2 date); 3443 are large and 610 mid by the preregistered cabin rule.
+match.item14 = every value of predictions/2026Q3.json that I rebuilt from data/snapshots/2026-10-29/ equals the file: events 35 large and 7 mid, trailing registry 187 and 28, trailing reported 140 and 23, nowcast 26.203209 + 5.750000 = 31.953209, band 21.233381 to 37.241087.
+match.item15 = four models are large by the rule and mid-cabin types by name (two GULFSTREAM 200 codes, GALAXY, GULFSTREAM 100): 11 airframes, none with an E1 or E2 date in 2016Q1 to 2026Q2. The misclassification touches no count in the window.
+match.windows = every window_end in registry_quarterly.csv equals the quarter's fiscal_end in gd_deliveries.csv, and every window_start equals the prior quarter's fiscal_end.
+
+## Ambiguities
+
+A1. Which call supplies the guidance outlook. HEADLINE-SENSITIVE.
+  The preregistration says "the latest GD earnings call, dated on or before q's fiscal end, that stated a number for it". The README text in my brief says "the full-year outlook from GD's latest call".
+  Reading A (my primary): the latest call among those that stated a number. A call that only confirms the outlook is skipped and the earlier number stands.
+    sourced quarters 22; fallback quarters 2021Q1, 2021Q2, 2021Q3, 2021Q4 (they fall back to same quarter last year).
+    holdout MAE of guidance 6.917259; MAE over its 22 sourced quarters 7.356760 (ratio 5.250326, seasonal 4.636364 over the same 22).
+  Reading B: the latest call on or before the fiscal end must itself state the number; when it does not, the quarter has no outlook.
+    sourced quarters 16; fallback adds 2022Q2, 2022Q4, 2024Q2, 2025Q2, 2025Q4, 2026Q2.
+    holdout MAE of guidance 6.683550; MAE over its 16 sourced quarters 8.423269 (ratio 5.669689, seasonal 5.062500 over the same 16).
+  Why it matters: the headline rule names guidance first only at 22 or more sourced quarters. Reading A gives exactly 22, the minimum. Reading B gives 16, and seasonal would lead the headline. Under either reading Holm rejects nothing.
+  For 2026Q3 both readings give the same pace: outlook 160 from the 2026-07-29 call, 33.840000.
+
+A2. Which quarters the sign test against guidance covers ("over the holdout quarters both score").
+  All 26, the four fallback quarters scoring as seasonal (my primary): wins 14, losses 12, ties 0, p 0.422509, relative MAE 0.798495.
+  Only the 22 sourced quarters: wins 13, losses 9, ties 0, p 0.261734, relative MAE 0.713674.
+  Holm rejects nothing either way. Lag-1 autocorrelation of the differences: 0.353072 over 26, 0.331645 over the 22 (which treats 2020Q4 and 2022Q1 as neighbours).
+
+A3. The quarter shares w_j, "pooled over years t-3 to t-1".
+  Pooled sums (my primary): holdout MAE of guidance 6.917259.
+  Mean of the three within-year shares: 6.925384. The largest change in any quarter's total is 0.346246.
+
+A4. "Mean absolute percentage error (percent of GD's reported total)".
+  Mean of each quarter's AE / reported x 100, the preregistration's APE (my primary): ratio 17.914963, raw 18.451958, guidance 23.186035, seasonal 15.205075, last 29.463661.
+  Sum of AE over sum of reported: ratio 16.895092, raw 18.941176, guidance 21.158673, seasonal 14.117647, last 26.941176.
+
+A5. The bound: README against preregistration.
+  README: the date "must fall within a year of the airframe's first airworthiness date". Preregistration: first airworthiness "plus 365 days". They differ when a 29 February lies between.
+  One airframe changes: G650 serial 6177, first airworthiness 2015-03-31, event 2016-03-31 (366 days). Under the README wording 2016Q1 large is 11, not 10, for E1 and E2.
+  Effect: design MAE of ratio 5.426019 (E1) and 5.534257 (E2) instead of 5.472548 and 5.580786; E1 is still chosen. Holdout MAE (5.523395) and band hits (18) do not change. The processed file follows the 365-day rule.
+
+A6. Fixed-width fallback in section 3.3: "cut the line at the header line's comma positions".
+  Taken literally this cannot work: the header line is not padded to the data lines' field widths. Moot here: in both snapshots no line of ACFTREF, MASTER or DEREG has a field count different from its header's, and no line holds a double quote.
+
+A7. Which counts feed the 38 past errors of the live band.
+  Section 3.5 says every count comes from the snapshot the prediction names, the past quarters' included. I built the band three ways: past counts from the lock snapshot (2026-10-29), from my rebuild of the backtest snapshot (2026-10-19), and from the processed file. All three give P10 -5.287879 and P90 10.719828, so the band is 21.233381 to 37.241087 each way. Six past-quarter cells do differ between the two snapshots (see O3); they do not move the two percentile elements.
+
+A8. Nearest-rank position, ceiling of p x n.
+  Exact integer ceiling against math.ceil on floats: identical for every n in use (12 to 38). Moot.
+
+A9. Events per delivery "by calendar year".
+  I group by the fiscal quarter's year label. Pooled (sum of events over sum of deliveries) is my primary; the mean of the quarterly ratios is printed beside it. 2026 holds two quarters only.
+
+A10. Standard deviation in the coverage-drift check: sample (n - 1), as the preregistration says; the population figure is printed for reference. Holm compares p <= alpha / (m - i + 1); no p-value sits on a threshold. The five largest misses have no ties.
+
+## Observations outside the list (facts my commands printed; the main session decides what they mean)
+
+O1. The baseline that wins. On holdout MAE, same quarter last year is the best of the five: 4.615385, against 5.523395 for ratio (relative MAE 1.196736; ratio wins 11 of 26, loses 15). Ratio is ahead of guidance pace (6.917259) and last quarter (8.807692) on MAE, but Holm rejects for none, so by the headline rule nothing may be called a beat. Ratio's bias is +2.235614 jets; its MAE by year runs from 3.037920 (2024) to 7.025277 (2021).
+
+O2. Used jets inside the count. By the registry's own YEAR MFR, 246 of the 1251 E1 events in 2016Q1 to 2026Q2 belong to airframes three or more years old at the event (large 214, mid 32); 76 more have no year. 929 are zero to two years old. By model the 246 include GV-SP (G550) 69, GVI (G650ER) 32, GIV-X (G450) 30, GVI (G650) 20, G-IV 17, G-V 12. Section 21 has the table by year. Some of the 246 may be true first deliveries of older test or demonstrator airframes (GVII-G500 10, GVII-G600 5, GVIII-G700 3); I cannot tell those apart from the registry.
+  In the locked quarter, 2026Q3, 5 of the 42 events are three or more years old by YEAR MFR: G550 serial 5260 (2009), G-1159A serial 445 (1984), G650ER serial 6206 (2016), G150 serial 311 (2014), and G700 serial 87118 (year reads 2006, which I take to be a data-entry error: its serial sits among the 2026 G700s, 87114 to 87128). A sixth, G-IV serial 1335, has no year and no airworthiness date, so no bound applies. For 5260, 445, 6206 and 311 the registry's AIR WORTH DATE is in July to September 2026, within weeks of the new certificate, so the bound does not exclude them. That is consistent with a used jet getting a new airworthiness date when it enters or re-enters the US registry; I did not check the FAA's definition of the field.
+  In fairness to the README sentence "which keeps out renewed certificates and most used jets": the bound drops the customer certificate of 1879 airframes (section 13), so "most" holds as worded. What the sentence leaves out is that 246 of the 1251 counted events (19.664269 percent), plus 76 of unknown year (6.075140 percent), are still airframes three or more years old by the registry's own year of manufacture.
+  Defensible version: "The bound keeps out renewed certificates and most used jets, but not all: about one counted event in five is an airframe at least three years old, most often a used jet that got a new airworthiness date."
+
+O3. A later registry copy also loses old events. Between the 2026-10-19 and 2026-10-29 snapshots, three past E1 events vanished: G450 serial 4166 (2019Q3), G650ER serial 6379 (2019Q4) and G280 serial 2053 (2024Q4). In the later snapshot each carries a customer certificate dated 2026-10-20 to 2026-10-27, past its bound, and the earlier event date no longer comes out of the records. One event appeared: G150 serial 311 in 2026Q3; in the earlier snapshot its 2026-08-26 certificate fell outside the bound, in the later one the airframe carries an airworthiness date of 2026-09-02 and the event counts. Six past-quarter cells changed in ten days (section 14).
+  In the backtest snapshot, registry events per reported delivery rise almost every year: 0.520661 (2016), 0.650000, 0.661157, 0.795918, 0.740157, 0.957983, 1.133333, 1.054054, 1.088235, 1.215190 (2025), 1.417722 (2026, two quarters). From 2022 on the registry shows more "first" events than GD reported deliveries.
+  So the framing "a registry copy that had months or years to fill in" is half the picture: the copy also had years to lose first registrations as jets changed hands. The counts for old quarters are lower than a snapshot taken at the time would have shown; I cannot say by how much from two snapshots ten days apart.
+
+O4. The coverage-drift flag is one-sided. Mean of deliveries per event over 2017Q1 to 2025Q2 is 1.182391, sample SD 0.351582, threshold 1.885554; none of 2025Q3 to 2026Q2 exceeds it, so no flag. The last three quarters sit below the mean by 1.393937, 1.397915 and 1.317168 SD (0.692308, 0.690909, 0.719298). The rule cannot flag a fall.
+
+O5. The same airframe under two maker prefixes. G150 serial 322 is counted in 2016Q2 (prefix 450, certificate 2016-06-28) and again in 2018Q2 (prefix 398, certificate 2018-05-22): one spurious mid-cabin event in the design window. G280 serial 2009 has a 2012-08-01 event under prefix 398 and a 2026-05-26 event under prefix 450, whose one record has no airworthiness date and no year: an airframe first registered to a customer in 2012 is one of the six mid-cabin events of 2026Q2. 105 serials appear under more than one prefix; my type check flags four of them (section 15x) and these two are the ones that put an event in the window.
+
+O6. The 2026Q3 score in context. Locked 31.953209 against GD's 40: miss 8.046791, 20.116979 percent, GD's count 2.758913 above the band's top (37.241087). The raw event count in the lock was 42 (miss 2). Guidance pace 33.840000 (miss 6.160000). Same quarter last year 39 and last quarter 41 (miss 1 each). The lock's large-cabin miss is 8.796791 and its mid-cabin miss 0.750000. sha256 of the file's bytes: 3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23 (532 bytes, LF, ends with a newline).
+
+O7. The E1 against E2 choice rests on one cell. Across 2016Q1 to 2019Q4 the two definitions differ only in 2019Q4 large (29 against 30). Over 2016Q1 to 2026Q2 they differ by nine events (large 1054 against 1063, mid 197 both).
+
+O8. The band undercovers. 18 of 26 holdout quarters fall inside a P10 to P90 band (69.230769 percent against a nominal 80; Clopper-Pearson 48.210356 to 85.674000). Misses above the band: 2020Q2, 2023Q4, 2025Q3. Misses below: 2020Q3, 2021Q1, 2021Q2, 2022Q1, 2025Q4. The locked 2026Q3 is a ninth miss, above.
+
+O9. Truncation table (extra, section 16), from my own airframe table: ratio's holdout MAE is 5.523395 at 0 days, 13.468241 at 30, 22.928680 at 60 and 31.671910 at 90. The events kept fall from 913 to 502, 257 and 29: the quarter's events are bunched at its end.
+
+## Candidate findings for the main session (IDs for reference)
+
+I may not open the public surfaces, so I cannot give file:line or confirm what each surface says. Severities are my suggestion, conditional on the wording the main session finds.
+
+RECOMPUTE-1 = S2 (S1 if any surface says or implies the count holds new deliveries only). Used jets in the count: O2, sections 18 and 21. Surface: the README's "The count" paragraph as quoted in my brief.
+RECOMPUTE-2 = S2. A later registry copy loses old events as well as gaining late ones: O3, sections 9, 14 and 20. Surface: every place that says the backtest copy "had months or years to fill in".
+RECOMPUTE-3 = S2 (S1 if a surface presents guidance as the lead baseline without saying the count of sourced quarters is exactly the minimum of 22 and depends on carrying an earlier call's number forward). A1.
+RECOMPUTE-4 = S2 if the surfaces do not say plainly that same quarter last year has the lowest holdout MAE (4.615385 against 5.523395) and that the band covers 18 of 26 (69.230769 percent against a nominal 80). O1, O8.
+RECOMPUTE-5 = S2. The coverage-drift check flags only a rise; the last three quarters fell by about 1.3 to 1.4 SD and print no flag. O4.
+RECOMPUTE-6 = S3. README says "within a year" of first airworthiness, the preregistration says 365 days; one cell differs (2016Q1 large, 11 against 10), design MAE 5.426019 against 5.472548, nothing in the holdout moves. A5.
+RECOMPUTE-7 = S3. Two airframes counted under two maker prefixes: G150 serial 322 (a second event in 2018Q2, design window) and G280 serial 2009 (first registered to a customer in 2012, counted again in 2026Q2). O5.
+RECOMPUTE-8 = S3. The cabin rule files four mid-cabin models as large (GULFSTREAM 200 twice, GALAXY, GULFSTREAM 100; 11 airframes); none has an event in 2016Q1 to 2026Q2, so no figure moves. Section 15.
+no_finding.1 = registry_quarterly.csv reproduces exactly from the 2026-10-19 subset (168 of 168 cells).
+no_finding.2 = predictions/2026Q3.json reproduces exactly from the 2026-10-29 subset (events, trailing sums, nowcast, band).
+no_finding.3 = the design-window choice of E1 reproduces (5.472548 against 5.580786).
+
+## Could not compute
+
+none_of_items_1_to_15_skipped = true
+not_checked.1 = whether the lock release's notes carry the sha256 above (I did not open the release; the main session can compare).
+not_checked.2 = whether gd_deliveries.csv matches GD's filings, whether guidance.csv's quotes and numbers match the calls, and GD's 2026Q3 count (35, 5, 40), which I took from the brief.
+not_checked.3 = the dollar estimate, the as-of study, the daily tables under data/snapshots/daily/, and the six other stored snapshots (2026-10-23 to 2026-10-28).
+not_checked.4 = the fixed-width fallback path of section 3.3: no line in either snapshot triggers it, so it has no effect to measure.
+not_checked.5 = how many old events the registry has lost in total (O3); two snapshots ten days apart show the mechanism, not the size.
+toy.guidance = skipped, as the brief says (the toy folder has no guidance file); sections 2 to 12 need the 2017Q1 to 2026Q2 windows and print "skipped" on the toy data.

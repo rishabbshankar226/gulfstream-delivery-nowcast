@@ -1,12 +1,13 @@
-One locked quarter so far: off by 8.0. I locked an estimate of 32.0 Gulfstream deliveries for 2026Q3 on GitHub before GD reported, and GD reported 40. One quarter shows how it works live, not whether it works.
+My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics (GD) reported 40.
+My tracker scales FAA registrations into an estimate of the Gulfstream jets GD reports each quarter, locked on GitHub the day before GD reports.
 
-How I tested it: I counted each Gulfstream jet's first customer registration or export in a registry copy, scaled the count by the last four quarters, and checked it on 26 past quarters held out from setting the rules, against GD's guidance pace and two simple baselines.
+The 2026Q3 miss was 8.0, outside my 80% band of past misses (it held 18 of 26 past quarters). My pace from GD's full-year outlook missed by 6.2, and last year's same quarter (39) by 1. The repository was private then; the timestamp is GitHub's.
 
-Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Simply repeating the same quarter last year missed by less on average, 4.6. That test reads a registry that had years to fill in, so only the locked quarters show whether it counts jets in time.
+Backtest (rules set minutes before scoring): Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Repeating the same quarter last year missed by less on average, 4.6. (Registry count: my scaled estimate; the pace: mine.) The test reads a registry copy that had months or years to fill in, so only locked quarters show if it counts jets in time. One quarter is one data point.
 
 Dashboard: https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/
-Code, data and the research note: https://github.com/rishabbshankar226/gulfstream-delivery-nowcast
+Code: https://github.com/rishabbshankar226/gulfstream-delivery-nowcast
 
-What public data would you add to sharpen a delivery estimate like this?
+Student project, not investment advice. I am not affiliated with General Dynamics or Gulfstream.
 
-#GeneralDynamics #EquityResearch #Python
+#EquityResearch #Aerospace

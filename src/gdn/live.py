@@ -19,6 +19,8 @@ ET = ZoneInfo("America/New_York")
 PATH_COLS = ["date", "events_large", "events_mid", "trailing_registry_large", "trailing_registry_mid",
              "nowcast_large", "nowcast_mid", "nowcast_total"]
 CABINS = ("large", "mid")
+REPORTED_SEG = "data/processed/segments_reported.csv"   # what GD reported for each scored live quarter
+REPORTED_SEG_COLS = ["quarter", "segment", "revenue_usd", "operating_earnings_usd", "accn"]
 LOCK_HOUR_ET = 19
 LAST_LOCK_MINUTES = 10          # never start a release within this many minutes of 00:00 ET on the release date
 LOCK_WINDOW_DAYS = 7
@@ -283,6 +285,9 @@ def write_lock_json(root, q, ops):
     ops.fetch_tag(tag)
     info = ops.release_view(tag)
     body = prediction_path(root, q).read_bytes()
+    tagged = ops.file_at_ref(f"refs/tags/{tag}", f"predictions/{q}.json")
+    if body != tagged:
+        raise GitError(f"prediction for {q} differs from release tag {tag}; refusing an invalid lock record")
     obj = {"tag": info["tagName"], "published_at": info["publishedAt"], "sha256": sha256(body),
            "commit": ops.tag_commit(tag)}
     write_json(lock_json_path(root, q), obj)
@@ -320,6 +325,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
     `now` decides whether a lock is due; with `wall` (a real run, not a rehearsal), the real clock must also be
     more than LAST_LOCK_MINUTES before midnight ET when the prediction is written and when the release is made."""
     now = parse_now(now)
+    root = Path(root).resolve()
     ops = ops or Ops(root, log)
     pull_clean(ops, on_conflict, log)
     q = live_quarter(root)
@@ -333,10 +339,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
         log(f"{tag} exists without {lock_p.name}: writing it from the release")
         write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
-        push_with_merge(ops, log)
-        return 0
+        return 0 if push_with_merge(ops, log, on_conflict) else 1
     if lock_p.exists():
-        return 0
+        return 0 if not ops.ahead() or push_with_merge(ops, log, on_conflict) else 1
     if not lock_due(now, rel, newest_snapshot(root)):
         if not before_release(now, rel):
             log(f"{q} missed its lock window (release {rel})"
@@ -351,7 +356,8 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             if not lock_p.exists() and pred_p.exists():
                 write_lock_json(root, q, ops)
                 ops.commit([lock_p], f"Record the {q} lock")
-                push_with_merge(ops, log)
+                if not push_with_merge(ops, log, on_conflict):
+                    return 1
             log(f"{tag} already exists; one lock per quarter")
             return 0
         if not before_release(now, rel) or (wall and not wall_clock_ok(rel)):
@@ -361,7 +367,7 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             before_prediction()
         if ops.ahead():
             log("daily outputs are not pushed yet; retrying")
-            if not push_with_merge(ops, log):
+            if not push_with_merge(ops, log, on_conflict):
                 continue
         if ops.tracked(pred_p):
             # Committed and pushed by an earlier attempt that failed before the release: never rewrite it.
@@ -370,6 +376,12 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             snap = newest_stored(root)
             if snap is None or snap >= rel:
                 log(f"no stored subset dated before {rel}")
+                return 1
+            end = Calendar.load(root).end(q)
+            if end is None or snap <= end:
+                # Every download in the lock window failed. An older subset stops before the quarter does,
+                # so a lock from it would publish a partial count as the quarter's estimate.
+                log(f"the newest stored subset ({snap}) is not dated after {q}'s fiscal end ({end}); no lock from it")
                 return 1
             rows = events.airframes(faa.read_subset(root, snap))
             pred = predict(root, q, rows, snap, utcnow() if wall else now)
@@ -391,7 +403,9 @@ def run_lock(now=None, offline=False, root=".", ops=None, log=print, before_pred
             log(f"{tag} was created by another run a moment ago; recording that release")
         obj = write_lock_json(root, q, ops)
         ops.commit([lock_p], f"Record the {q} lock")
-        push_with_merge(ops, log)
+        if not push_with_merge(ops, log, on_conflict):
+            log(f"{tag} exists but its lock record could not be pushed; retry to record it")
+            return 1
         published = parse_now(obj["published_at"])
         if not before_release(published, rel):
             log(f"WARNING: {tag} published at {obj['published_at']}, on or after the release date")
@@ -450,10 +464,70 @@ def run_score(now=None, offline=False, root=".", log=print):
     except ValueError as e:
         log(f"{q}: the 8-K {f['accn']} gives no delivery counts ({e}); not scored")
         return 1
+    lock_p = lock_json_path(root, q)
+    if lock_p.exists():
+        # The release date in config/calendar.json is typed by hand. SEC's acceptance time is the check on it.
+        published = read_json(lock_p)["published_at"]
+        if not f.get("accepted"):
+            # F124. With no acceptance time the lock cannot be checked against the release, so fail closed.
+            log(f"{q}: SEC gave no acceptance time for GD's 8-K {f['accn']}, so lock-{q} cannot be checked against "
+                "the release. The quarter is not scored: check the filing by hand.")
+            return 1
+        if parse_now(published) >= parse_now(f["accepted"]):
+            log(f"{q}: lock-{q} was published at {published}, not before SEC accepted GD's 8-K at {f['accepted']}. "
+                "It is not a lock made before the release, so the quarter is not scored: fix the record by hand.")
+            return 1
     s = score_quarter(root, q, d, f["accn"])
     write_json(live_dir(root) / f"{q}_score.json", s)
+    write_reported_segments(root, q, sec.plain(body), f["accn"], log)
     log(f"scored {q}: GD reported {d['total']}" + (f", locked {s['nowcast']['total']:.1f}" if s["locked"] else ""))
     return 0
+
+
+# ---------- what GD reported by segment, for a scored quarter ----------
+def reported_segments(root):
+    """{quarter: {"accn": ..., segment: (revenue_usd, operating_earnings_usd)}} from the tracked file."""
+    p = Path(root) / REPORTED_SEG
+    out = {}
+    for r in (read_csv(p) if p.exists() else []):
+        d = out.setdefault(r["quarter"], {"accn": r["accn"]})
+        d[r["segment"]] = (int(r["revenue_usd"]), int(r["operating_earnings_usd"]))
+    return out
+
+
+def write_reported_segments(root, q, release_text, accn, log=print):
+    """Add quarter q's segment revenue and operating earnings, as the release prints them, to the tracked file.
+    The estimates were made before the release; the note and the dashboard set these beside them."""
+    try:
+        seg = sec.parse_segments(release_text)
+    except ValueError as e:
+        log(f"{q}: the release {accn} gives no segment table ({e}); reported segments not written")
+        return False
+    p = Path(root) / REPORTED_SEG
+    rows = [r for r in (read_csv(p) if p.exists() else []) if r["quarter"] != q]
+    for s, (rev, oe) in seg.items():
+        rows.append({"quarter": q, "segment": s, "revenue_usd": int(round(rev * 1_000_000)),
+                     "operating_earnings_usd": int(round(oe * 1_000_000)), "accn": accn})
+    rows.sort(key=lambda r: (qidx(r["quarter"]), sec.SEGMENTS.index(r["segment"])))
+    write_text(p, csv_text(REPORTED_SEG_COLS, rows))
+    return True
+
+
+def run_reported(now=None, offline=False, root=".", log=print):
+    """`python -m gdn reported`: write the reported segments of every scored quarter from its release.
+    Offline it reads only the cached exhibit under data/raw/sec."""
+    c = sec.Client(root, network=not offline)
+    rc = 0
+    for q, s in sorted(scores(root).items(), key=lambda kv: qidx(kv[0])):
+        try:
+            name, body = c.exhibit_991(s["accn"])
+        except sec.SECUnavailable as e:
+            log(f"{q}: release {s['accn']} not read ({e})")
+            rc = 1
+            continue
+        if write_reported_segments(root, q, sec.plain(body), s["accn"], log):
+            log(f"{q}: reported segments written from {s['accn']}")
+    return rc
 
 
 def run_build(now=None, offline=False, root="."):

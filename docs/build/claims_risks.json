@@ -1,5 +1,14 @@
 [
   {
+    "id": "risk-midcabin-supplier-delay",
+    "text": "In its 2026Q2 quarterly report, GD said it had seen some delays, including at its Israel-based supplier of mid-cabin airframes, caused by conflicts in the Middle East.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000032",
+    "quote": "we have experienced some delays including at our Israel-based supplier of mid-cabin airframes caused by conflicts in the Middle East",
+    "retrieved_on": "2026-11-12",
+    "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
+  },
+  {
     "id": "risk-bizjet-demand-economy",
     "text": "GD says customer demand for its business aircraft can be affected by changes in general economic conditions, the availability and cost of credit, pricing pressures and trends in capital goods markets.",
     "source_type": "filing",
@@ -70,5 +79,14 @@
     "quote": "Non-U.S. transactions can involve increased risks arising from foreign exchange rate variability, which could, among other things, negatively impact sales and the translation of our international revenue from local currencies into U.S. dollars, and differing legal systems.",
     "retrieved_on": "2026-10-19",
     "sha256": "0200d601a9b15c4da74f53716855861a238c884a2be4fd8ece77cd7c721139bc"
+  },
+  {
+    "id": "risk-tariffs-update",
+    "text": "In its 2026Q2 quarterly report, GD said the U.S. Supreme Court held in February 2026 that the tariffs imposed under IEEPA were unauthorized, and that tariffs as applied and tariffs yet to be refunded are not material to its results.",
+    "source_type": "filing",
+    "url_or_accn": "0000040533-26-000032",
+    "quote": "Overall, tariffs as applied in their current form and tariffs yet to be refunded are not material to our results of operations.",
+    "retrieved_on": "2026-10-19",
+    "sha256": "09f79c28004297fa404998656ae516de20c501e691905a9cc8917aa5474a1c7f"
   }
 ]

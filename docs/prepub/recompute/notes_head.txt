@@ -1,0 +1,20 @@
+INDEPENDENT RECOMPUTE
+Subagent: recompute. Run on 2026-11-11 with /usr/bin/python3 (3.9.6), standard library only. scipy is not installed for python3, so the Clopper-Pearson interval is solved by bisection on the exact binomial tail.
+
+COMMANDS (from the repository root; S=~/gdn-prepub/agents/recompute, copies of every script in docs/prepub/recompute/)
+  python3 $S/parta.py docs/prepub/recompute/toy
+  python3 $S/parta.py data/processed --guidance data/guidance.csv --prediction predictions/2026Q3.json --q3-reported 35,5
+  python3 $S/partb.py data/snapshots 2026-10-19 2026-10-29 data/processed predictions/2026Q3.json
+  python3 $S/partb_diag.py data/snapshots 2026-10-19 2026-10-29 data/processed predictions/2026Q3.json
+  python3 $S/assemble.py ~/Desktop/projects/gulfstream-delivery-nowcast
+The last command runs the four above, in that order, after the last edit to any script, and writes this file from their output plus two hand-written note files (notes_head.txt, notes_tail.txt).
+
+WHAT I READ
+  docs/prepub/briefs/_common.md, docs/prepub/briefs/recompute.md, docs/PREREGISTRATION.md, data/processed/gd_deliveries.csv, data/processed/registry_quarterly.csv, data/guidance.csv, predictions/2026Q3.json, data/snapshots/MANIFEST.json (first 60 lines), data/snapshots/2026-10-19/ and data/snapshots/2026-10-29/ (by script), docs/prepub/recompute/toy/.
+  I opened nothing under src/, tools/, results/, tests/, report/, site/, output/, docs/build/, data/snapshots/daily/, no README.md and no other file under docs/. I imported no module of the repository.
+  One disclosure: docs/PREREGISTRATION.md, which the brief told me to read, prints the two design-window MAEs of ratio in its "Chosen definition" section (5.472548294344893 under E1, 5.5807858422376135 under E2). Those are the only project-computed results I saw. My design figures in section 2 agree with them to the 6 decimals I print. Every other figure here is blind.
+
+HOW TO READ THIS FILE
+  One figure per line as key = value. Arithmetic is exact (Python fractions) and converted to float only when printed, to 6 decimals. Nothing is rounded toward any target.
+  "reading A" and "reading B" of the guidance rule are defined under Ambiguities, item A1. Unless a key says otherwise, guidance figures are reading A.
+  Sections 0 to 12 are Part A (processed files only). Sections 13 to 15 are Part B (raw registry subsets). Sections 16 to 23 are extras the brief did not ask for; they come from my own airframe tables.

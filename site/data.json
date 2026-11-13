@@ -1136,6 +1136,28 @@
       "release_date": null
     }
   ],
+  "reported_segments": {
+    "2026Q3": {
+      "Aerospace": {
+        "revenue_usd": 3536000000,
+        "operating_earnings_usd": 513000000
+      },
+      "Marine Systems": {
+        "revenue_usd": 4960000000,
+        "operating_earnings_usd": 391000000
+      },
+      "Combat Systems": {
+        "revenue_usd": 2386000000,
+        "operating_earnings_usd": 330000000
+      },
+      "Technologies": {
+        "revenue_usd": 3684000000,
+        "operating_earnings_usd": 346000000
+      }
+    }
+  },
+  "public": false,
+  "public_since": null,
   "path": {
     "2026Q3": [
       {

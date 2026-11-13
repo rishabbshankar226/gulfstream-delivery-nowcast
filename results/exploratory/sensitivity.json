@@ -1,0 +1,231 @@
+{
+  "note": "Exploratory: tried after the held-out results were seen. None of it changes the headline.",
+  "chosen_definition": "E1",
+  "sourced_quarters_with_2021_as_117": 26,
+  "quarter_plans": {
+    "2021Q3": 32.0,
+    "2021Q4": 40.0,
+    "2022Q2": 26.0,
+    "2022Q4": 40.5,
+    "2023Q2": 26.0,
+    "2023Q3": 27.0
+  },
+  "variants": [
+    {
+      "key": "preregistered",
+      "label": "The preregistered comparison: all 26 held-out quarters",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 6.91725852797886,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 14,
+        "losses": 12,
+        "ties": 0,
+        "p_one_sided": 0.42250949144363403
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      }
+    },
+    {
+      "key": "outlook_2021_as_117",
+      "label": "GD's January 2021 statement (\"10 fewer aircraft\" than 2020's 127) read as an outlook of 117",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 6.656663722206374,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 13,
+        "losses": 13,
+        "ties": 0,
+        "p_one_sided": 0.577490508556366
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      }
+    },
+    {
+      "key": "without_2020",
+      "label": "Without the four quarters of 2020",
+      "n": 22,
+      "mae": {
+        "ratio": 5.3509265000943245,
+        "raw": 5.818181818181818,
+        "guidance": 7.405505293700861,
+        "seasonal": 4.454545454545454,
+        "last": 8.681818181818182
+      },
+      "ratio_vs_guidance": {
+        "wins": 12,
+        "losses": 10,
+        "ties": 0,
+        "p_one_sided": 0.4159059524536133
+      },
+      "ratio_vs_seasonal": {
+        "wins": 9,
+        "losses": 13,
+        "ties": 0,
+        "p_one_sided": 0.8568606376647949
+      }
+    },
+    {
+      "key": "without_2023_2024",
+      "label": "Without 2023 and 2024, the two years the guidance pace missed by most",
+      "n": 18,
+      "mae": {
+        "ratio": 6.430811636168303,
+        "raw": 7.722222222222222,
+        "guidance": 4.429407651898659,
+        "seasonal": 4.444444444444445,
+        "last": 7.666666666666667
+      },
+      "ratio_vs_guidance": {
+        "wins": 6,
+        "losses": 12,
+        "ties": 0,
+        "p_one_sided": 0.951873779296875
+      },
+      "ratio_vs_seasonal": {
+        "wins": 6,
+        "losses": 12,
+        "ties": 0,
+        "p_one_sided": 0.951873779296875
+      }
+    },
+    {
+      "key": "without_2023Q1_2024Q1",
+      "label": "Without 2023Q1 to 2024Q1, the five quarters before G700 deliveries began",
+      "n": 21,
+      "mae": {
+        "ratio": 6.039965584627777,
+        "raw": 7.190476190476191,
+        "guidance": 5.417498883785716,
+        "seasonal": 4.857142857142857,
+        "last": 8.523809523809524
+      },
+      "ratio_vs_guidance": {
+        "wins": 9,
+        "losses": 12,
+        "ties": 0,
+        "p_one_sided": 0.808344841003418
+      },
+      "ratio_vs_seasonal": {
+        "wins": 8,
+        "losses": 13,
+        "ties": 0,
+        "p_one_sided": 0.9053764343261719
+      }
+    },
+    {
+      "key": "only_2023_2024",
+      "label": "Only 2023 and 2024",
+      "n": 8,
+      "mae": {
+        "ratio": 3.4817086072765546,
+        "raw": 2.75,
+        "guidance": 12.51492299915931,
+        "seasonal": 5.0,
+        "last": 11.375
+      },
+      "ratio_vs_guidance": {
+        "wins": 8,
+        "losses": 0,
+        "ties": 0,
+        "p_one_sided": 0.00390625
+      },
+      "ratio_vs_seasonal": {
+        "wins": 5,
+        "losses": 3,
+        "ties": 0,
+        "p_one_sided": 0.36328125
+      }
+    },
+    {
+      "key": "definition_E2",
+      "label": "The other event definition, E2, in place of E1",
+      "n": 26,
+      "mae": {
+        "ratio": 5.468303894717964,
+        "raw": 6.269230769230769,
+        "guidance": 6.91725852797886,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 17,
+        "losses": 9,
+        "ties": 0,
+        "p_one_sided": 0.08431877195835114
+      },
+      "ratio_vs_seasonal": {
+        "wins": 12,
+        "losses": 14,
+        "ties": 0,
+        "p_one_sided": 0.7214014530181885
+      }
+    },
+    {
+      "key": "quarter_plans",
+      "label": "GD's stated plan for the quarter in place of the guidance pace, in the 6 quarters where a call gave one",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 6.018387110703274,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 12,
+        "losses": 14,
+        "ties": 0,
+        "p_one_sided": 0.7214014530181885
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      }
+    },
+    {
+      "key": "quarter_plans_and_2021_as_117",
+      "label": "Both: GD's stated quarter plans, and the January 2021 statement read as 117",
+      "n": 26,
+      "mae": {
+        "ratio": 5.523395319586225,
+        "raw": 6.1923076923076925,
+        "guidance": 5.703118279404744,
+        "seasonal": 4.615384615384615,
+        "last": 8.807692307692308
+      },
+      "ratio_vs_guidance": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      },
+      "ratio_vs_seasonal": {
+        "wins": 11,
+        "losses": 15,
+        "ties": 0,
+        "p_one_sided": 0.8365302085876465
+      }
+    }
+  ]
+}

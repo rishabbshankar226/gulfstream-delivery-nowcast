@@ -1,0 +1,196 @@
+# Link check. Extraction and fetch: ~/gdn-prepub/venv/bin/python tools/prepub/links.py --root . --out docs/prepub/LINKS.csv
+# Extractors: Markdown links and bare URLs; href, src and css url() in HTML; URL literals and fetch() in site/app.js and style.css; PDF link annotations (pypdf); workbook hyperlinks and URL text (openpyxl); url columns of data/guidance.csv and docs/build/AIRFRAME_AUDIT.csv; report/claims.json sources.
+source,link,kind,class,now,after_public,title_or_note
+docs/LINKEDIN_POST.md,https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/,bare URL,own repository or Pages,status 404,will resolve once the repository is public and Pages is on,
+docs/LINKEDIN_POST.md,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,bare URL,own repository or Pages,status 404,will resolve once the repository is public,
+README.md,output/charts/track_record.png,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,output/GD_research_note.pdf,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,output/gd_gulfstream_model.xlsx,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,results/exploratory/sensitivity.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,results/error_analysis.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/releases/tag/lock-2026Q3,markdown link,own repository or Pages,status 404,will resolve once the repository is public (tag exists locally; the release is confirmed by gh release view),
+README.md,docs/PREREGISTRATION.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/prepub/ERRATA.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,markdown link,external,resolves,same,Does backlog predict revenue? Five defense primes
+README.md,results/exploratory/asof.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,results/exploratory/sensitivity.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/snapshots/,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/processed/gd_deliveries.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/processed/gd_deliveries.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/guidance.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/quarter_plans.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,data/processed/segments_reported.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,report/claims.json,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/build/DECISIONS.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/prepub/ERRATA.md,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/build/AIRFRAME_AUDIT.csv,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,.github/workflows/nowcast.yml,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/build/,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,docs/prepub/,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,LICENSE,markdown link,in-repo relative,resolves in the tree,same (also on GitHub once public),
+README.md,https://rshankar.dev,markdown link,external,resolves,same,"Rishabb Shankar | Finance, software & AI"
+README.md,https://registry.faa.gov/database/ReleasableAircraft.zip,bare URL,external,resolves,same,"(application/x-zip-compressed, 400000 bytes read)"
+docs/PREREGISTRATION.md,https://registry.faa.gov/database/ReleasableAircraft.zip,bare URL,external,resolves,same,"(application/x-zip-compressed, 400000 bytes read)"
+docs/PREREGISTRATION.md,https://www.faa.gov/licenses_certificates/aircraft_certification/aircraft_registry/releasable_aircraft_download,bare URL,external,resolves,same,Aircraft Registration | Federal Aviation Administration
+docs/PREREGISTRATION.md,https://web.archive.org/cdx/search/cdx?url=registry.faa.gov/database/ReleasableAircraft.zip&output=json,bare URL,external,resolves,same,"(application/json, 17510 bytes read)"
+results/error_analysis.md,https://www.fool.com/earnings/call-transcripts/2021/04/28/general-dynamics-gd-q1-2021-earnings-call-transcri/,bare URL,external,resolves,same,General Dynamics (GD) Q1 2021 Earnings Call Transcript | The Motley Fool
+site/index.html,favicon.svg,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/index.html,fonts/ibm-plex-sans-wght.woff2,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/index.html,style.css,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/index.html,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#results,href/src,own repository or Pages,status 404,will resolve once the repository is public,
+site/index.html,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,href/src,own repository or Pages,status 404,will resolve once the repository is public,
+site/index.html,GD_research_note.pdf,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/index.html,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,href/src,external,resolves,same,Does backlog predict revenue? Five defense primes
+site/index.html,https://rshankar.dev,href/src,external,resolves,same,"Rishabb Shankar | Finance, software & AI"
+site/index.html,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#limitations,href/src,own repository or Pages,status 404,will resolve once the repository is public,
+site/index.html,vendor/chart.umd.js,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/index.html,app.js,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+report/note.html,https://rshankar.dev,href/src,external,resolves,same,"Rishabb Shankar | Finance, software & AI"
+report/note.html,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,href/src,own repository or Pages,status 404,will resolve once the repository is public,
+report/note.html,../output/charts/track_record.png,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+report/note.html,../output/charts/signed_errors.png,href/src,in-repo relative,resolves in the tree,same (also on GitHub once public),
+report/note.html,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,href/src,external,resolves,same,Does backlog predict revenue? Five defense primes
+report/note.html,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,href/src,own repository or Pages,status 404,will resolve once the repository is public,
+report/note.html,../site/fonts/ibm-plex-sans-wght.woff2,css url,in-repo relative,resolves in the tree,same (also on GitHub once public),
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000006,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000008,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000008
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000014,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000014
+report/note.html,https://web.archive.org/web/20170516140736id_/http://gulfstreamnews.com:80/news/gulfstream-g280-certified-by-federal-aviation-administration-and-civil-aviation-authority-of-israel,URL in text,external,resolves,same,Gulfstream News – News Releases – GULFSTREAM G280 CERTIFIED BY FEDERAL AVIATION ADMINISTRATION AND CIVIL AVIATION AUTHOR
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000045,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000045
+report/note.html,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,URL in text,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000029,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000029
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000032,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000032
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053317000012,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053317000012
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053317000031,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053317000031
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053317000040,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053317000040
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053318000003,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053318000003
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053318000016,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053318000016
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053318000040,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053318000040
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053318000058,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053318000058
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053319000004,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053319000004
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053319000018,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053319000018
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053319000046,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053319000046
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053319000054,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053319000054
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053320000007,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053320000007
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053320000026,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053320000026
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053320000055,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053320000055
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053320000061,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053320000061
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053321000004,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053321000004
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053321000014,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053321000014
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053321000041,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053321000041
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053321000047,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053321000047
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053322000004,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053322000004
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053322000011,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053322000011
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053322000037,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053322000037
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053322000046,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053322000046
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053323000003,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053323000003
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053323000025,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053323000025
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053323000058,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053323000058
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053323000068,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053323000068
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053324000004,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053324000004
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053324000013,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053324000013
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053324000033,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053324000033
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053324000041,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053324000041
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000003,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000003
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000012,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000012
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000033,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000033
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053325000043,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000043
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000003,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000003
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000010,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000010
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000029,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000029
+report/note.html,https://sec.gov/Archives/edgar/data/40533/000004053326000036,URL in text,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000036
+site/app.js,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#results,URL literal,own repository or Pages,status 404,will resolve once the repository is public,
+site/app.js,data.json,fetch,in-repo relative,resolves in the tree,same (also on GitHub once public),
+site/style.css,fonts/ibm-plex-sans-wght.woff2,css url,in-repo relative,resolves in the tree,same (also on GitHub once public),
+output/GD_research_note.pdf:p1,https://rshankar.dev/,pdf annotation,external,resolves,same,"Rishabb Shankar | Finance, software & AI"
+output/GD_research_note.pdf:p1,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,pdf annotation,own repository or Pages,status 404,will resolve once the repository is public,
+output/GD_research_note.pdf:p6,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,pdf annotation,external,resolves,same,Does backlog predict revenue? Five defense primes
+output/GD_research_note.pdf:p6,https://rishabbshankar226.github.io/Defense-Backlog-forecast/,pdf annotation,external,resolves,same,Does backlog predict revenue? Five defense primes
+output/GD_research_note.pdf:p8,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,pdf annotation,own repository or Pages,status 404,will resolve once the repository is public,
+workbook:About!A19,https://github.com/rishabbshankar226/gulfstream-delivery-nowcast,URL in cell,own repository or Pages,status 404,will resolve once the repository is public,
+data/guidance.csv:2,https://www.fool.com/earnings/call-transcripts/2020/01/29/general-dynamics-corp-gd-q4-2019-earnings-call-tra.aspx,csv url,external,resolves,same,General Dynamics Corp (GD) Q4 2019 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:3,https://www.fool.com/earnings/call-transcripts/2020/04/29/general-dynamics-corp-gd-q1-2020-earnings-call-tra.aspx,csv url,external,resolves,same,General Dynamics Corp (GD) Q1 2020 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:4,https://www.fool.com/earnings/call-transcripts/2020/07/30/general-dynamics-gd-q2-2020-earnings-call-transcri.aspx,csv url,external,resolves,same,General Dynamics (GD) Q2 2020 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:5,https://www.fool.com/earnings/call-transcripts/2020/10/28/general-dynamics-gd-q3-2020-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2020 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:6,https://www.fool.com/earnings/call-transcripts/2021/01/27/general-dynamics-gd-q4-2020-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2020 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:7,https://www.fool.com/earnings/call-transcripts/2021/04/28/general-dynamics-gd-q1-2021-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q1 2021 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:8,https://www.fool.com/earnings/call-transcripts/2021/07/29/general-dynamics-gd-q2-2021-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2021 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:9,https://www.fool.com/earnings/call-transcripts/2021/10/28/general-dynamics-gd-q3-2021-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2021 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:10,https://www.fool.com/earnings/call-transcripts/2022/01/26/general-dynamics-gd-q4-2021-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2021 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:11,https://www.fool.com/earnings/call-transcripts/2022/04/27/general-dynamics-gd-q1-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q1 2022 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:12,https://www.fool.com/earnings/call-transcripts/2022/07/27/general-dynamics-gd-q2-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2022 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:13,https://www.fool.com/earnings/call-transcripts/2022/10/26/general-dynamics-gd-q3-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2022 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:14,https://www.fool.com/earnings/call-transcripts/2023/01/25/general-dynamics-gd-q4-2022-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2022 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:15,https://marketbeat.com/earnings/transcripts/89656,csv url,external,fails: status 403,same,
+data/guidance.csv:16,https://www.fool.com/earnings/call-transcripts/2023/07/26/general-dynamics-gd-q2-2023-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2023 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:17,https://www.fool.com/earnings/call-transcripts/2023/10/25/general-dynamics-gd-q3-2023-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2023 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:18,https://www.fool.com/earnings/call-transcripts/2024/01/24/general-dynamics-gd-q4-2023-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2023 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:19,https://www.fool.com/earnings/call-transcripts/2024/04/24/general-dynamics-gd-q1-2024-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q1 2024 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:20,https://www.fool.com/earnings/call-transcripts/2024/07/24/general-dynamics-gd-q2-2024-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q2 2024 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:21,https://www.fool.com/earnings/call-transcripts/2024/10/23/general-dynamics-gd-q3-2024-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q3 2024 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:22,https://www.fool.com/earnings/call-transcripts/2025/01/29/general-dynamics-gd-q4-2024-earnings-call-transcri/,csv url,external,resolves,same,General Dynamics (GD) Q4 2024 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:23,https://www.marketbeat.com/earnings/reports/2025-4-23-general-dynamics-co-stock,csv url,external,fails: status 403,same,
+data/guidance.csv:24,https://www.fool.com/earnings/call-transcripts/2025/08/05/general-dynamics-gd-q2-2025-earnings-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q2 2025 Earnings Transcript | The Motley Fool
+data/guidance.csv:25,https://www.marketbeat.com/earnings/reports/2025-10-24-general-dynamics-co-stock,csv url,external,fails: status 403,same,
+data/guidance.csv:26,https://www.fool.com/earnings/call-transcripts/2026/01/28/general-dynamics-gd-q4-2025-earnings-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q4 2025 Earnings Transcript | The Motley Fool
+data/guidance.csv:27,https://www.fool.com/earnings/call-transcripts/2026/04/29/general-dynamics-gd-q1-2026-earnings-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q1 2026 Earnings Transcript | The Motley Fool
+data/guidance.csv:28,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+data/guidance.csv:29,https://www.fool.com/earnings/call-transcripts/2026/10/30/general-dynamics-gd-q3-2026-earnings-call-transcript/,csv url,external,resolves,same,General Dynamics (GD) Q3 2026 Earnings Call Transcript | The Motley Fool
+docs/build/AIRFRAME_AUDIT.csv:2,https://flightaware.com/resources/registration/N898S,csv url,external,resolves,same,N898S (2018 GULFSTREAM AEROSPACE CORP GVI (G650ER) owned by TVPX AIRCRAFT SOLUTIONS INC TRUSTEE) Aircraft Registration -
+docs/build/AIRFRAME_AUDIT.csv:3,https://flightaware.com/resources/registration/N38NG,csv url,external,resolves,same,N38NG (2015 GULFSTREAM AEROSPACE GV-SP (G550) owned by NORTHROP GRUMMAN SYSTEMS CORP) Aircraft Registration - FlightAwar
+docs/build/AIRFRAME_AUDIT.csv:4,https://www.airport-data.com/aircraft/N533SF.html,csv url,external,resolves,same,"Aircraft Data N533SF, 2018 Gulfstream Aerospace G500, c/n 72017"
+docs/build/AIRFRAME_AUDIT.csv:5,https://flightaware.com/resources/registration/N1ED,csv url,external,resolves,same,N1ED (2016 IAI LTD GULFSTREAM G150 owned by DBCT LLC) Aircraft Registration - FlightAware
+docs/build/AIRFRAME_AUDIT.csv:6,https://www.airport-data.com/aircraft/N24JR.html,csv url,external,resolves,same,"Aircraft Data N24JR, 2008 Gulfstream Aerospace GIV-X (G450), c/n 4122"
+docs/build/AIRFRAME_AUDIT.csv:7,https://www.airport-data.com/aircraft/N383MJ.html,csv url,external,resolves,same,"Aircraft Data N383MJ, 1985 Gulfstream Aerospace G-1159A, c/n 466"
+docs/build/AIRFRAME_AUDIT.csv:8,https://www.airport-data.com/aircraft/N650XA.html,csv url,external,resolves,same,"Aircraft Data N650XA, 2016 Gulfstream Aerospace G650 (G-VI), c/n 6201"
+docs/build/AIRFRAME_AUDIT.csv:9,https://www.airport-data.com/aircraft/N950CM.html,csv url,external,resolves,same,"Aircraft Data N950CM, 2016 Gulfstream G-VI (G650ER), c/n 6270"
+docs/build/AIRFRAME_AUDIT.csv:10,https://www.airport-data.com/aircraft/N568JL.html,csv url,external,resolves,same,"Aircraft Data N568JL, 2011 Gulfstream Aerospace GV-SP (G550), c/n 5340"
+docs/build/AIRFRAME_AUDIT.csv:11,https://www.airport-data.com/aircraft/N809DA.html,csv url,external,resolves,same,"Aircraft Data N809DA, 2010 Gulfstream Aerospace GV-SP (G550), c/n 5269"
+docs/build/AIRFRAME_AUDIT.csv:12,https://tailno.com/n-numbers/N680GA,csv url,external,resolves,same,N680GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:13,https://tailno.com/n-numbers/N307GA,csv url,external,resolves,same,N307GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:14,https://tailno.com/n-numbers/N639GA,csv url,external,resolves,same,N639GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:15,https://tailno.com/n-numbers/N834GA,csv url,external,resolves,same,N834GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:16,https://www.airport-data.com/aircraft/B-8098.html,csv url,external,resolves,same,"Aircraft Data B-8098, 2007 Gulfstream Aerospace GIV-X (G450), c/n 4076"
+docs/build/AIRFRAME_AUDIT.csv:17,https://tailno.com/n-numbers/N616GA,csv url,external,resolves,same,N616GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:18,https://tailno.com/n-numbers/N557GD,csv url,external,resolves,same,N557GD N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:19,https://tailno.com/n-numbers/N625G,csv url,external,resolves,same,N625G N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:20,https://tailno.com/n-numbers/N681GD,csv url,external,resolves,same,N681GD N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:21,https://tailno.com/n-numbers/N621GD,csv url,external,resolves,same,N621GD N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:22,https://tailno.com/n-numbers/N566GA,csv url,external,resolves,same,N566GA N-Number registration information and historical record. | Tailno
+docs/build/AIRFRAME_AUDIT.csv:23,https://www.globalsecurity.org/military/library/news/2000/02/mil-000221-general-dynamics02.htm,csv url,external,resolves,same,Gulfstream Aerospace Delivers First C-37A for U.S. Commander-in-Chief Support Mission
+docs/build/AIRFRAME_AUDIT.csv:24,https://www.airport-data.com/aircraft/N218GA.html,csv url,external,resolves,same,"Aircraft Data N218GA, 2011 Gulfstream Aerospace GIV-X (G450), c/n 4218"
+docs/build/AIRFRAME_AUDIT.csv:25,https://www.airport-data.com/aircraft/SU-BPE.html,csv url,external,resolves,same,"Aircraft Data SU-BPE, 2003 Gulfstream Aerospace G-IV, c/n 1506"
+docs/build/AIRFRAME_AUDIT.csv:26,https://www.airport-data.com/aircraft/N587GA.html,csv url,external,resolves,same,"Aircraft Data N587GA, 2005 Gulfstream Aerospace GV-SP (G550), c/n 5087"
+docs/build/AIRFRAME_AUDIT.csv:27,https://www.myplane.com/N654JK,csv url,external,resolves,same,N654JK — 2019 Gulfstream GVII-G500 — MyPlane.com
+docs/build/AIRFRAME_AUDIT.csv:28,https://www.airport-data.com/aircraft/N588PX.html,csv url,external,resolves,same,"Aircraft Data N588PX, Gulfstream Aerospace GV-SP (G550), c/n 5467"
+docs/build/AIRFRAME_AUDIT.csv:29,https://www.airport-data.com/aircraft/N523GA.html,csv url,external,resolves,same,"Aircraft Data N523GA, 2007 Vans RV-7A, c/n 72223"
+docs/build/AIRFRAME_AUDIT.csv:30,https://www.airport-data.com/aircraft/N652BA.html,csv url,external,resolves,same,"Aircraft Data N652BA, 2015 Gulfstream G-VI (G650ER), c/n 6130"
+docs/build/AIRFRAME_AUDIT.csv:31,https://aircraftexchange.com/jet-aircraft-for-sale/details/6590/2019-gulfstream-g280,csv url,external,fails: status error: timeout: The read operation timed out,same,
+report/claims.json:bo-aerospace,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:bo-combat,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:bo-marine,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:bo-technologies,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:os-btb,https://www.sec.gov/Archives/edgar/data/40533/000004053326000029/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000029
+report/claims.json:os-del,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,claim source,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/claims.json:os-margin,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,claim source,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/claims.json:os-rev,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,claim source,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/claims.json:pc-g280-final-delivery,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,claim source,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/claims.json:pc-g280-iai,https://web.archive.org/web/20170516140736id_/http://gulfstreamnews.com:80/news/gulfstream-g280-certified-by-federal-aviation-administration-and-civil-aviation-authority-of-israel,claim source,external,resolves,same,Gulfstream News – News Releases – GULFSTREAM G280 CERTIFIED BY FEDERAL AVIATION ADMINISTRATION AND CIVIL AVIATION AUTHOR
+report/claims.json:pc-g280-mid-cabin,https://www.sec.gov/Archives/edgar/data/40533/000004053325000008/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000008
+report/claims.json:pc-g300-replaces-g280,https://www.sec.gov/Archives/edgar/data/40533/000004053325000045/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000045
+report/claims.json:pc-g400-timing-update,https://www.fool.com/earnings/call-transcripts/2026/08/07/general-dynamics-gd-q2-2026-earnings-call-transcript/,claim source,external,resolves,same,General Dynamics (GD) Q2 2026 Earnings Call Transcript | The Motley Fool
+report/claims.json:pc-g500-g600-entry-into-service,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:pc-g650-end-of-production,https://www.sec.gov/Archives/edgar/data/40533/000004053325000014/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000014
+report/claims.json:pc-g700-first-deliveries,https://www.sec.gov/Archives/edgar/data/40533/000004053325000008/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000008
+report/claims.json:pc-g800-certification,https://www.sec.gov/Archives/edgar/data/40533/000004053325000014/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053325000014
+report/claims.json:pc-g800-first-deliveries,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-aerospace-customer-defaults,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-bizjet-demand-economy,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-fixed-price-contracts,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-international-fx,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-midcabin-supplier-delay,https://www.sec.gov/Archives/edgar/data/40533/000004053326000032/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000032
+report/claims.json:risk-new-product-regulatory-delays,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-supply-chain-disruption,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-tariffs,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
+report/claims.json:risk-tariffs-update,https://www.sec.gov/Archives/edgar/data/40533/000004053326000032/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000032
+report/claims.json:risk-us-government-spending,https://www.sec.gov/Archives/edgar/data/40533/000004053326000006/,claim accession,external,resolves,same,Directory List of /Archives/edgar/data/40533/000004053326000006
