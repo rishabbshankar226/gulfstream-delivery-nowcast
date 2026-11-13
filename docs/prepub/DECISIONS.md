@@ -226,4 +226,4 @@ The owner asked for "all of this" to be done with Claude in Chrome. Before actin
 - **Waiting.**
   - Support's reply comes first. Then come part 0's step 8 checks: the old lock commit's URL returns 404 while logged in, and no `refs/pull/*` is left.
   - Then step 9 (the commit map, E11, the README sentence, a `LOCK_CHECK.md` line), step 10 (log gate `L3`) and step 11 (re-enable the workflow), and part 2 from step 3.
-  - Until the workflow is re-enabled, no daily snapshot is taken.
+  - The owner chose to re-enable the workflow now, before Support's reply. It was re-enabled at 2026-11-13 00:05 ET ("Workflow enabled successfully"), so step 11 is done early. The workflow's commits will land on `origin/main`, so this clone pulls (a merge, not a rebase) before it pushes its local commits.
