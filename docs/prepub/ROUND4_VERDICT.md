@@ -8,14 +8,12 @@
 - Seventeen of the eighteen new S2 findings are fixed. That includes the cold read's one finding (F130) and the first-screen findings F113, F114, F116, F117, F123 and F130. F115 is fixed where the pace is defined; its post and live-card part is regraded to S3 (`FINDINGS.md` 5.3).
 - The private name and the home paths are gone from the tracked files (F110, F111). They remain in history.
 
-What stops the post now is only what the owner must decide or do:
+What stops the post now is only what the owner must do. The decisions are made: on 2026-11-12 the owner chose privacy first, with the repository public (DECISIONS D25).
 
-1. **Decision A**, the email address on 62 commits of `main` (F015, F112).
-2. **Decision B**, the home paths in the 16 build briefs and in history (F016, F111).
-3. **The private name in the branch history** (F110, A.3 below): a local squash merge, with `origin/prepub-audit` deleted before the flip, keeps it off `main`.
-4. **`GO_PUBLIC.md` step 1**, dating the position statement (F081).
+1. **Run `GO_PUBLIC.md` part 0.** It rewrites the history once, so no commit holds the email address, the home paths or the private name (F015, F016, F110, F111), and pushes it before the repository is ever public. A rehearsal took every count to 0 and left every record file and the lock's hash unchanged. Then ask GitHub Support to purge the old commits.
+2. **Date the position statement**, `GO_PUBLIC.md` step 1 (F081). Part 0 does this at its own step 3.
 
-After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129). One order matters: `origin/prepub-audit` on GitHub holds every audit commit, `aa273cb` included, so its history holds the private name. Step 2b, which deletes that branch, must come before step 4 if the name is to stay out of public history.
+After that, parts 0 and 2 of `GO_PUBLIC.md`, in order, make the repository public and protect it, with the security settings in part 0 and step 4b. Part 0 replaces the old steps 2 and 2b, so the branch with the old history is deleted before anything is public.
 
 | # | Criterion | Holds | Measurement at `2393a18` (`BASELINE.md`, Round 4 final) |
 |---|---|---|---|

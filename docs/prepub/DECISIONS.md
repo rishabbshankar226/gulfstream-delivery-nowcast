@@ -155,3 +155,18 @@ The owner said "Yes, run fix pass" to the round 4 verdict. The pass fixes what `
 
   `links.py` does not scan `docs/prepub/`. The new index page's nine relative links were checked by script, and all resolve.
 - **The owner pushed the branch again.** At 21:58 CST, `refs/remotes/origin/prepub-audit` moved from `4388294` to `e054804` ("update by push" in its reflog). This session ran no push. The repository is still private (`gh repo view` prints `PRIVATE`). The new remote tip no longer holds the private name, but its history does, from `aa273cb`. So the order in the entry above still holds: step 2b before step 4. The two commits after `e054804` are local only.
+
+## D25. The owner's decision on history: privacy first, with the repository public (2026-11-12)
+The owner wrote: "private and security is the goal, while having the github public". This settles decision A (the email address, F015), decision B (home paths, F016 and F111) and the private name in the branch history (F110): none of it is to be public, history included. The repository still goes public.
+
+- **Reading taken.** Rewrite the history once, before the repository is ever public, so that no commit holds the personal data. Then push the rewritten history over the old one, and ask GitHub to purge the old commits. R3 binds this audit session ("never rewrite history"), not the owner. So the audit rehearsed the rewrite and wrote the tool, and the owner runs it and pushes (`GO_PUBLIC.md`, part 0).
+- **R7.** The record's files do not change: every file in `predictions/`, `results/live/`, `data/snapshots/`, `docs/PREREGISTRATION.md` and `.github/` keeps its bytes. The lock file keeps its sha256, and the release and its `published_at` are not touched. What changes is every commit hash, the lock commit's included, so the `lock-2026Q3` tag moves to the rewritten lock commit. That is a change to how an outsider finds the lock, not to the lock. It gets a dated erratum, E11, and a published old-to-new commit map. Keeping the old history was the other way to keep the tag where it is, and the owner ruled it out.
+- **The rehearsal.** `git filter-branch` ran on a scratch mirror (`~/gdn-prepub/scratch/rewrite_rehearsal`), and `tools/prepub/rewrite_history.py` then ran on a fresh one (`~/gdn-prepub/scratch/rewrite_script_test.git`), both with pushing disabled. Across all 190 commits:
+  - personal email in commit metadata went from 286 to 0;
+  - home-folder prefix lines from 177 to 0;
+  - account name in an `ls -l` owner column from 2 to 0;
+  - private name from 4 to 0.
+
+  Every record file was identical at every branch tip and at the tag. `predictions/2026Q3.json` at the new tag hashed to `3c4cdbd0...6f23`, and the lock commit kept its author and dates. The script printed `ALL CHECKS PASSED`. `filter-repo` is not installed here, so the tool uses git's own `filter-branch`.
+- **What the rewrite cannot do alone.** GitHub's "Removing sensitive data from a repository" page (read 2026-11-12) says old commits may stay reachable by SHA in cached views, and through pull-request refs and forks, until GitHub Support removes them. The repository has never been public and has no forks, and the audit merged nothing through a pull request. Part 0 therefore asks Support to purge before the repository goes public, and checks afterwards that the old lock commit's URL returns 404.
+- **Not done by the audit:** no rewrite of this checkout, no push, no change to GitHub, account or Actions settings.

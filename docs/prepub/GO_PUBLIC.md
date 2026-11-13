@@ -2,14 +2,78 @@
 
 Written 2026-11-11 by the pre-publication audit. Nothing here has been done. The audit pushed nothing, changed nothing on GitHub and ran no daily job, lock or score. Every step below is yours, in this order. Each has its check.
 
-Read `VERDICT.md` first. If it says NO-GO, the list of what remains is there, and most of it is the decisions in part 1.
+Read `ROUND4_VERDICT.md` first; `VERDICT.md` is the earlier verdict. If it says NO-GO, the list of what remains is there, and most of it is the decisions in part 1.
+
+## Part 0. The privacy route (chosen 2026-11-12)
+
+You chose a public repository with no personal data in it, its history included (DECISIONS D25). That settles decisions A and B, and the private name in the branch history (F110). The way to do it is to rewrite the history once, before the repository is ever public, and push the rewritten history over the old one.
+
+What the rewrite keeps and changes:
+
+- Every record file stays byte for byte: `predictions/`, `results/live/`, `data/snapshots/`, `docs/PREREGISTRATION.md` and `.github/`.
+- `predictions/2026Q3.json` keeps its sha256, so it still matches the `lock-2026Q3` release notes.
+- The lock commit keeps its date (2026-10-29 05:51:22 UTC) and its author (`github-actions[bot]`).
+- The release itself, and its `published_at`, are not touched.
+- What changes: every commit hash, the lock commit's included (`a44e5ac` becomes a new hash), and so the `lock-2026Q3` tag moves to the new commit.
+- The release's `targetCommitish` still names `a44e5ac`. ERRATA E11 says so.
+
+A rehearsal on 2026-11-12, on a scratch mirror, found:
+
+| Pattern, across all 190 commits | Before | After |
+|---|---|---|
+| Personal email in commit metadata | 286 | 0 |
+| Home-folder prefix | 177 | 0 |
+| Account name in an `ls -l` owner column | 2 | 0 |
+| Private name | 4 | 0 |
+
+It also found every record file identical at every branch tip and tag, and the lock file's hash unchanged (`DECISIONS.md` D25).
+
+Do these steps in order. They replace decisions A and B below, and they replace steps 2 and 2b of part 2.
+
+1. **Stop the workflow.** On GitHub, open Actions, then the nowcast workflow, and choose "Disable workflow". Nothing must commit while you rewrite.
+   - Check: the workflow shows as disabled.
+2. **Hide your email from now on.**
+   - Settings (your account), Emails: turn on "Keep my email addresses private" and "Block command line pushes that expose my email". Copy the no-reply address shown there.
+   - In this checkout: `git config user.email <that no-reply address>`.
+3. **Date the position statement:** step 1 of part 2, on `prepub-audit`.
+4. **Merge locally:** `git switch main && git merge --no-ff prepub-audit`.
+   - Check: `make test` passes, and `make all` then `git status --short` prints nothing.
+5. **Rewrite into a new mirror:**
+
+   ```
+   PRIVATE_NAME='<your private name>' python3 tools/prepub/rewrite_history.py --new-email '<your no-reply address>' --out ~/gdn-rewrite.git
+   ```
+
+   - Check: it ends with `ALL CHECKS PASSED`, and every "After" count it prints is 0.
+   - It writes `~/gdn-rewrite.git.commit_map.csv` (old SHA, new SHA) and prints the push commands.
+6. **Push the rewritten history.** Run the commands it printed: force-push `main`, force-push the tag `lock-2026Q3`, then delete `prepub-audit` and `codex/fix-daily-merge-and-lock-integrity` on GitHub.
+   - Check: `git ls-remote --heads origin` lists `main` only.
+   - Check: `git ls-remote --tags origin` shows `lock-2026Q3` at the new lock hash the script printed.
+   - Check: `gh release view lock-2026Q3 --json publishedAt` still prints `2026-10-29T05:51:24Z`.
+7. **Retire this checkout.** It still holds the old history. Rename the folder, `git clone` a fresh copy from GitHub, and work only in that copy from now on. Never push from the old one: a push from it would bring the old commits back.
+8. **Ask GitHub to purge the old commits.** At support.github.com, ask GitHub to "remove cached views and unreachable commits" for this repository, after a history rewrite to remove personal data. Attach the old SHAs from the commit map. Wait for their reply before step 4 of part 2.
+   - Check, once public, from a logged-out browser: `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/commit/a44e5aca3756941a075150d9e381020826f3fb81` returns 404.
+9. **Record it, in the fresh clone.**
+   - Add `docs/prepub/COMMIT_MAP.csv`: copy `~/gdn-rewrite.git.commit_map.csv` into it, so every SHA the audit notes cite can be looked up.
+   - Add ERRATA E11: "History rewritten on <date> to remove personal data. Every commit hash changed. The lock commit `a44e5ac` is now `<new>`, and the `lock-2026Q3` tag points at it. `predictions/2026Q3.json` is byte-identical, and its sha256 still equals the release notes. The release and its `published_at` are unchanged. Its `targetCommitish` still names `a44e5ac`."
+   - Add one line to `LOCK_CHECK.md` naming the new lock hash.
+   - Commit and push.
+10. **Restart the workflow** (Actions, nowcast, Enable workflow). Then carry on from step 3 of part 2. Steps 2 and 2b of part 2 are done.
+
+**Security settings for the public repository** (do them with step 4b of part 2):
+
+- Settings, Code security: turn on secret scanning with push protection, Dependabot alerts, and private vulnerability reporting. `SECURITY.md` points reporters to private vulnerability reporting.
+- Settings, Actions, General: require approval to run workflows from fork pull requests. Set the default workflow permissions to read.
+- The `SEC_UA` Actions secret holds the email address the SEC user agent carries. It is masked in logs and sent to sec.gov only. If you want that address kept private as well, use a separate address in the secret.
+
+What stays public by design: your name, `rshankar.dev` and your GitHub handle, in the README, the note and the links. The FAA's own public file, with registrants' names and addresses, is in the stored snapshots (decision D); they are part of the record and cannot change.
 
 ## Part 1. Decisions only you can make (before any step in part 2)
 
-**A. Your email address in the commit history (finding F015).** `git log --format='%ae' | sort | uniq -c` on `main` shows your personal address as the author of 62 commits, 58 of them under the lock commit `a44e5ac`. Every commit on `prepub-audit` that `main` lacks carries it too: a normal merge in step 2 adds all of them, and `git merge --squash` adds one (round 4, F112). A public repository shows it to anyone who clones. It cannot be removed without rewriting history, and a rewrite changes the hash of the lock commit (`a44e5ac`), which the `lock-2026Q3` release and its notes point at. So the choice is: accept it, or do not make this repository public.
+**A. Your email address in the commit history (finding F015). Decided 2026-11-12: removed by the rewrite in part 0.** The text below is how the choice stood before. `git log --format='%ae' | sort | uniq -c` on `main` shows your personal address as the author of 62 commits, 58 of them under the lock commit `a44e5ac`. Every commit on `prepub-audit` that `main` lacks carries it too: a normal merge in step 2 adds all of them, and `git merge --squash` adds one (round 4, F112). A public repository shows it to anyone who clones. It cannot be removed without rewriting history, and a rewrite changes the hash of the lock commit (`a44e5ac`), which the `lock-2026Q3` release and its notes point at. So the choice is: accept it, or do not make this repository public.
 - Check after you decide: none. Write your decision in `docs/prepub/DECISIONS.md`.
 
-**B. Home-folder paths in the build notes and in history (F016).** `git grep -c "/Users/" -- docs/build` lists 16 files under `docs/build/briefs/`. The folder name in them is your macOS account name. Same choice as A for history. For the tree, you can leave the build notes as written (the README says they are kept as written) or replace the prefix with `~`.
+**B. Home-folder paths in the build notes and in history (F016). Decided 2026-11-12: removed by the rewrite in part 0.** The text below is how the choice stood before. `git grep -c "/Users/" -- docs/build` lists 16 files under `docs/build/briefs/`. The folder name in them is your macOS account name. Same choice as A for history. For the tree, you can leave the build notes as written (the README says they are kept as written) or replace the prefix with `~`.
 
 **C. The G700 type code the scope rule drops (F056, `ERRATA.md` E5).** The FAA files G700 code `3980222` under engine-type code 2, and the preregistered rule keeps 4 and 5. In the FAA file of 2026-10-30, 17 G700s registered to Gulfstream sat under that code. None had been delivered. When they are, the count will miss them. Before the 2026Q4 window closes on 2026-12-31, either amend the rule in `src/gdn/faa.py` (name the code, date the change in the README and in a new section of `ERRATA.md`, never in the preregistration, and expect every later stored subset to hold those rows) or keep the rule and keep the README's Holder and scope limitation.
 - Check if you amend: `make test` passes, and the dashboard's count of G700s on Gulfstream's own registration rises by the number of rows under that code.
