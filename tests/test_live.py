@@ -552,6 +552,24 @@ def test_a_lock_published_after_the_filing_is_not_scored(repo, monkeypatch, acce
     assert scored or any("not before" in m for m in msgs)
 
 
+@pytest.mark.parametrize("filing", [{"accn": "0000040533-26-000099", "accepted": ""},
+                                    {"accn": "0000040533-26-000099"}])
+def test_a_lock_is_not_scored_when_sec_gives_no_acceptance_time(repo, monkeypatch, filing):
+    # F124. The late-lock check above needs SEC's acceptance time. Without one the lock cannot be checked against
+    # the release, so the quarter is left unscored and the run fails, instead of the check being skipped.
+    from gdn import sec
+    (repo / "data/guidance.csv").write_text(
+        "call_date,year,outlook,quote,speaker,url\n2026-07-29,2026,160,about 160,CFO,u\n")
+    lock(repo, "2026-10-29T19:00")
+    FakeSEC.body = (FIXTURES / "releases" / "with_sentence.htm").read_bytes()
+    monkeypatch.setattr(sec, "Client", FakeSEC)
+    monkeypatch.setattr(sec, "results_8k", lambda filings, end: dict(filing))
+    msgs = []
+    rc = live.run_score(at("2026-10-31T09:00"), root=repo, log=msgs.append)
+    assert not (repo / "results/live/2026Q3_score.json").exists() and rc == 1
+    assert any("no acceptance time" in m for m in msgs)
+
+
 SEG_TEXT = """REVENUE AND OPERATING EARNINGS BY SEGMENT - (UNAUDITED)
 Revenue:
 Aerospace $ 3,536 $ 3,234 $ 302 9.3 %

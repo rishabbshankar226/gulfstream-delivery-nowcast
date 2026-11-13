@@ -109,6 +109,10 @@ No preregistered figure changed. An independent recompute from the data files ma
   subset dated 2026-10-29, after the 2026-10-04 fiscal end, and was published about 30 hours before the SEC
   accepted the 8-K. Each guard can only stop a lock or a score, never make or alter one.
 - **Why made:** each closes a way for a lock or a score to be wrong. Each has a test.
+- **Amended 2026-11-12 (round 4, F124):** guard 2 was skipped when the SEC gave no acceptance time, so a late lock could
+  have been scored as a lock. The job now also refuses to score a locked quarter when the SEC gives no acceptance time,
+  and the run fails so the owner checks the filing by hand. It changes no figure: the 2026Q3 filing has an acceptance
+  time (2026-10-30T12:09:27Z). Test: `tests/test_live.py::test_a_lock_is_not_scored_when_sec_gives_no_acceptance_time`.
 
 ## E10. The dashboard's lead says "registry estimate" where the preregistered sentence says "registry count"
 

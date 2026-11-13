@@ -465,9 +465,14 @@ def run_score(now=None, offline=False, root=".", log=print):
         log(f"{q}: the 8-K {f['accn']} gives no delivery counts ({e}); not scored")
         return 1
     lock_p = lock_json_path(root, q)
-    if lock_p.exists() and f.get("accepted"):
+    if lock_p.exists():
         # The release date in config/calendar.json is typed by hand. SEC's acceptance time is the check on it.
         published = read_json(lock_p)["published_at"]
+        if not f.get("accepted"):
+            # F124. With no acceptance time the lock cannot be checked against the release, so fail closed.
+            log(f"{q}: SEC gave no acceptance time for GD's 8-K {f['accn']}, so lock-{q} cannot be checked against "
+                "the release. The quarter is not scored: check the filing by hand.")
+            return 1
         if parse_now(published) >= parse_now(f["accepted"]):
             log(f"{q}: lock-{q} was published at {published}, not before SEC accepted GD's 8-K at {f['accepted']}. "
                 "It is not a lock made before the release, so the quarter is not scored: fix the record by hand.")
