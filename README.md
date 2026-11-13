@@ -12,7 +12,7 @@ I test how closely FAA aircraft registrations track the Gulfstream deliveries Ge
 
 Dashboard: https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/. Research note: [output/GD_research_note.pdf](output/GD_research_note.pdf). Excel model: [output/gd_gulfstream_model.xlsx](output/gd_gulfstream_model.xlsx).
 
-Student research project. Not investment advice. I hold no position in General Dynamics, and I am not affiliated with General Dynamics, Gulfstream or the FAA.
+Student research project. Not investment advice. I hold no position in General Dynamics as of 2026-11-12, and I am not affiliated with General Dynamics, Gulfstream or the FAA.
 
 ## Results
 
