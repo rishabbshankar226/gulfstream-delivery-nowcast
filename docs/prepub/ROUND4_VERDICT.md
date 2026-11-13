@@ -15,7 +15,7 @@ What stops the post now is only what the owner must decide or do:
 3. **The private name in the branch history** (F110, A.3 below): a local squash merge, with `origin/prepub-audit` deleted before the flip, keeps it off `main`.
 4. **`GO_PUBLIC.md` step 1**, dating the position statement (F081).
 
-After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129). One order matters: `origin/prepub-audit` on GitHub still points at `4388294`, whose `DECISIONS.md` holds the private name, so step 2b (delete that branch) must come before step 4 (make the repository public).
+After those, `GO_PUBLIC.md` steps 2 to 8 make the repository public. The new step 4b protects the record on GitHub (F129). One order matters: `origin/prepub-audit` on GitHub holds every audit commit, `aa273cb` included, so its history holds the private name. Step 2b, which deletes that branch, must come before step 4 if the name is to stay out of public history.
 
 | # | Criterion | Holds | Measurement at `2393a18` (`BASELINE.md`, Round 4 final) |
 |---|---|---|---|

@@ -154,3 +154,4 @@ The owner said "Yes, run fix pass" to the round 4 verdict. The pass fixes what `
   - 1 timed out: a used-jet dealer listing cited in the dated build note `docs/build/AIRFRAME_AUDIT.csv`. It is not on the post or a first screen.
 
   `links.py` does not scan `docs/prepub/`. The new index page's nine relative links were checked by script, and all resolve.
+- **The owner pushed the branch again.** At 21:58 CST, `refs/remotes/origin/prepub-audit` moved from `4388294` to `e054804` ("update by push" in its reflog). This session ran no push. The repository is still private (`gh repo view` prints `PRIVATE`). The new remote tip no longer holds the private name, but its history does, from `aa273cb`. So the order in the entry above still holds: step 2b before step 4. The two commits after `e054804` are local only.
