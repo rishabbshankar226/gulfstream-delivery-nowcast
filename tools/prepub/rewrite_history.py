@@ -49,7 +49,8 @@ SED = (' -e "s|$OLD_HOME|~|g" -e "s|$ACCT  staff|owner  staff|g" -e "s|$PRIV|[pr
        f' -e "s|personal {CAP} address|personal email address|g" -e "s|personal {MAIL} address|personal email address|g"'
        f' -e "s|{CAP} address|email address|g" -e "s|<personal {MAIL}>|<personal email>|g"'
        f' -e "s|{MAIL}\\.com|a personal domain|g" -e "s#@{MAIL}|@uic#@<personal domains>#g"'
-       f' -e "s|; it is a {NARROW}|; it does not|g" -e "s|[{CAP[0]}{MAIL[0]}]{MAIL[1:]}|email|g"')
+       f' -e "s|; it is a {NARROW}|; it does not|g" -e "s|{NARROW}|narrowing phrase|g"'
+       f' -e "s|[{CAP[0]}{MAIL[0]}]{MAIL[1:]}|email|g"')
 
 INDEX_FILTER = r"""#!/bin/sh
 git grep --cached -l -I -i -e "$OLD_HOME" -e "$ACCT  staff" -e "$PRIV" -e "$MAILWORD" -e "$NARROW" 2>/dev/null | \
