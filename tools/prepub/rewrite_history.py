@@ -180,10 +180,9 @@ def main():
                 w.writerow(row)
     print(f"commit map: {mp} ({len(seen)} commits)")
     print("\nIf every check above passed, the owner pushes (GO_PUBLIC.md, part 0):\n")
-    print(f"  git -C {out} remote set-url --push origin {REPO_URL}")
-    print(f"  git -C {out} push --force origin refs/heads/main:refs/heads/main")
-    print(f"  git -C {out} push --force origin refs/tags/{LOCK_TAG}:refs/tags/{LOCK_TAG}")
-    print("  git -C <out> push origin --delete prepub-audit codex/fix-daily-merge-and-lock-integrity")
+    print(f"  git -C {out} push --force {REPO_URL} refs/heads/main:refs/heads/main")
+    print(f"  git -C {out} push --force {REPO_URL} refs/tags/{LOCK_TAG}:refs/tags/{LOCK_TAG}")
+    print(f"  git -C {out} push {REPO_URL} --delete prepub-audit codex/fix-daily-merge-and-lock-integrity")
     print(f"\n{'ALL CHECKS PASSED' if ok else 'A CHECK FAILED: do not push'}")
     sys.exit(0 if ok else 1)
 
