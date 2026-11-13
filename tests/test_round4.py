@@ -181,3 +181,11 @@ def test_the_track_chart_draws_each_scored_lock_after_the_backtest(tmp_path, sta
     assert [q for q, *_ in pts] == expect
     qs = charts.track_quarters(tmp_path)
     assert qs[:len(charts.QS)] == charts.QS and (qs[-1] == expect[-1] if expect else qs == charts.QS)
+
+
+def test_the_readmes_first_screen_says_whose_pace_it_is():
+    # F130 (COLDREAD-1). The live summary and the backtest line sit above the README's definition of the pace, so they
+    # name it as mine. The preregistered headline sentence further down keeps its own wording, glossed after it.
+    s = report.live_summary(ROOT)
+    assert "GD's guidance pace missed by" not in s and "GD's guidance pace by" not in s
+    assert "my pace from GD's outlook by" in s

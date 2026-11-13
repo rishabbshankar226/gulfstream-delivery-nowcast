@@ -110,7 +110,7 @@ At `f88b7c8`, a clean tree that differs from `4388294` only under `docs/prepub/`
 
 ## Round 4 fix pass, after
 
-Measured 2026-11-12 between 20:45 and about 21:10 ET, on clean trees at `b461695` and `de26f49` (the last commit that touches a public surface is `de26f49`, which shortened a resume bullet).
+Measured 2026-11-12 between 20:45 and about 20:50 ET, on clean trees at `b461695` and `de26f49` (the last commit that touches a public surface is `de26f49`, which shortened a resume bullet).
 
 | Check | Command | Result |
 |---|---|---|

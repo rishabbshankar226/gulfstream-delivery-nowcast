@@ -123,6 +123,9 @@ CASES = [
      'before anything else. A baseline with a lower holdout figure than MAE ratio missed by "',
      'before anything else: a baseline with a lower holdout figure than MAE ratio beat the "',
      "tests/test_round4.py::test_the_workbook_summary_does_not_say_a_baseline_beat_the_estimate"),
+    ("F130", "src/gdn/report.py", 'f"quarter on average, my pace from GD\'s outlook by {f1(h[\'mae\'][\'guidance\'])}',
+     'f"quarter on average, GD\'s guidance pace by {f1(h[\'mae\'][\'guidance\'])}',
+     "tests/test_round4.py::test_the_readmes_first_screen_says_whose_pace_it_is"),
 ]
 
 

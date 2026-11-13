@@ -122,7 +122,8 @@ def live_summary(root):
                 f"{'inside' if s['inside_band'] else 'outside'} the band, whose nominal level is 80% and which held "
                 f"{m['holdout']['band']['hits']} of {m['holdout']['band']['n']} held-out quarters.")
         if pace and yago:
-            line += (f" GD's guidance pace missed by {pace[2]} and the same quarter last year ({yago[1]}) by {yago[2]}.")
+            line += (f" My pace from GD's outlook missed by {pace[2]} and the same quarter last year ({yago[1]}) by "
+                     f"{yago[2]}.")
     elif scores:
         q = sorted(scores, key=qidx)[0]
         line = (f"**Live record so far: no locked quarter.** {q} missed its lock window, so there is no locked "
@@ -131,7 +132,7 @@ def live_summary(root):
         line = "**Live record so far: no locked quarter yet.** The first lock comes the day before GD next reports."
     low = min(("seasonal", "last"), key=lambda b: h["mae"][b])
     back = (f"**Backtest, {h['n']} held-out quarters:** the registry estimate missed by {f1(h['mae']['ratio'])} jets a "
-            f"quarter on average, GD's guidance pace by {f1(h['mae']['guidance'])} and {BASE[low]} by "
+            f"quarter on average, my pace from GD's outlook by {f1(h['mae']['guidance'])} and {BASE[low]} by "
             f"{f1(h['mae'][low])}.")
     if h["mae"][low] < h["mae"]["ratio"]:
         back += f" Simply repeating {BASE[low]} missed by least."

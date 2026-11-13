@@ -366,6 +366,7 @@ Raw counts across the eleven reports: S1 6, S2 39, S3 70. After clustering dupli
 | F127 | `src/gdn/note.py` (`old_events_line`, `used_share`); `README.md:157` | S2 | CODE-6. `grep -rn` for each function name in `tests/` prints 0, and no test file holds 246 or 1,251. "5 of the 42" and "246 of 1,251" are public figures with no test. The auditor recomputed both and they are right. | A direct test of each function against the stored subset. | f366975 | new tests `tests/test_round4.py::test_the_locks_old_airframe_count_rebuilds_from_its_snapshot_table` and `::test_the_counted_events_used_jet_share_rebuilds_from_the_serials_table` (the code was right) | fixed |
 | F128 | `docs/prepub/` (no index) | S2 | EXPOSURE-5. `ls docs/prepub/README.md docs/prepub/index.md` finds neither. `VERDICT.md` and most of the earlier reviews open with NO-GO. Nothing tells a public reader which verdict is current or what the folder is. | A short `docs/prepub/README.md`: what the audit was, the current verdict file, and that reviews are dated and superseded. | b461695 | none: text | fixed |
 | F129 | `docs/prepub/GO_PUBLIC.md` (no step) | S2 | EXPOSURE-6. `grep -c -i -E 'protect\|ruleset\|immutable' docs/prepub/GO_PUBLIC.md` prints 0. Once public, nothing stops a `lock-*` tag from being moved or deleted, or `main` from being force-pushed. Republishing `lock-2026Q3` would replace its timestamp. | Add a runbook step: a tag ruleset for `lock-*`, branch protection on `main` against force-push and deletion, and a warning never to republish or edit `lock-2026Q3`. | b461695 | none: text | open: runbook step 4b written in b461695; the GitHub settings are the owner's |
+| F130 | `README.md:6` and `:8` (live summary and backtest line), `src/gdn/report.py` (`live_summary`) | S2 | COLDREAD-1, the cold read after the fix pass. Line 6 said "GD's guidance pace missed by 6.2" and line 8 "GD's guidance pace by 6.9", above the README's definition of the pace at line 23. Verified by `sed -n 6,8p README.md`. The preregistration fixes the headline sentence, not these two lines. | "My pace from GD's outlook" in both lines; the preregistered sentence below keeps its wording and its gloss. | (this commit) | `tests/test_round4.py::test_the_readmes_first_screen_says_whose_pace_it_is` FAIL / PASS (`REVERT_TESTS.md`) | fixed |
 
 ### 5.2 Known rows that round 4 found again
 
@@ -487,3 +488,16 @@ No round 4 finding moves the record. `shasum -a 256 predictions/2026Q3.json` pri
 | S2 new (F112 to F123, F125 to F129) | 16 | 1 (F129: the runbook step is written, the settings are the owner's) | 17 |
 
 Still open from before round 4, all the owner's: F015 and F016 (S1), F081 (S2), and the S3 rows F063, F064, F068, F074, F098, F107. The round 4 S3 rows in 5.4 stay as listed, apart from those the fix pass touched in passing: CODE-9 and EDITOR-2 (the dashboard's pace name, with F114), and HIRING-7 (the track chart, with F117).
+
+
+### 5.7 The cold read after the fix pass
+
+One fresh reader (`reviews/round4_coldread.md`, brief `briefs/round4_coldread.md`) read the changed first screens on a copy at `b128144`. Its verdict was GO, with S1 0, S2 1 and S3 6, and it found every figure it checked by command right.
+
+- COLDREAD-1 (S2) is F130, fixed.
+- COLDREAD-7 (S3): resume bullet 1 now says "my guidance pace" (219 characters). Fixed with F130.
+- COLDREAD-2 (S3): the track chart's source line names the backtest snapshot only, not the lock's. Open.
+- COLDREAD-3 (S3): GD's 2026Q3 count has no marker of its own on the chart. Open.
+- COLDREAD-4 (S3): same as RENDERED-5. Open.
+- COLDREAD-5 (S3): same as RENDERED-12. Open.
+- COLDREAD-6 (S3): same as HIRING-9 and EDITOR-7. Open.

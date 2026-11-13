@@ -3,9 +3,9 @@
 I test how closely FAA aircraft registrations track the Gulfstream deliveries General Dynamics (GD) reports each quarter. I scale the registry count into an estimate, check it on 26 past quarters against a pace built from GD's own guidance and two simple rules, and lock each live estimate on GitHub the day before GD reports.
 
 <!-- live-summary:start -->
-**Live record so far: one locked quarter, a miss outside its band.** For 2026Q3 I locked an estimate of 32.0 Gulfstream deliveries (band 21.2 to 37.2) the day before GD reported. GD reported 40, so the lock missed by 8.0 (20%), outside the band, whose nominal level is 80% and which held 18 of 26 held-out quarters. GD's guidance pace missed by 6.2 and the same quarter last year (39) by 1.
+**Live record so far: one locked quarter, a miss outside its band.** For 2026Q3 I locked an estimate of 32.0 Gulfstream deliveries (band 21.2 to 37.2) the day before GD reported. GD reported 40, so the lock missed by 8.0 (20%), outside the band, whose nominal level is 80% and which held 18 of 26 held-out quarters. My pace from GD's outlook missed by 6.2 and the same quarter last year (39) by 1.
 
-**Backtest, 26 held-out quarters:** the registry estimate missed by 5.5 jets a quarter on average, GD's guidance pace by 6.9 and the same quarter last year by 4.6. Simply repeating the same quarter last year missed by least. None of the three preregistered sign tests finds the registry estimate better than a baseline. The backtest reads a registry copy that had months or years to fill in.
+**Backtest, 26 held-out quarters:** the registry estimate missed by 5.5 jets a quarter on average, my pace from GD's outlook by 6.9 and the same quarter last year by 4.6. Simply repeating the same quarter last year missed by least. None of the three preregistered sign tests finds the registry estimate better than a baseline. The backtest reads a registry copy that had months or years to fill in.
 <!-- live-summary:end -->
 
 [![GD's reported Gulfstream deliveries by quarter against five backtest estimates, and each locked live estimate with its band](output/charts/track_record.png)](https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/)

@@ -874,11 +874,11 @@ NEW = [
                "{live.Q.pred.band.1:f1}) the day before GD reported. GD reported {live.Q.score.reported.total:int}, so the "
                "lock missed by {live.Q.score.ae_total:f1} ({live.Q.score.ape_pct:pct0}), outside the band, whose nominal level is "
                "{const.band_nominal_pct:pct0} and which held {m.holdout.band.hits:int} of {m.holdout.band.n:int} held-out "
-               "quarters. GD's guidance pace "
+               "quarters. My pace from GD's outlook "
                "missed by {live.Q.score.guidance_ae:f1} and the same quarter last year ({cmp.Q.yago:int}) by "
                "{cmp.Q.yago_miss:int}"),
     ("readme", "Backtest, {m.holdout.n:int} held-out quarters: the registry estimate missed by {m.holdout.mae.ratio:f1} jets a "
-               "quarter on average, GD's guidance pace by {m.holdout.mae.guidance:f1} and the same quarter last year by "
+               "quarter on average, my pace from GD's outlook by {m.holdout.mae.guidance:f1} and the same quarter last year by "
                "{m.holdout.mae.seasonal:f1}"),
     ("readme", "GD's reported Gulfstream deliveries by quarter against {const.n_models:word} backtest estimates"),
     # README results and error analysis
@@ -1042,7 +1042,7 @@ NEW = [
                   "2026Q2. So I scale this quarter's count by the last {const.lags:word} quarters' ratio"),
     ("interview", "{const.n_simple:word} smaller surprises"),
     ("resume", "on {m.holdout.n:int} quarters scored after its rules were set it missed by {m.holdout.mae.ratio:f1} jets a quarter vs "
-               "{m.holdout.mae.guidance:f1} for a guidance pace, {m.holdout.mae.seasonal:f1} for the year-ago quarter"),
+               "{m.holdout.mae.guidance:f1} for my guidance pace, {m.holdout.mae.seasonal:f1} for the year-ago quarter"),
     ("resume", "the first lock, 2026Q3, said {live.Q.pred.nowcast.total:f1} and GD reported "
                "{live.Q.score.reported.total:int}: a miss of {live.Q.score.ae_total:f1}, outside its band"),
     # sensitivity.md
