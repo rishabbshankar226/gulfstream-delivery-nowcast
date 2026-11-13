@@ -56,7 +56,7 @@ Do these steps in order. They replace decisions A and B below, and they replace 
    - It ends with `ALL CHECKS PASSED` only when every "After" count is 0. That includes "any non-noreply email in metadata", which catches a wrong `--old-email`.
    - It writes `~/gdn-rewrite.git.commit_map.csv` (old SHA, new SHA) and prints the push commands.
    - The audit ran it in this order on 2026-11-12: `ALL CHECKS PASSED` (DECISIONS D25).
-6. **Push the rewritten history.** Run the commands it printed: force-push `main`, force-push the tag `lock-2026Q3`, then delete `prepub-audit` and `codex/fix-daily-merge-and-lock-integrity` on GitHub.
+6. **Push the rewritten history.** Push to the repository's URL, not to the mirror's `origin`: a mirror clone refuses named refspecs on its own remote. Run the commands it printed, with `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast.git` in place of `origin`: force-push `main`, force-push the tag `lock-2026Q3`, then delete `prepub-audit` and `codex/fix-daily-merge-and-lock-integrity` on GitHub.
    - Check: `git ls-remote --heads origin` lists `main` only.
    - Check: `git ls-remote --tags origin` shows `lock-2026Q3` at the new lock hash the script printed.
    - Check: `gh release view lock-2026Q3 --json publishedAt,isDraft` still prints `2026-10-29T05:51:24Z` and `false`.

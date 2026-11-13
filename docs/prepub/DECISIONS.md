@@ -186,3 +186,44 @@ The owner wrote: "private and security is the goal, while having the github publ
     - adds a README sentence pointing to E11;
     - says what to do if the route fails.
 - **This is a reading of the owner's goal.** The owner asked for a public repository with privacy and security, not for a history rewrite in words. The rewrite is the only way found that meets both and keeps the lock's GitHub release.
+
+## D26. Part 0 run in the owner's Chrome and git (2026-11-12, evening CST)
+The owner asked for "all of this" to be done with Claude in Chrome. Before acting, the owner gave two answers: the position sentence is true today, and yes to steps a to g of part 0 (the trial, the workflow, the email settings, the git email, the merge and rewrite, the force-push and branch deletion, and the Support ticket). Making the repository public, Pages and the post stay for later.
+
+- **a. Trial.**
+  - A private test repository, `tag-move-test`, got a release on tag `t1`. The tag was force-moved from commit A to commit B.
+  - Before and after the move, `gh release view` printed `isDraft` false and the same `publishedAt`, 2026-11-13T04:43:28Z, and the release page showed the tag at B.
+  - The test repository was deleted. GitHub asked for access confirmation by email, which the owner gave.
+- **b.** The nowcast workflow was disabled ("This workflow was disabled manually").
+- **c.** "Keep my email addresses private" and "Block command line pushes that expose my email" are both on.
+- **d.** This repository's `user.email` is the GitHub no-reply address.
+- **e. Merge and rewrite.**
+  - The disclosure was dated (F081).
+  - `prepub-audit` was merged into `main`, after a pull showed `origin/main` already contained.
+  - The rewrite tool stopped itself twice (in `~/gdn-rewrite.git` and `~/gdn-rewrite2.git`): its own pattern strings counted as narrowing phrases. Nothing was pushed from either. It was fixed to assemble its patterns at run time and to reword the bare phrase in its superseded versions.
+  - The third run, in `~/gdn-rewrite3.git`, printed `ALL CHECKS PASSED`. Across 197 commits:
+    - non-noreply commit emails went from 292 to 0;
+    - home-folder prefix from 177 to 0;
+    - account name in an `ls -l` owner column from 2 to 0;
+    - private name from 4 to 0;
+    - mail-provider word from 42 to 0;
+    - narrowing phrase from 8 to 0.
+
+    Every record file was identical, the lock file's sha256 matched the release notes, and the lock commit kept its author and dates.
+  - A clone of the rewritten `main` (scratch, without raw data) gave `196 passed, 2 skipped`, an empty status after `make all`, and lock sha256 `3c4cdbd0...`. Only the 16 build briefs differed at the tip.
+- **f. Push.**
+  - `main` moved from `8c7692f` to `9d82c0f`, and `lock-2026Q3` from `a44e5ac` to `54a2e28`, both by force-push from the mirror to the GitHub URL. The mirror's own remote refuses refspecs, so the tool's printed commands need the URL; that is fixed in the runbook below.
+  - `prepub-audit` and `codex/fix-daily-merge-and-lock-integrity` were deleted on GitHub.
+  - The release is still published: `publishedAt` 2026-10-29T05:51:24Z, `targetCommitish` `a44e5ac`. Its page shows `54a2e28` and the sha256 in its notes.
+  - `refs/pull/1/head` (`163eac0`) remains; only Support can remove it.
+- **The fresh clone (step 7).**
+  - This folder was cloned from GitHub. `data/raw/` was copied in, `.venv` links to the old checkout's, and `CLAUDE.md` was copied in.
+  - `make claims` gave 44 claims. After `python -m gdn note` (the note prunes uncited claims), `make test` gave `198 passed` with no tracked change.
+  - The old checkout's push URL is set to `DISABLED-old-history-do-not-push`.
+- **g. Support.**
+  - A ticket was filed at support.github.com, under Repositories, then Repository features, then Branches. It carried the approved text, with one added line naming the repository, and `old_to_new_commit_map.csv` attached. The page said "Your message has been successfully submitted".
+  - GitHub's suggested-solution page warned that Support reviews whether an email address and home paths qualify for server-side removal.
+- **Waiting.**
+  - Support's reply comes first. Then come part 0's step 8 checks: the old lock commit's URL returns 404 while logged in, and no `refs/pull/*` is left.
+  - Then step 9 (the commit map, E11, the README sentence, a `LOCK_CHECK.md` line), step 10 (log gate `L3`) and step 11 (re-enable the workflow), and part 2 from step 3.
+  - Until the workflow is re-enabled, no daily snapshot is taken.
