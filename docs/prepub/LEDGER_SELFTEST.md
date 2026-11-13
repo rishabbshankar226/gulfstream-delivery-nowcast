@@ -92,3 +92,12 @@ Run 2026-11-12, about 09:50 ET, at commit `a964df8`: after the last change to an
 9 planted, 9 caught, 0 missed.
 
 The clean copy's two flagged rows are both `stale` rows on sentences that say the workflow made the lock while the repository was private (one in `README.md`, one in `docs/INTERVIEW_NOTES.md`). The ledger admits those sentences only when `git log` shows the lock commit's author, and an archive copy has no history. On the real tree, which has the history, the same run prints `rows 2864  flagged 0`. On the clean copy the post, the dashboard, the note, the PDF and the workbook have zero flagged rows.
+
+## Rerun after the round 4 fix pass (2026-11-12)
+
+Round 4 reworded sentences on every surface (F113, F114, F115, F116, F119, F121) and changed the post. The ledger's templates and staleness patterns in `tools/prepub/ledger_rules.py` were updated to the new wording (commit "ledger rules follow the reworded sentences"); no rule was loosened to pass a number. The nine plants were then rerun at `205245b`:
+
+- Copies: `git archive prepub-audit | tar -x -C <dir>` into `~/gdn-prepub/plantA7/` (clean) and `~/gdn-prepub/plantB7/` (planted), each with `data/raw/wayback/cdx.json` and a `.venv` link; `make pdf` in the planted copy for plant 7.
+- Ledgers: clean `rows 2925  flagged 2`; planted `rows 2927  flagged 38`. The clean copy's two rows are the two private-lock sentences explained above.
+- Compare: 9 planted, 9 caught, 0 missed (plant 7 is caught on PDF page 3; the earlier rerun caught it on page 2).
+- On the repository itself: `rows 2923  flagged 0` (`docs/prepub/LEDGER.csv`).

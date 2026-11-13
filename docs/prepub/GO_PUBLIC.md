@@ -22,19 +22,19 @@ Read `VERDICT.md` first. If it says NO-GO, the list of what remains is there, an
 
 ### 1. Confirm you hold no position in General Dynamics (F081)
 
-The README (line 15) says "I hold no position in General Dynamics". The note says "The author holds no position in General Dynamics." on page 1 and in every page footer. The build copies that sentence forward; it carries no date. Only you can state it.
+On `prepub-audit`, before step 2, the README says "I hold no position in General Dynamics" (find it with `grep -n "I hold no position" README.md`). The note says "The author holds no position in General Dynamics." on page 1 and in every page footer. The build copies that sentence forward; it carries no date. Only you can state it.
 
-If it is true today, date it in both places. First edit `README.md` line 15 so the sentence reads "I hold no position in General Dynamics as of <today's date>, and I am not affiliated with General Dynamics, Gulfstream or the FAA." Then:
+If it is true today, date it in both places. First edit that line of `README.md` so the sentence reads "I hold no position in General Dynamics as of <today's date>, and I am not affiliated with General Dynamics, Gulfstream or the FAA." Then:
 
 ```
 printf '%s\n' "The author holds no position in General Dynamics as of $(date +%F)." > ~/.gdn_disclosure
 PYTHONPATH=src .venv/bin/python -m gdn note && make pdf
 ```
 
-If it is not true, write the true sentence into `~/.gdn_disclosure` and into `README.md` line 15 before anything else, then run the same two commands.
+If it is not true, write the true sentence into `~/.gdn_disclosure` and into that line of `README.md` before anything else, then run the same two commands.
 
 - Check: `grep -o '<p id="disclosure">[^<]*' report/note.html` prints your sentence, and `shasum -a 256 report/note.html | cut -c1-64` equals `cut -c1-64 output/GD_research_note.inputs.sha256`.
-- Check: `sed -n 15p README.md` shows the dated sentence.
+- Check: `grep -n "I hold no position" README.md` shows the dated sentence.
 - Commit by path: `git add README.md report/note.html output/GD_research_note.pdf site/GD_research_note.pdf output/GD_research_note.inputs.sha256 && git commit -m "Date the position disclosure"`.
 
 ### 2. Merge `prepub-audit` into `main`
@@ -44,7 +44,7 @@ git switch main && git pull --ff-only
 git merge --no-ff prepub-audit
 ```
 
-When the audit ended, `prepub-audit` already held every commit of `origin/main` (`8c7692f`, the workflow's 2026-11-12 run, merged in `bbf88fd`), so the merge was clean. Merge the local branch: `origin/prepub-audit` on GitHub sits at `f14a400`, behind the local branch, and a pull request from it would leave out the last commits (the chart legends, the preview image and the final records). Run `git log --oneline origin/prepub-audit..prepub-audit` to see them, and push the branch again first if you want to merge on GitHub. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs and their stamps). For each one take either side, then rebuild them all from the merged data and code:
+When the audit ended, `prepub-audit` already held every commit of `origin/main` (`8c7692f`, the workflow's 2026-11-12 run, merged in `bbf88fd`), so the merge was clean. Merge the local branch. `origin/prepub-audit` on GitHub may be behind it: `git log --oneline origin/prepub-audit..prepub-audit` lists what it lacks. Do not merge through a GitHub pull request: its `refs/pull/*/head` keeps every branch commit reachable after the branch is deleted. If you chose a squash merge in decision A or under `ROUND4_VERDICT.md` A.3, run `git merge --squash prepub-audit && git commit` in place of `git merge --no-ff prepub-audit`. The daily workflow commits to `main` twice a day. If it has committed since, the merge will stop on files both sides rewrote. Every such file is a generated output (`README.md`, `report/note.html`, `site/data.json`, `docs/LINKEDIN_POST.md`, the workbook, the PDFs and their stamps). For each one take either side, then rebuild them all from the merged data and code:
 
 ```
 git checkout --theirs -- <each conflicted file>
@@ -56,6 +56,18 @@ Never resolve a conflict in `predictions/`, `results/live/`, `data/snapshots/` o
 
 - Use the project's environment: Python 3.11 with `requirements.lock` installed (the README's Reproduce section). The system `python3` on this Mac is 3.9.6 and cannot install the pinned requirements.
 - Check: `make test` ends with no failure (178 tests passed when the audit ended; a clone without the untracked `data/raw/` folder prints 176 passed and 2 skipped). `make all` then `git status --short` prints nothing. `shasum -a 256 predictions/2026Q3.json` prints `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
+
+### 2b. Clean up the branches that would go public
+
+A public repository shows every branch on GitHub. `origin/codex/fix-daily-merge-and-lock-integrity` is merged and `origin/prepub-audit` is merged once step 2 is pushed. The local throwaway branches `prepub-mergecheck` and `prepub-mergecheck2` were never pushed and stay on this Mac only.
+
+```
+git push origin main
+git push origin --delete codex/fix-daily-merge-and-lock-integrity
+git push origin --delete prepub-audit
+```
+
+- Check: `git ls-remote --heads origin` lists `main` only, and `git ls-remote --tags origin` lists `lock-2026Q3` only.
 
 ### 3. Set the public flag
 
@@ -77,12 +89,13 @@ The merge changes the daily job (the two outside commits, the lock and score gua
 ```
 gh workflow run nowcast.yml
 gh run list --workflow nowcast.yml -L 1
+gh run watch "$(gh run list --workflow nowcast.yml -L 1 --json databaseId -q '.[0].databaseId')"
 git pull --ff-only
 shasum -a 256 predictions/2026Q3.json results/live/2026Q3_lock.json results/live/2026Q3_score.json
 grep -E "predictions/2026Q3.json|results/live/2026Q3_lock.json|results/live/2026Q3_score.json" docs/prepub/RECORD_HASHES.txt
 ```
 
-- Check: the run ends `completed  success`; the three hashes printed by `shasum` equal the three lines printed by `grep`; `git log -3 --format='%an %s'` shows the workflow's daily commits and no commit that touches `predictions/`.
+- Check: the run ends `completed  success`; the three hashes printed by `shasum` equal the three lines printed by `grep`; `git log --oneline -3 -- predictions/ results/live/2026Q3_lock.json results/live/2026Q3_score.json` shows no commit newer than the 2026Q3 lock and score.
 - If the run fails, do not go on. Read its log (`gh run view --log-failed`), and keep the repository private until a run is green.
 
 ### 4. Make the repository public
@@ -90,6 +103,16 @@ grep -E "predictions/2026Q3.json|results/live/2026Q3_lock.json|results/live/2026
 GitHub, the repository's Settings, General, Danger Zone, Change repository visibility, Public.
 
 - Check: in a logged-out browser window, `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast` opens, the README's live summary reads "one locked quarter, a miss outside its band", and its first chart (`output/charts/track_record.png`) renders.
+
+### 4b. Protect the record on GitHub (round 4, F129)
+
+Do this straight after step 4, before the post. Once the repository is public nothing else stops a moved tag or a force-push.
+
+- Settings, Rules, Rulesets, New tag ruleset: target `lock-*`, enforcement Active, and turn on "Restrict updates" and "Restrict deletions".
+- Settings, Rules, Rulesets, New branch ruleset: target the default branch, and turn on "Block force pushes" and "Restrict deletions". The daily workflow pushes ordinary commits, which these rules allow.
+- If Settings offers immutable releases, turn them on before the 2026Q4 lock. They apply to later releases only.
+- Never edit, delete or republish the `lock-2026Q3` release: republishing would replace the timestamp that is the record.
+- Check: `gh api repos/rishabbshankar226/gulfstream-delivery-nowcast/rulesets --jq '.[].name'` lists both rulesets.
 
 ### 5. Enable Pages and deploy
 
@@ -116,20 +139,20 @@ The pages workflow runs on a push that touches `site/**` or by hand. The daily j
 
 - Open `https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/releases/tag/lock-2026Q3` logged out. The notes carry `sha256 3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`.
 - `gh release view lock-2026Q3 --json publishedAt,author` prints `2026-10-29T05:51:24Z` and `github-actions[bot]`.
-- `shasum -a 256 predictions/2026Q3.json` prints the same hash.
+- `git show lock-2026Q3:predictions/2026Q3.json | shasum -a 256` prints the same hash: the file as the tag holds it, not the working copy.
 - GD's 8-K (accession 0000040533-26-000036) was accepted by the SEC at 2026-10-30 08:09:27 ET, 30 hours later (`LOCK_CHECK.md`).
 
 ### 8. Post
 
-Paste this text. It is `docs/LINKEDIN_POST.md` as the generator writes it, 1,281 characters. If step 2 or 3 rebuilt the post, paste the file as it stands then, and check `wc -m docs/LINKEDIN_POST.md` is under 1,300.
+Paste this text. It is `docs/LINKEDIN_POST.md` as the generator writes it, 1,282 characters (round 4 added the band's coverage and called the pace mine). If step 2 or 3 rebuilt the post, paste the file as it stands then, and check `wc -m docs/LINKEDIN_POST.md` is under 1,300.
 
 ```
-My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics reported 40.
-My tracker scales FAA registrations into an estimate of the Gulfstream jets General Dynamics (GD) reports each quarter, locked on GitHub the day before GD reports.
+My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics (GD) reported 40.
+My tracker scales FAA registrations into an estimate of the Gulfstream jets GD reports each quarter, locked on GitHub the day before GD reports.
 
-The 2026Q3 miss was 8.0, outside my 80% band of past misses. A pace I derived from GD's own full-year outlook missed by 6.2, and last year's same quarter (39) by 1. The repository was private then; the timestamp is GitHub's.
+The 2026Q3 miss was 8.0, outside my 80% band of past misses (it held 18 of 26 past quarters). My pace from GD's full-year outlook missed by 6.2, and last year's same quarter (39) by 1. The repository was private then; the timestamp is GitHub's.
 
-Backtest (rules set minutes before scoring): Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Repeating the same quarter last year missed by less on average, 4.6. (Registry count: my scaled estimate; the pace: mine.) The test reads a registry copy that had months or years to fill in, so only locked quarters show whether it counts jets in time. One quarter is one data point.
+Backtest (rules set minutes before scoring): Over 26 held-out quarters the registry count was off by 5.5 jets a quarter on average, against 6.9 for GD's guidance pace. The difference is not statistically distinguishable. Repeating the same quarter last year missed by less on average, 4.6. (Registry count: my scaled estimate; the pace: mine.) The test reads a registry copy that had months or years to fill in, so only locked quarters show if it counts jets in time. One quarter is one data point.
 
 Dashboard: https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/
 Code: https://github.com/rishabbshankar226/gulfstream-delivery-nowcast

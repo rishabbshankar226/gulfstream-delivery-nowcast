@@ -41,3 +41,15 @@ From `LINKS.csv`, rerun on the final tree:
 | One disclaimer line | "Student project, not investment advice. I am not affiliated with General Dynamics or Gulfstream." |
 | No hashtag names a ticker | `#EquityResearch #Aerospace` |
 | Every figure traced | ledger, surface `post`: 12 rows, 0 flagged |
+
+## Round 4 recheck (2026-11-12, after the fix pass)
+
+Round 4 changed the post (F113: the band's coverage; the pace named as mine; "GD" defined in line 1). Measured again on `docs/LINKEDIN_POST.md` as the generator writes it:
+
+- Length: `len()` prints `1282` with the final newline, `1281` without. The two-lock and inside-the-band states stay under the cap (`tests/test_after_score.py::test_the_post_counts_its_locked_quarters` and `::test_the_post_is_short_and_carries_its_disclaimer` pass).
+- First 210 characters: "My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics (GD) reported 40. / My tracker scales FAA registrations into an estimate of the Gulfstream jets GD reports each"
+- First 140 characters: "My first locked estimate of Gulfstream deliveries missed: I said 32.0 for 2026Q3, General Dynamics (GD) reported 40. / My tracker scales FAA"
+- The band: "outside my 80% band of past misses (it held 18 of 26 past quarters)".
+- The pace: "My pace from GD's full-year outlook missed by 6.2", and the backtest line keeps the preregistered sentence with "(Registry count: my scaled estimate; the pace: mine.)".
+- Links: unchanged, the same two as above.
+- Ledger, surface `post`: 14 rows, 0 flagged.
