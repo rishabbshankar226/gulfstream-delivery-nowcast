@@ -40,14 +40,19 @@ LOCK_SHA256 = "3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23"
 RECORD = ["predictions", "results/live", "data/snapshots", "docs/PREREGISTRATION.md", ".github"]
 REPO_URL = "https://github.com/rishabbshankar226/gulfstream-delivery-nowcast.git"
 
+# The patterns are assembled at run time, so this file never holds them verbatim: the rewrite then leaves the current
+# version of this file alone, and the file itself says nothing about the address it removes.
+MAIL = "g" + "mail"
+CAP = MAIL[0].upper() + MAIL[1:]
+NARROW = "prefix" + " of it"
 SED = (' -e "s|$OLD_HOME|~|g" -e "s|$ACCT  staff|owner  staff|g" -e "s|$PRIV|[private name]|g"'
-       ' -e "s|personal email address|personal email address|g" -e "s|personal email address|personal email address|g"'
-       ' -e "s|email address|email address|g" -e "s|<personal email>|<personal email>|g"'
-       ' -e "s|email\\.com|a personal domain|g" -e "s#@<personal domains>#@<personal domains>#g"'
-       ' -e "s|; it does not|; it does not|g" -e "s|[Gg]mail|email|g"')
+       f' -e "s|personal {CAP} address|personal email address|g" -e "s|personal {MAIL} address|personal email address|g"'
+       f' -e "s|{CAP} address|email address|g" -e "s|<personal {MAIL}>|<personal email>|g"'
+       f' -e "s|{MAIL}\\.com|a personal domain|g" -e "s#@{MAIL}|@uic#@<personal domains>#g"'
+       f' -e "s|; it is a {NARROW}|; it does not|g" -e "s|[{CAP[0]}{MAIL[0]}]{MAIL[1:]}|email|g"')
 
 INDEX_FILTER = r"""#!/bin/sh
-git grep --cached -l -I -i -e "$OLD_HOME" -e "$ACCT  staff" -e "$PRIV" -e "email" -e "narrowing phrase" 2>/dev/null | \
+git grep --cached -l -I -i -e "$OLD_HOME" -e "$ACCT  staff" -e "$PRIV" -e "$MAILWORD" -e "$NARROW" 2>/dev/null | \
 while IFS= read -r path; do
   entry=$(git ls-files -s -- "$path")
   mode=$(printf '%s' "$entry" | cut -d' ' -f1)
@@ -78,7 +83,7 @@ def scan(repo, rs, email, home, acct, priv):
             "any non-noreply email in metadata": len(personal),
             "old email in files or messages": body.count(email), "home prefix": body.count(home),
             "account in ls owner column": body.count(acct + "  staff"), "private name": body.lower().count(priv.lower()),
-            "mail-provider word": body.lower().count("email"), "account-narrowing phrase": body.count("narrowing phrase")}
+            "mail-provider word": body.lower().count(MAIL), "account-narrowing phrase": body.count(NARROW)}
 
 
 def blobs(repo, ref):
@@ -118,6 +123,7 @@ def main():
         f.write(INDEX_FILTER.replace("SEDEXPR", SED))
     os.chmod(f.name, 0o755)
     env = dict(os.environ, OLD_EMAIL=email, NEW_EMAIL=a.new_email, OLD_HOME=home, ACCT=acct, PRIV=priv,
+               MAILWORD=MAIL, NARROW=NARROW,
                FILTER_BRANCH_SQUELCH_WARNING="1")
     print("rewriting (a few minutes)...", flush=True)
     git(out, "filter-branch", "-f",
