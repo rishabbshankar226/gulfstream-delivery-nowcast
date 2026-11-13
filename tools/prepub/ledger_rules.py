@@ -1041,8 +1041,8 @@ NEW = [
     ("interview", "the gap drifted from about {const.two_x:word} deliveries per event in {const.y2016:year} to {cov.2026Q2:f2} in "
                   "2026Q2. So I scale this quarter's count by the last {const.lags:word} quarters' ratio"),
     ("interview", "{const.n_simple:word} smaller surprises"),
-    ("resume", "on {m.holdout.n:int} backtest quarters scored after the rules were committed it missed by {m.holdout.mae.ratio:f1} jets a quarter vs "
-               "{m.holdout.mae.guidance:f1} for a guidance-based pace and {m.holdout.mae.seasonal:f1} for last year's same quarter"),
+    ("resume", "on {m.holdout.n:int} quarters scored after its rules were set it missed by {m.holdout.mae.ratio:f1} jets a quarter vs "
+               "{m.holdout.mae.guidance:f1} for a guidance pace, {m.holdout.mae.seasonal:f1} for the year-ago quarter"),
     ("resume", "the first lock, 2026Q3, said {live.Q.pred.nowcast.total:f1} and GD reported "
                "{live.Q.score.reported.total:int}: a miss of {live.Q.score.ae_total:f1}, outside its band"),
     # sensitivity.md
@@ -1596,7 +1596,7 @@ def live_ok(F):
         # round 4: the chart's alt text and caption name the locked live estimates; the resume's qualified backtest
         (r"against (?:the )?(five|#) backtest estimates(?: to QQ)?, and each locked live estimate with its (?:past-miss )?band",
          G),
-        (r"backtest quarters scored after the rules were committed", G),
+        (r"quarters scored after its rules were set", G),
         (r"the locked estimate implied #B of Aerospace revenue for QQ", "Q3LS"),
         (r"I wrote this note before GD reported QQ on D", "Q3LS"),
         (r"I locked this estimate as a timestamped GitHub release, made while the repository was private, at TM ET on D",

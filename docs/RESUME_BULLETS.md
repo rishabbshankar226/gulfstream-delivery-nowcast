@@ -1,3 +1,3 @@
-- Built a Python pipeline estimating Gulfstream deliveries from FAA registrations; on 26 backtest quarters scored after the rules were committed it missed by 5.5 jets a quarter vs 6.9 for a guidance-based pace and 4.6 for last year's same quarter
+- Built a Python pipeline estimating Gulfstream deliveries from FAA registrations; on 26 quarters scored after its rules were set it missed by 5.5 jets a quarter vs 6.9 for a guidance pace, 4.6 for the year-ago quarter
 - Built a daily job that locks each estimate as a timestamped GitHub release before GD reports and scores it from GD's SEC filing; the first lock, 2026Q3, said 32.0 and GD reported 40: a miss of 8.0, outside its band
 - Wrote a cited research note and an Excel model with live formulas on GD, and applied my defense backlog study's best next-quarter baseline to GD's defense segments
