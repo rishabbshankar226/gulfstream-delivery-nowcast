@@ -33,7 +33,7 @@ The merge into `prepub-audit` waits until the P4 reviewers have written their re
 `docs/build/` holds v1's dated build logs, 28 files with hundreds of build-time figures. The ledger does not trace those figures one by one. It gives the folder one row, which passes only when a `docs/build/README.md` says the files are dated logs whose figures are as of their date. A stale claim in them that reads as current is still a finding when a reviewer or I find it by reading.
 
 ## D8. Owner's name in tracked files (2026-11-11)
-The spec calls the owner [private name]. Tracked files under `docs/prepub/` say "the owner", because the public author name on every surface is Rishabb Shankar and these files become public with the merge.
+The spec calls the owner by a private name. Tracked files under `docs/prepub/` say "the owner", because the public author name on every surface is Rishabb Shankar and these files become public with the merge.
 
 ## D9. Round 2 reads `round2_clean`, a copy without `tools/prepub/` (2026-11-11)
 P8.1 says the copy sits at `$HOME/gdn-prepub/round2/` with `docs/prepub/` removed. `rm` is denied, so I left the folder out at extraction: `git archive prepub-audit | tar -x -C <dir> --exclude 'docs/prepub'`. That first copy still held `tools/prepub/`, whose `revert_check.py` lists finding IDs. So the reviewers read a second copy, `~/gdn-prepub/round2_clean/`, extracted with `--exclude 'tools/prepub'` as well. `docs/prepub/ERRATA.md` is copied in, because the README links to it and a reader can open it. The copy has no `.git`.
@@ -121,3 +121,9 @@ The owner asked for "a harsh audit using 11 independent auditors to determine wh
   - Each auditor's own verdict is reported; none of them overrides §7.
 - **Verification.** The main session verifies every S1 and S2 by a command whose output it records, and regrades by the spec's §2. S3 findings are verified where that is cheap, and otherwise are marked `reported, unverified`. New rows start at F109.
 - **Dashboard in a browser.** The main session checks the dashboard in the app's own browser pane, at desktop width and 375 px. It serves the cold copy on localhost from a `.claude/launch.json`, which is gitignored.
+
+## D24. Round 4 fix pass: readings taken (2026-11-12)
+The owner said "Yes, run fix pass" to the round 4 verdict. The pass fixes what `ROUND4_VERDICT.md` lists under B and C. It leaves list A, the owner's decisions and outward steps, alone.
+
+- **F111 and P2.1.** P2.1 says `docs/prepub/reviews/recompute.txt` is copied unchanged and never edited. Round 4 found a home-folder path on its line 9 (and on the same line of `docs/prepub/recompute/notes_head.txt`). I replaced the prefix with `~` in both files and changed nothing else in them. A personal path in a public file outweighs the rule against touching the copy. The 16 build briefs stay as they are, because they belong to decision B.
+- **F110.** D8 is reworded so that it no longer names the owner's private name. The name stays in the branch's history from `aa273cb`; that is part of decision A.3 in `ROUND4_VERDICT.md`.
