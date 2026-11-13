@@ -102,8 +102,8 @@ def test_the_notes_risks_carry_the_mid_cabin_supplier_delay(clone):
     claims = json.loads((ROOT / "docs/build/claims_risks.json").read_text())
     c = next(x for x in claims if x["id"] == "risk-midcabin-supplier-delay")
     assert c["url_or_accn"] == "0000040533-26-000032" and len(c["quote"].split()) < 25
-    subprocess.run([str(ROOT / ".venv/bin/python"), "-m", "gdn", "claims"], cwd=clone, check=True,
-                   env={"PYTHONPATH": str(ROOT / "src")}, capture_output=True)
+    # report/claims.json is built where the cached sources are (data/raw/, untracked); the clone reads the tracked one.
+    assert any(x["id"] == c["id"] for x in json.loads((clone / "report/claims.json").read_text()))
     note.build(clone)
     html = (clone / "report/note.html").read_text()
     risks = plain(html[html.index("<h2>Risks</h2>"):html.index("<h2>Limitations of the method</h2>")])
