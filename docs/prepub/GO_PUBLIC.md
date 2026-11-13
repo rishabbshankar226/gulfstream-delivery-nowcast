@@ -6,7 +6,7 @@ Read `VERDICT.md` first. If it says NO-GO, the list of what remains is there, an
 
 ## Part 1. Decisions only you can make (before any step in part 2)
 
-**A. Your email address in the commit history (finding F015).** `git log --format='%ae' | sort | uniq -c` on `main` shows your personal address as the author of 124 commits. A public repository shows it to anyone who clones. It cannot be removed without rewriting history, and a rewrite changes the hash of the lock commit (`a44e5ac`), which the `lock-2026Q3` release and its notes point at. So the choice is: accept it, or do not make this repository public.
+**A. Your email address in the commit history (finding F015).** `git log --format='%ae' | sort | uniq -c` on `main` shows your personal address as the author of 62 commits, 58 of them under the lock commit `a44e5ac`. Every commit on `prepub-audit` that `main` lacks carries it too: a normal merge in step 2 adds all of them, and `git merge --squash` adds one (round 4, F112). A public repository shows it to anyone who clones. It cannot be removed without rewriting history, and a rewrite changes the hash of the lock commit (`a44e5ac`), which the `lock-2026Q3` release and its notes point at. So the choice is: accept it, or do not make this repository public.
 - Check after you decide: none. Write your decision in `docs/prepub/DECISIONS.md`.
 
 **B. Home-folder paths in the build notes and in history (F016).** `git grep -c "/Users/" -- docs/build` lists 16 files under `docs/build/briefs/`. The folder name in them is your macOS account name. Same choice as A for history. For the tree, you can leave the build notes as written (the README says they are kept as written) or replace the prefix with `~`.

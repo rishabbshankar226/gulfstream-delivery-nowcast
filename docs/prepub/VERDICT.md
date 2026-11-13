@@ -8,7 +8,7 @@ Written 2026-11-12 at the end of the pre-publication audit, on branch `prepub-au
 
 ## What remains before GO
 
-1. **Decision A** in `GO_PUBLIC.md` (F015, S1): the personal email address on 124 commits.
+1. **Decision A** in `GO_PUBLIC.md` (F015, S1): the personal email address on 62 commits of `main` (corrected in round 4, F112).
 2. **Decision B** (F016, S1): home-folder paths in the build notes and in history.
 3. **Step 1** in `GO_PUBLIC.md` (F081, S2): confirm and date "I hold no position in General Dynamics", on the README and the note.
 
@@ -49,7 +49,7 @@ Not blocking, and due before the next lock: decision C (the G700 type code), the
 
 **S1**
 
-- **F015.** The owner's personal email address is the author address on 124 commits of `main`. A public repository shows it. It cannot be removed without rewriting history, which would change the lock commit's hash. Decision A in `GO_PUBLIC.md`.
+- **F015.** The owner's personal email address is the author address on 62 commits of `main` (58 of them under the lock commit `a44e5ac`); every commit on `prepub-audit` that `main` lacks carries it too, so a normal merge adds all of them and a squash merge adds one (count corrected in round 4, F112). A public repository shows it. It cannot be removed without rewriting history, which would change the lock commit's hash. Decision A in `GO_PUBLIC.md`.
 - **F016.** Home-folder paths in 16 build-note files and in history. Decision B.
 
 **S2**
