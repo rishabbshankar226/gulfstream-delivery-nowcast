@@ -877,7 +877,7 @@
     "GVIII-G700": 52,
     "GVIII-G800": 73
   },
-  "pipeline_snapshot": "2026-11-15",
+  "pipeline_snapshot": "2026-11-16",
   "estimates": {
     "origin": "2026Q2",
     "target": "2026Q3",
@@ -1102,7 +1102,7 @@
         "quarter": "2026Q4",
         "window_start": "2026-10-04",
         "window_end": "2026-12-31",
-        "snapshot": "2026-11-15",
+        "snapshot": "2026-11-16",
         "definition": "E1",
         "events": {
           "large": 17,
@@ -1127,7 +1127,7 @@
           4.252659186279875,
           21.774025234025235
         ],
-        "made_utc": "2026-11-15T06:38:05Z"
+        "made_utc": "2026-11-16T06:34:40Z"
       },
       "locked": null,
       "lock": null,
@@ -1444,6 +1444,16 @@
       },
       {
         "date": "2026-11-15",
+        "events_large": 17,
+        "events_mid": 3,
+        "trailing_registry_large": 189,
+        "trailing_registry_mid": 30,
+        "nowcast_large": 12.772486772486772,
+        "nowcast_mid": 2.2,
+        "nowcast_total": 14.972486772486771
+      },
+      {
+        "date": "2026-11-16",
         "events_large": 17,
         "events_mid": 3,
         "trailing_registry_large": 189,
