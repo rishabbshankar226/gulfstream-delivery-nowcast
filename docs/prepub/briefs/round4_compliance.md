@@ -14,7 +14,7 @@ Read `round4_common.md` in this folder first. Its rules bind you.
 2. Disclaimers. Check that every surface carries all three: a student project, not investment advice, and no affiliation with General Dynamics, Gulfstream or the FAA. That includes every PDF page and the workbook. Name each surface that lacks one.
 3. The position statement. Where does it appear, is it dated, and does each surface say the same thing?
 4. Trademarks. How are "Gulfstream", "General Dynamics" and the aircraft names used? Is any logo or brand styling used? Is anything implied about endorsement?
-5. Self-descriptions. Check each claim the author makes about their own work against what the tree shows: "I locked", "I tested", "preregistered", "held out", "built with Claude Code", and anything similar.
+5. Self-descriptions. Check each claim the author makes about their own work against what the tree shows: "I locked", "I tested", "preregistered", "held out", "built with an AI coding agent", and anything similar.
 6. The post as a LinkedIn post.
    - Count its characters with Python and quote the first 140 and the first 210.
    - Check the hashtags (no ticker hashtags).

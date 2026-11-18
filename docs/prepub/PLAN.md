@@ -20,7 +20,7 @@ Branch: `prepub-audit`, cut from `origin/main` at `36fed31` on 2026-11-11.
 | ID | Item | Status | Done test |
 |---|---|---|---|
 | P0.1 | Branch and record hashes | done | `prepub-audit` cut from `origin/main` `36fed31`; `RECORD_HASHES.txt` has 61 lines |
-| P0.2 | New CLAUDE.md | done | `head -5 CLAUDE.md` names the spec path |
+| P0.2 | New AGENT.md | done | `head -5 AGENT.md` names the spec path |
 | P0.3 | Baseline | done | `BASELINE.md`, Before |
 | P0.4 | SURFACE.md | done | a row per §3 file, the `public` readers, the rounding rules |
 | P1.0 | Tools venv | done | imports pypdf, openpyxl, formulas |

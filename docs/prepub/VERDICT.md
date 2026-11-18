@@ -113,6 +113,6 @@ The gate prints `42 assertions, 4 failing, 3 warning` on the fresh clone. The fo
 
 **"Does the registry count deliveries?"** It counts registration events. About one counted event in five is on an airframe at least three years old (246 of 1,251), 5 of the 42 in the locked quarter. The registry keeps only an airframe's current certificate, so old quarters lose events over time. Four registrations to Gulfstream's own leasing company count as deliveries, and one G700 type code is outside the scope rule. Each is in the README's Limitations with its size.
 
-**"Did an AI write this?"** I built it with Claude Code, an AI coding agent, in sessions I ran and directed, and the README says so. The build notes and this audit's notes are in the repository.
+**"Did an AI write this?"** I built it with an AI coding agent, in sessions I ran and directed. The build notes and this audit's notes are in the repository.
 
 **"Is this investment advice? Do you own the stock?"** No. Every surface says it is a student project and not investment advice, and the note carries no rating or target. The position statement is mine to confirm and date before posting.

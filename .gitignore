@@ -4,8 +4,6 @@ data/raw/
 __pycache__/
 .DS_Store
 ~$*
-/CLAUDE.md
 /OUTCOME_SELF.md
-.claude/
 .impeccable/
 *.tmp

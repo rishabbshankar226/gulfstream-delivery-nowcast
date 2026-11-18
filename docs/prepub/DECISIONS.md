@@ -3,7 +3,7 @@
 Each entry: what the spec left open or what blocked the plain reading, the reading I took, and why.
 
 ## D1. `OUTCOME_SELF.md` is kept out of commits through `.gitignore`, not `.git/info/exclude` (2026-11-11)
-The spec says to add `OUTCOME_SELF.md` to `.git/info/exclude`. A session hook from an unrelated plugin (`claude-seo-ai`) refuses any write to `.git/info/exclude`, by shell redirect and by the Edit tool. I did not route around the hook. I added `/OUTCOME_SELF.md` to the tracked `.gitignore` instead, which keeps the file out of every commit and keeps the tree clean for the gate's `repo` family. Cost: one extra line in a public file.
+The spec says to add `OUTCOME_SELF.md` to `.git/info/exclude`. A session hook from an unrelated plugin (a third-party plugin) refuses any write to `.git/info/exclude`, by shell redirect and by the Edit tool. I did not route around the hook. I added `/OUTCOME_SELF.md` to the tracked `.gitignore` instead, which keeps the file out of every commit and keeps the tree clean for the gate's `repo` family. Cost: one extra line in a public file.
 
 ## D2. P2, P3 and P4 subagents start as soon as P0 is done, while the main thread builds the ledger (2026-11-11)
 §4 says the order of items is the order to run them, and only says P2, P3 and P4 run in parallel with each other. The subagents take hours of wall clock and touch nothing P1 touches (each writes only its own file under `docs/prepub/reviews/` or `docs/prepub/recompute/`). Running them behind the ledger build saves that time with no shared state. No detector output is used before its §5 plant result is in `DETECTORS.md`. The gate is not run while a subagent is writing, because the `repo` family fails on an uncommitted file.
@@ -109,7 +109,7 @@ The owner asked for "a harsh audit using 11 independent auditors to determine wh
   - Eight cold auditors read a copy with no git history and without `docs/prepub/` or `tools/prepub/` (`ERRATA.md` excepted): `hiring`, `sellside`, `stats`, `registry`, `editor`, `compliance`, `recompute` and `rendered`. `recompute` first works blind on a data-only copy.
   - Three informed auditors read history or the earlier audit: `code` (its own clone; it builds and tests there), `exposure` (a bare mirror plus the tracked files) and `attacker` (its own clone and `docs/prepub/`).
   - Briefs are `docs/prepub/briefs/round4_*.md`. Each writes only `docs/prepub/reviews/round4_<name>.md`.
-- **Permissions.** No deny rule is enforced by a settings file this session. `~/.claude/settings.json` has none. The project's `.claude/settings.local.json` allows `git push`, `gh release`, `gh workflow run`, `make` and `curl`. The deny list in this repository's `CLAUDE.md` therefore rests on instructions. So:
+- **Permissions.** No deny rule is enforced by a settings file this session. `~/.agent/settings.json` has none. The project's `.agent/settings.local.json` allows `git push`, `gh release`, `gh workflow run`, `make` and `curl`. The deny list in this repository's `AGENT.md` therefore rests on instructions. So:
   - every brief carries the never-run list word for word;
   - cold copies carry no `.git`;
   - each informed auditor's clone or mirror has its push URL set to an invalid value.
@@ -120,7 +120,7 @@ The owner asked for "a harsh audit using 11 independent auditors to determine wh
   - Any S1 that the main session verifies keeps it NO-GO.
   - Each auditor's own verdict is reported; none of them overrides §7.
 - **Verification.** The main session verifies every S1 and S2 by a command whose output it records, and regrades by the spec's §2. S3 findings are verified where that is cheap, and otherwise are marked `reported, unverified`. New rows start at F109.
-- **Dashboard in a browser.** The main session checks the dashboard in the app's own browser pane, at desktop width and 375 px. It serves the cold copy on localhost from a `.claude/launch.json`, which is gitignored.
+- **Dashboard in a browser.** The main session checks the dashboard in the app's own browser pane, at desktop width and 375 px. It serves the cold copy on localhost from a `.agent/launch.json`, which is gitignored.
 
 ## D24. Round 4 fix pass: readings taken (2026-11-12)
 The owner said "Yes, run fix pass" to the round 4 verdict. The pass fixes what `ROUND4_VERDICT.md` lists under B and C. It leaves list A, the owner's decisions and outward steps, alone.
@@ -188,7 +188,7 @@ The owner wrote: "private and security is the goal, while having the github publ
 - **This is a reading of the owner's goal.** The owner asked for a public repository with privacy and security, not for a history rewrite in words. The rewrite is the only way found that meets both and keeps the lock's GitHub release.
 
 ## D26. Part 0 run in the owner's Chrome and git (2026-11-12, evening CST)
-The owner asked for "all of this" to be done with Claude in Chrome. Before acting, the owner gave two answers: the position sentence is true today, and yes to steps a to g of part 0 (the trial, the workflow, the email settings, the git email, the merge and rewrite, the force-push and branch deletion, and the Support ticket). Making the repository public, Pages and the post stay for later.
+The owner asked for "all of this" to be done with the browser extension. Before acting, the owner gave two answers: the position sentence is true today, and yes to steps a to g of part 0 (the trial, the workflow, the email settings, the git email, the merge and rewrite, the force-push and branch deletion, and the Support ticket). Making the repository public, Pages and the post stay for later.
 
 - **a. Trial.**
   - A private test repository, `tag-move-test`, got a release on tag `t1`. The tag was force-moved from commit A to commit B.
@@ -217,7 +217,7 @@ The owner asked for "all of this" to be done with Claude in Chrome. Before actin
   - The release is still published: `publishedAt` 2026-10-29T05:51:24Z, `targetCommitish` `a44e5ac`. Its page shows `54a2e28` and the sha256 in its notes.
   - `refs/pull/1/head` (`163eac0`) remains; only Support can remove it.
 - **The fresh clone (step 7).**
-  - This folder was cloned from GitHub. `data/raw/` was copied in, `.venv` links to the old checkout's, and `CLAUDE.md` was copied in.
+  - This folder was cloned from GitHub. `data/raw/` was copied in, `.venv` links to the old checkout's, and `AGENT.md` was copied in.
   - `make claims` gave 44 claims. After `python -m gdn note` (the note prunes uncited claims), `make test` gave `198 passed` with no tracked change.
   - The old checkout's push URL is set to `DISABLED-old-history-do-not-push`.
 - **g. Support.**

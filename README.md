@@ -175,10 +175,6 @@ The pinned requirements need Python 3.11 or later; an older `python3` fails at t
 
 The live job is `make daily`. The [nowcast workflow](.github/workflows/nowcast.yml) runs it twice a day and can lock from either run on the release date's eve; every daily commit since 2026-10-31 has come from the workflow. The FAA's download refuses some automated clients, so the job sends ordinary browser headers, and a download can still fail. When it does, the run says so and carries on with the newest stored snapshot, and a quarter with no fresh snapshot after its fiscal end goes without a lock. On my Mac the job falls back to my own Chrome. The workflow cannot print the note's PDF, so after a lock or a score I rebuild it on the Mac with `make pdf`.
 
-## How this was built
-
-The build notes are in [docs/build/](docs/build/), and the notes of a pre-publication audit of every public figure are in [docs/prepub/](docs/prepub/).
-
 ## License and data
 
 The code is under the [MIT license](LICENSE). The FAA registry data is a U.S. government work. GD's filings and the short call quotes belong to their owners and are quoted for reference.

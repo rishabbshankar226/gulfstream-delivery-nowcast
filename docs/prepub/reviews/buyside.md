@@ -177,7 +177,7 @@ Evidence: `git log --reverse --format='%h %ad %s' --date=iso-local`: `2c62ad3 20
 Defensible version: "I committed the rules, then scored the 26 quarters in the same session; the split is a discipline of the pipeline, not a wait."
 
 **BUYSIDE-14. The build log shows an AI agent session; the public prose says "I".** `README.md:145` links `docs/build/AIRFRAME_AUDIT.csv`, so `docs/build/` is one click away.
-Evidence: `docs/build/DECISIONS.md:41` "The session runs in the Claude desktop app (Code tab)"; `:115` "three checker subagents, nine calls each"; `:105` "Asked the owner how to proceed"; `docs/PREREGISTRATION.md:3` "cut by `tools/preregister.py` from the build prompt, word for word". Against `README.md:145` "I checked 30 airframes against outside sources" and `docs/INTERVIEW_NOTES.md:30` "I stopped, checked the cause". No public surface says how the project was built.
+Evidence: `docs/build/DECISIONS.md:41` "The session runs in the agent's desktop app"; `:115` "three checker subagents, nine calls each"; `:105` "Asked the owner how to proceed"; `docs/PREREGISTRATION.md:3` "cut by `tools/preregister.py` from the build prompt, word for word". Against `README.md:145` "I checked 30 airframes against outside sources" and `docs/INTERVIEW_NOTES.md:30` "I stopped, checked the cause". No public surface says how the project was built.
 Fix I would make: one sentence in the README saying how it was built and what the owner did himself, and a pass over every first-person sentence so that each is one he can defend aloud. This is a hiring risk, not a numbers defect. `docs/prepub/` on this branch would add to it if merged; I did not read it.
 
 **BUYSIDE-15. Resume bullet 1 gives only the favourable comparison.** `docs/RESUME_BULLETS.md:1`.

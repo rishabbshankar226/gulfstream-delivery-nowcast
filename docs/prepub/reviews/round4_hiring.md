@@ -14,7 +14,7 @@ It claims that FAA registrations, scaled by a trailing ratio, track GD's reporte
 **2. Would I invite the author to interview?**
 After 90 seconds (post, README top), as the research director: yes, to a first-round screen. The author pulls primary data from SEC filings and a government registry and publishes an estimate before the print. The miss and the baseline that won are both on the first screen. Against that, the opening is hedged and full of terms like "guidance pace" and "past-miss band" that a recruiter has to decode.
 As the PM: yes, out of curiosity. A registry-based delivery nowcast is a real buy-side technique, and a candidate who reports a miss outside the band plainly shows judgment I would pay for.
-After 10 minutes: still yes, with two questions ready. The error analysis by year, the as-of study, the G280 filed under IAI, and the sign tests with Holm's correction show care beyond student norm. But the README repeats itself, and the note spends two pages on boilerplate. README.md:180 says Claude Code built the project, while the resume says "Built" and "Wrote", so the first interview question will be about authorship. The only GD view is a mechanical revenue figure, which missed by 23.4% (note Exhibit 8).
+After 10 minutes: still yes, with two questions ready. The error analysis by year, the as-of study, the G280 filed under IAI, and the sign tests with Holm's correction show care beyond student norm. But the README repeats itself, and the note spends two pages on boilerplate. README.md:180 says the coding agent built the project, while the resume says "Built" and "Wrote", so the first interview question will be about authorship. The only GD view is a mechanical revenue figure, which missed by 23.4% (note Exhibit 8).
 
 **3. What reads as amateur, defensive, padded, repetitive or machine-written**
 - docs/LINKEDIN_POST.md:6: "(Registry count: my scaled estimate; the pace: mine.)" This reads machine-written and needs decoding.
@@ -55,7 +55,7 @@ Nothing is a rating, target or recommendation. Every surface carries "not invest
 
 **7. Do the resume bullets and interview notes claim what the repository does not back? Would any of them hurt?**
 The numbers in all three bullets check out (5.5, 6.9, 4.6, 32.0, 40, 8.0, outside the band). The score file carries accession 0000040533-26-000036, which supports "scores it from GD's SEC filing". The problems:
-- "Built" (bullets 1 and 2) and "Wrote" (bullet 3) sit against README.md:180, which says the project was built with Claude Code in sessions the author directed. An interviewer who reads both will probe authorship first. INTERVIEW_NOTES.md:35 to :36 gives a one-line answer, which will not hold up (HIRING-4).
+- "Built" (bullets 1 and 2) and "Wrote" (bullet 3) sit against README.md:180, which says the project was built with the coding agent in sessions the author directed. An interviewer who reads both will probe authorship first. INTERVIEW_NOTES.md:35 to :36 gives a one-line answer, which will not hold up (HIRING-4).
 - Bullet 1 says "26 held-out quarters" with no hint that the rules were committed two minutes before scoring, with the data already in the repository (README.md:119). The question is answerable from INTERVIEW_NOTES.md:7, but the bullet invites it.
 - INTERVIEW_NOTES.md:5: "I read every Gulfstream jet in the FAA's public registry". README.md:159 says 17 G700s are outside the count (HIRING-3). An interviewer who read the limitations will catch it.
 - INTERVIEW_NOTES.md:13: the drift from "about two deliveries per event in 2016 to 0.72 in 2026Q2" checks against README.md:156 (1.92) and data.json (0.7193).
@@ -85,7 +85,7 @@ The numbers in all three bullets check out (5.5, 6.9, 4.6, 32.0, 40, 8.0, outsid
 
 ### HIRING-4 (S2): Resume bullets claim sole authorship that the README qualifies
 - Surface: docs/RESUME_BULLETS.md:1 to :3 (hand-written).
-- Evidence: the bullets begin "Built a Python pipeline", "Built a daily job" and "Wrote a cited research note". README.md:180 says the project was built with Claude Code, "in sessions I ran and directed", and that many commits carry a `Co-Authored-By: Claude` trailer. A recruiter who reads the resume and then the README sees the gap. Bullet 1 also says "26 held-out quarters", while README.md:119 says only the locked quarters are out of sample in the strict sense.
+- Evidence: the bullets begin "Built a Python pipeline", "Built a daily job" and "Wrote a cited research note". README.md:180 says the project was built with the coding agent, "in sessions I ran and directed", and that many commits carry a `Co-Authored-By` trailer. A recruiter who reads the resume and then the README sees the gap. Bullet 1 also says "26 held-out quarters", while README.md:119 says only the locked quarters are out of sample in the strict sense.
 - Fix: "Designed and directed, using an AI coding agent, a Python pipeline that..." For bullet 1, write "on 26 backtest quarters scored after the rules were committed". Expand INTERVIEW_NOTES.md:35 to :36 to say which choices were the author's.
 
 ### HIRING-5 (S3): "Registry count" names the scaled estimate, so three surfaces need a gloss

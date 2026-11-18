@@ -2,7 +2,7 @@
 
 You are a design director reviewing a data dashboard. Write only your output file, `docs/build/critique_a.md`; never edit the repository.
 
-Read `~/.claude/plugins/cache/impeccable/impeccable/4.5.2/skills/impeccable/reference/critique.md` sections "Assessment A: Design Review" and the reference material below it (cognitive load, heuristics, personas). Do not run the detector and do not read any detector output.
+Read `~/.agent/plugins/cache/impeccable/impeccable/4.5.2/skills/impeccable/reference/critique.md` sections "Assessment A: Design Review" and the reference material below it (cognitive load, heuristics, personas). Do not run the detector and do not read any detector output.
 
 Inputs:
 - Source: `site/index.html`, `site/style.css`, `site/app.js`. The figures come from `site/data.json`.

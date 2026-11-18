@@ -1,6 +1,6 @@
 # Pre-publication audit
 
-Before making this repository public, I ran a pre-publication audit of it, in sessions with Claude Code. Every file in this folder is the audit's own work: its rules, findings, reviews and checks. The project's results are in the [main README](../../README.md).
+Before making this repository public, I ran a pre-publication audit of it, in agent-assisted sessions. Every file in this folder is the audit's own work: its rules, findings, reviews and checks. The project's results are in the [main README](../../README.md).
 
 **Start here:** [`ROUND4_VERDICT.md`](ROUND4_VERDICT.md) is the current verdict, with what is still open and who must close it. [`VERDICT.md`](VERDICT.md) is the earlier verdict, kept as written; its header points to round 4.
 

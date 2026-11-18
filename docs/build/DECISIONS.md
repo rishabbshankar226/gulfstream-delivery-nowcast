@@ -37,8 +37,8 @@ true
 ```
 
 - `~/.gdn_disclosure` was missing at the start. The owner answered "No position in GD" in chat, so I wrote Part A's example sentence: "The author holds no position in General Dynamics."
-- Part A step 7's second block had not run. With the owner's approval I wrote `.claude/settings.local.json` with Part A's exact allowlist. A PreToolUse hook from the `claude-seo-ai` plugin blocked the shell write to `.git/info/exclude` ("VCS internals"). I did not route around the hook. Instead, `.gitignore` lists `/CLAUDE.md` and `.claude/`, which keeps both off GitHub and keeps P2's tree clean. The owner's global `~/.config/git/ignore` already ignores `**/.claude/settings.local.json`.
-- The session runs in the Claude desktop app (Code tab), not under `caffeinate -is claude`. The app's keep-awake hold is on (`session_idle`). The reference folders were readable without `--add-dir`.
+- Part A step 7's second block had not run. With the owner's approval I wrote `.agent/settings.local.json` with Part A's exact allowlist. A PreToolUse hook from the third-party plugin blocked the shell write to `.git/info/exclude` ("VCS internals"). I did not route around the hook. Instead, `.gitignore` lists `/AGENT.md` and `.agent/`, which keeps both off GitHub and keeps P2's tree clean. The owner's global `~/.config/git/ignore` already ignores `**/.agent/settings.local.json`.
+- The session runs in the agent's desktop app, not under `caffeinate`. The app's keep-awake hold is on (`session_idle`). The reference folders were readable without `--add-dir`.
 - GitHub Actions is enabled on the repository (`true`), so Phase 5 runs and watches the workflow.
 
 ## Permission smoke test (Phase 0, first action)
@@ -65,10 +65,10 @@ All passed with exit 0, and no prompt came up:
 
 ## Tool routing
 
-- Present: `dataviz`, Impeccable (`impeccable:impeccable`), `vectorlab-ux-skills:viewports`, `anthropic-skills:citation-integrity-skill`, `anthropic-skills:anti-hallucination`, `superpowers:systematic-debugging`, `anthropic-skills:root-cause-debugging`.
+- Present: `dataviz`, Impeccable (`impeccable:impeccable`), `vectorlab-ux-skills:viewports`, a citation-integrity skill, an anti-hallucination skill, `superpowers:systematic-debugging`, a root-cause-debugging skill.
 - Absent: a skill named `pdf-reading`. Fallback: the Read tool reads PDF pages directly, with `sips` or `qlmanage` to PNG for page images.
 - Left alone, though installed: `design-taste-frontend` and `redesign-existing-projects`. The rest of the prompt's leave-alone list (`gpt-taste`, `high-end-visual-design`, `stitch-design-taste`, `minimalist-ui`, `industrial-brutalist-ui`, `brandkit`, `image-to-code`, `imagegen-frontend-web`, `imagegen-frontend-mobile`, `full-output-enforcement`, `find-skills`) is not installed in this session. They direct marketing pages or generate images, and this is a data product that matches the backlog dashboard.
-- Subagent types available: `general-purpose`, `Explore`, `Plan`, `claude`. Checkers and reviewers run as `general-purpose` from briefs in `docs/build/briefs/`.
+- Subagent types available: `general-purpose`, `Explore`, `Plan`. Checkers and reviewers run as `general-purpose` from briefs in `docs/build/briefs/`.
 
 ## Limitations (collected for the README)
 

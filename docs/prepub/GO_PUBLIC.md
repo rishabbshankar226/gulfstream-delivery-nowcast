@@ -65,7 +65,7 @@ Do these steps in order. They replace decisions A and B below, and they replace 
    - In the fresh clone:
      - copy `data/raw/` across from the old folder (it is untracked; without it `make claims` drops every claim);
      - make the environment with `python3.11 -m venv .venv && .venv/bin/python -m pip install -r requirements.lock`;
-     - copy the untracked `CLAUDE.md` across if you use it;
+     - copy the untracked `AGENT.md` across if you use it;
      - run `git config user.email <your no-reply address>`.
    - Check: `make claims` prints `report/claims.json: 44 claims`, and `make test` passes.
 8. **Ask GitHub to purge the old commits, while the repository is still private.**

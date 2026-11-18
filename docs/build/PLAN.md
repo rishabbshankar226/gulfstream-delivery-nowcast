@@ -6,7 +6,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 |---|---|---|---|---|
 | 0 | Smoke test, preflight, .gitignore, .gitattributes | done | - |  09c16a9 |
 | 0 | FAA backtest zip, project venv, gate venv, selftest | done | selftest |  09c16a9 |
-| 0 | PLAN.md, DECISIONS.md, CLAUDE.md | done | - |  09c16a9 |
+| 0 | PLAN.md, DECISIONS.md, AGENT.md | done | - |  09c16a9 |
 | 1 | Makefile, faa.py, sec.py, events.py, __main__.py | done | - | 6725184 |
 | 1 | Backtest subset and manifest | done | F1 F2 | 6725184 |
 | 1 | SEC releases, gd_deliveries.csv, segments.csv, backlog | done | T1 T2 S1 S3 | 6725184 |
@@ -56,7 +56,7 @@ Backtest snapshot: 2026-10-19. Critical path (Phases 0 to 5) due 2026-10-28 18:0
 
 ## Running
 
-Scheduled tasks in the Claude app (they run while the app is open; a task missed while it is closed runs at the next launch):
+Scheduled tasks in the agent app (they run while the app is open; a task missed while it is closed runs at the next launch):
 - `gulfstream-daily-job`: `make daily` every day at 06:43 ET until 2026Q3 is scored
 - `gulfstream-eve-morning-check`: 2026-10-29 08:47 ET, checks the lock after GitHub's 08:17 ET run
 - `gulfstream-eve-lock-1907`, `-2037`, `-2207`, `-2317`: 2026-10-29 evening, `make daily-core` unless the lock is on origin

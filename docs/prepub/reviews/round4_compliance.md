@@ -48,8 +48,8 @@ Every surface says it is not affiliated, so I found nothing that implies endorse
 **5. Self-descriptions.**
 - "I locked". `gh release view lock-2026Q3` shows the release was published 2026-10-29T05:51:24Z by `github-actions[bot]`, and its notes carry the sha256 `3c4cdbd0...6f23`. `shasum -a 256 predictions/2026Q3.json` prints the same hash. README:121 and INTERVIEW_NOTES.md:30 both say the workflow made the lock, which matches the release author. The release shows `immutable: false`, and README:121 says the absence of later edits cannot be checked.
 - "Preregistered" and "held out". README:119 says the commit order is all that backs both words, and that the rules went in two minutes before scoring with the data already in the repository. The post says "rules set minutes before scoring". The two say the same thing.
-- "Built with Claude Code". README:180 says so, and INTERVIEW_NOTES.md:36 says the same. The resume bullets do not. See COMPLIANCE-7.
-- "I checked 30 airframes" (README:161). This is covered by the README:180 convention that "I" means work done in the Claude Code sessions.
+- "Built with the coding agent". README:180 says so, and INTERVIEW_NOTES.md:36 says the same. The resume bullets do not. See COMPLIANCE-7.
+- "I checked 30 airframes" (README:161). This is covered by the README:180 convention that "I" means work done in the the coding agent sessions.
 
 **6. The post as a LinkedIn post.**
 - **Length.** `post.py` prints 1,280 characters after stripping, with 1,280 UTF-16 units. It has no em or en dashes and no characters outside ASCII.
@@ -83,7 +83,7 @@ Every surface says it is not affiliated, so I found nothing that implies endorse
   - `data/processed/*.csv` has no row without an accession number, and `data/guidance.csv` and `data/quarter_plans.csv` have no row without a URL.
   - The workbook has live formulas: 448 in Quarters, 9 in Summary, 11 in Live, 27 in Segments and 18 in Sensitivity, with `fullCalcOnLoad` set.
 - **Claims that go beyond the repository.**
-  - The resume bullets say "Built" and "Wrote" and do not name Claude Code (COMPLIANCE-7).
+  - The resume bullets say "Built" and "Wrote" and do not name the coding agent (COMPLIANCE-7).
   - INTERVIEW_NOTES.md:33 says every registry figure traces "to a stored FAA snapshot". The as-of study's figures come from Wayback captures that are not stored.
   - INTERVIEW_NOTES.md:30 says the count "has not changed" since the lock, without a date.
   See COMPLIANCE-12.
@@ -92,7 +92,7 @@ Every surface says it is not affiliated, so I found nothing that implies endorse
 - Replace the home-folder paths in `docs/build/` with `~` (COMPLIANCE-1).
 - Make one disclosure set match on the post, the note, the dashboard, the workbook and the README. It should name the FAA and include a dated position statement, and the note should carry a publication date (COMPLIANCE-2, COMPLIANCE-3).
 - In the post, say the band is nominally 80% and held 18 of 26 backtest quarters (COMPLIANCE-4).
-- Name Claude Code in the resume bullets (COMPLIANCE-7).
+- Name the coding agent in the resume bullets (COMPLIANCE-7).
 - Give Pages a deploy path that runs after the workflow's commits, and confirm the dashboard URL returns 200 before posting (COMPLIANCE-6).
 - Decide on the stored registrant addresses and record the decision (COMPLIANCE-5).
 
@@ -161,10 +161,10 @@ Every surface says it is not affiliated, so I found nothing that implies endorse
 - **Consequence:** making the repository public fires no push, so the first deploy needs a manual dispatch. Later, a workflow-made 2026Q4 lock or score would show in the README on GitHub, but the dashboard would keep the older `data.json`. Meanwhile the dashboard says the estimate "stays on this page whether it hits or misses" (app.js:169).
 - **Fix:** before posting, dispatch `pages.yml` by hand and confirm the dashboard URL returns 200. Then give the nowcast job a deploy step, or have it dispatch `pages.yml` after any commit that touches `site/`. The job needs permission to dispatch workflows.
 
-### COMPLIANCE-7 (S2): the resume bullets claim the build without naming Claude Code, while the README does
+### COMPLIANCE-7 (S2): the resume bullets claim the build without naming the coding agent, while the README does
 - **Surface:** `docs/RESUME_BULLETS.md:1-3`, hand-written: "Built a Python pipeline", "Built a daily job", "Wrote a cited research note and an Excel model".
-- **Evidence:** README:180 says "I built this project with Claude Code, an AI coding agent, in sessions I ran and directed." The note's prose is produced by `src/gdn/note.py`. A recruiter who reads both files sees two accounts of the same work.
-- **Fix:** add one clause, for example "Built, with Claude Code (an AI coding agent I directed), a Python pipeline that ...". Keep the figures as they are; they match the tree.
+- **Evidence:** README:180 says "I built this project with the coding agent, an AI coding agent, in sessions I ran and directed." The note's prose is produced by `src/gdn/note.py`. A recruiter who reads both files sees two accounts of the same work.
+- **Fix:** add one clause, for example "Built, with the coding agent (an AI coding agent I directed), a Python pipeline that ...". Keep the figures as they are; they match the tree.
 
 ### COMPLIANCE-8 (S3): no trademark attribution or "not endorsed" line
 - **Surfaces:** README `## License and data`, the note's footer and the dashboard footer.
@@ -206,7 +206,7 @@ Every surface says it is not affiliated, so I found nothing that implies endorse
 2. Add a dated revision line to the note, such as "Published 2026-11-12; estimates made before 2026-10-30, wording revised after". It shows that the "before the release" exhibits were not edited.
 3. Have the workflow redeploy Pages after each lock and score (COMPLIANCE-6), so the public dashboard and the README never disagree.
 4. Put a one-line "Data handling" note in README `## Data`: which FAA columns the method reads, that it never reads addresses, and a contact for registrants.
-5. Point to `docs/INTERVIEW_NOTES.md`'s "How did you build it?" answer from the resume bullets, so the Claude Code disclosure travels with the claims.
+5. Point to `docs/INTERVIEW_NOTES.md`'s "How did you build it?" answer from the resume bullets, so the the coding agent disclosure travels with the claims.
 
 ## Checked and clean
 

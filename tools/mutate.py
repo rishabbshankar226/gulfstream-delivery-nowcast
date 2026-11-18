@@ -11,7 +11,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 PY = ROOT / ".venv/bin/python"
-SKIP = {".venv", ".git", ".build", "data/raw", "output", "__pycache__", ".pytest_cache", ".impeccable", ".claude"}
+SKIP = {".venv", ".git", ".build", "data/raw", "output", "__pycache__", ".pytest_cache", ".impeccable"}
 
 # (rule, file, exact line fragment to replace, replacement)
 MUTANTS = [
