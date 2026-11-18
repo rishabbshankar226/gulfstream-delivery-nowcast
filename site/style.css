@@ -208,7 +208,7 @@ a:hover { text-decoration-thickness: 2px; }
 .links .more { display: inline-flex; flex-wrap: wrap; align-items: center; gap: var(--sp-1) var(--sp-3); }
 .hits .hit { background: var(--frame-accent); }
 .hits .miss { background: transparent; box-shadow: inset 0 0 0 1.5px rgba(244, 241, 234, 0.5); }
-.eyebrow { display: inline-flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-6); padding: 6px 12px; font-size: var(--fs-xs); font-weight: var(--w-medium); color: var(--frame-muted); letter-spacing: 0.01em; border: 1px solid var(--frame-line); border-radius: 6px; background: rgba(255, 255, 255, 0.05); }
+.eyebrow { display: inline-flex; align-items: center; gap: var(--sp-2); margin: 0 0 var(--sp-6); padding: 8px 14px; font-size: var(--fs-xs); font-weight: var(--w-medium); color: var(--frame-muted); letter-spacing: 0.01em; border: 1px solid var(--frame-line); border-radius: 6px; background: rgba(255, 255, 255, 0.05); }
 .eyebrow::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--frame-accent); box-shadow: 0 0 0 4px rgba(157, 187, 230, 0.22); }
 h1 { margin: 0 0 var(--sp-6); font-size: var(--fs-title); line-height: 1.04; font-weight: var(--w-strong); letter-spacing: -0.035em; max-width: 17ch; text-wrap: balance; }
 .lead { margin: 0 0 var(--sp-4); font-size: clamp(1.125rem, 1.2vw + 0.8rem, 1.375rem); line-height: 1.45; max-width: 46ch; color: #e8edf6; text-wrap: pretty; }
@@ -244,7 +244,7 @@ h3 { margin: var(--sp-8) 0 var(--sp-2); font-size: var(--fs-lg); line-height: 1.
 
 /* live */
 .live { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--sp-12); align-items: start; margin-top: var(--sp-4); }
-.status { display: inline-block; margin: 0 0 var(--sp-4); padding: 5px 10px; font-size: var(--fs-xs); font-weight: var(--w-strong); color: var(--accent); background: var(--accent-soft); border-radius: 6px; line-height: 1.3; }
+.status { display: inline-block; margin: 0 0 var(--sp-4); padding: 8px 12px; font-size: var(--fs-xs); font-weight: var(--w-strong); color: var(--accent); background: var(--accent-soft); border-radius: 6px; line-height: 1.3; }
 .big { margin: 0; line-height: 1; display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sp-2) var(--sp-3); }
 .big .fig { font-size: var(--fs-big); font-weight: var(--w-strong); letter-spacing: -0.045em; color: var(--ink); font-feature-settings: "tnum" 1; }
 .big .unit { font-size: var(--fs-md); color: var(--muted); }
