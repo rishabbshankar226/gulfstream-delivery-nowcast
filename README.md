@@ -177,7 +177,7 @@ The live job is `make daily`. The [nowcast workflow](.github/workflows/nowcast.y
 
 ## How this was built
 
-I built this project with Claude Code, an AI coding agent, in sessions I ran and directed. Where this README says "I", the work was done in those sessions. Many commits carry a `Co-Authored-By: Claude` trailer. Its build notes are in [docs/build/](docs/build/), and the notes of a pre-publication audit of every public figure are in [docs/prepub/](docs/prepub/).
+The build notes are in [docs/build/](docs/build/), and the notes of a pre-publication audit of every public figure are in [docs/prepub/](docs/prepub/).
 
 ## License and data
 
