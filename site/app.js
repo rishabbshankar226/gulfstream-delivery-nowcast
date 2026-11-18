@@ -57,7 +57,7 @@
       var row = el("tr", r.cls || null);
       r.cells.forEach(function (c, i) {
         var cell = el(i === 0 ? "th" : "td", null, c);
-        if (i === 0) { cell.scope = "row"; cell.style.fontWeight = "inherit"; cell.style.textAlign = "left"; cell.style.borderBottom = "1px solid var(--line-soft)"; }
+        if (i === 0) cell.scope = "row";
         row.appendChild(cell);
       });
       tb.appendChild(row);
@@ -121,6 +121,41 @@
     return new Date(new Date(d + "T12:00:00Z").getTime() + 86400000).toISOString().slice(0, 10);
   }
 
+  // A picture of the numbers the text beside it already states: the band, the estimate and, once scored, GD's count.
+  function gauge(pred, actual) {
+    var g = $("gauge");
+    if (!g) return;
+    var est = pred.nowcast.total, lo = pred.band[0], hi = pred.band[1];
+    var vals = [est, lo, hi].concat(actual === null ? [] : [actual]);
+    var a = Math.min.apply(null, vals), b = Math.max.apply(null, vals), pad = (b - a) * 0.14 || 1;
+    a -= pad; b += pad;
+    function at(v) { return Math.max(6, Math.min(94, (v - a) / (b - a) * 100)); }
+    g.textContent = "";
+    g.hidden = false;
+    g.classList.toggle("no-actual", actual === null);
+    function put(cls, v, html) {
+      var d = el("div", cls);
+      d.style.left = (v === undefined ? 0 : at(v)) + "%";
+      if (html) { d.appendChild(el("b", null, html[0])); d.appendChild(document.createTextNode(html[1])); }
+      g.appendChild(d);
+      return d;
+    }
+    g.appendChild(el("div", "g-track"));
+    var band = el("div", "g-band");
+    band.style.left = at(lo) + "%";
+    band.style.width = (at(hi) - at(lo)) + "%";
+    g.appendChild(band);
+    put("g-lab lo", lo, [f1(lo), " band low"]);
+    put("g-lab hi", hi, [f1(hi), " band high"]);
+    if (actual !== null) {
+      put("g-stem", actual).style.left = at(actual) + "%";
+      put("g-act", actual);
+      put("g-lab act", actual, [whole(actual), " GD reported"]);
+    }
+    put("g-est", est);
+    put("g-lab est", est, [f1(est), actual === null ? " estimate" : " locked estimate"]);
+  }
+
   function liveCard() {
     var L = current();
     if (!L) { text($("live-status"), "No live quarter"); return; }
@@ -138,6 +173,7 @@
     var hb = data.metrics.holdout.band;
     text($("live-band"), "Band of past misses: " + f1(pred.band[0]) + " to " + f1(pred.band[1]) + " deliveries. " +
       "It held GD's count in " + hb.hits + " of " + hb.n + " held-out quarters, against a nominal 80%.");
+    gauge(pred, L.score ? L.score.reported.total : null);
     var facts = $("live-facts");
     facts.textContent = "";
     function fact(k, v) { facts.appendChild(el("dt", null, k)); facts.appendChild(el("dd", null, v)); }
@@ -184,7 +220,7 @@
       layout: { padding: { right: 8 } },
       plugins: {
         legend: { position: "top", align: "start", labels: { color: ink, boxWidth: 28, boxHeight: 2, usePointStyle: false, font: { family: css("--font"), size: 12 } } },
-        tooltip: { backgroundColor: css("--surface"), titleColor: ink, bodyColor: ink, borderColor: css("--line"), borderWidth: 1, padding: 10, titleFont: { family: css("--font") }, bodyFont: { family: css("--font") } }
+        tooltip: { backgroundColor: css("--surface"), titleColor: ink, bodyColor: ink, borderColor: css("--line"), borderWidth: 1, padding: 12, cornerRadius: 10, boxPadding: 4, caretSize: 0, titleFont: { family: css("--font"), weight: "600" }, bodyFont: { family: css("--font") } }
       },
       scales: {
         x: { title: { display: true, text: xlabel, color: muted, font: { family: css("--font") } }, grid: { display: false }, ticks: { color: ink, autoSkip: true, maxRotation: 0, font: { family: css("--font"), size: 11 } }, border: { color: css("--axis") } },
@@ -192,6 +228,25 @@
       }
     };
   }
+
+  // A vertical rule under the pointer, so the five lines can be read at one quarter.
+  var cross = {
+    id: "cross",
+    afterDatasetsDraw: function (chart) {
+      var act = chart.tooltip && chart.tooltip.getActiveElements ? chart.tooltip.getActiveElements() : [];
+      if (!act.length || chart.config.options.indexAxis === "y") return;
+      var x = act[0].element.x, a = chart.chartArea, ctx = chart.ctx;
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, a.top);
+      ctx.lineTo(x, a.bottom);
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = css("--axis");
+      ctx.setLineDash([3, 3]);
+      ctx.stroke();
+      ctx.restore();
+    }
+  };
 
   var shade = {
     id: "shade",
@@ -214,12 +269,14 @@
     var q = data.quarters, rep = data.reported.total;
     var sets = [{
       label: NAME.reported, data: rep, borderColor: css("--s-reported"), backgroundColor: css("--s-reported"),
-      borderWidth: WIDTH.reported, pointRadius: 0, pointHitRadius: 8, tension: 0, order: 0
+      borderWidth: WIDTH.reported, pointRadius: 0, pointHoverRadius: 5, pointHitRadius: 8, tension: 0, order: 0,
+      borderJoinStyle: "round", borderCapStyle: "round"
     }];
     MODELS.forEach(function (m, i) {
       sets.push({
         label: NAME[m], data: data.backtest[m], borderColor: css("--s-" + m), backgroundColor: css("--s-" + m),
-        borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1,
+        borderWidth: WIDTH[m], borderDash: DASH[m], pointRadius: 0, pointHoverRadius: 4, pointHitRadius: 8, tension: 0, spanGaps: false, order: i + 1,
+        borderJoinStyle: "round", borderCapStyle: "round",
         hidden: narrow.matches && (m === "raw" || m === "last")
       });
     });
@@ -236,7 +293,7 @@
     };
     opts.scales.x.ticks.callback = function (v, i) { var l = q[i]; return l.slice(4) === "Q1" ? l.slice(0, 4) : ""; };
     opts.scales.x.ticks.autoSkip = false;
-    charts.push(new Chart($("c-track"), { type: "line", data: { labels: q, datasets: sets }, options: opts, plugins: [shade] }));
+    charts.push(new Chart($("c-track"), { type: "line", data: { labels: q, datasets: sets }, options: opts, plugins: [shade, cross] }));
     $("c-track").setAttribute("aria-label", "Line chart of GD's reported Gulfstream deliveries by quarter from " + q[0] +
       " to " + q[q.length - 1] + " against five estimates. The registry estimate missed by " + f1(data.metrics.holdout.mae.ratio) +
       " deliveries a quarter on average over the quarters held out for the test. The table below lists every value.");
@@ -257,9 +314,15 @@
     var h = data.metrics.holdout, b = beats(h), ul = $("tiles");
     ul.textContent = "";
     var low = MODELS.reduce(function (a, m) { return h.mae[m] < h.mae[a] ? m : a; }, MODELS[0]);
-    MODELS.forEach(function (m) {
-      var li = el("li", b.length && m === low ? "best" : null);
+    var top = Math.max.apply(null, MODELS.map(function (m) { return h.mae[m]; }));
+    MODELS.slice().sort(function (x, y) { return h.mae[x] - h.mae[y]; }).forEach(function (m) {
+      var li = el("li", (b.length && m === low ? "best" : "") + (m === "ratio" ? " me" : "") || null);
       li.appendChild(el("span", "t-name", NAME[m]));
+      var bar = el("span", "t-bar"), fill = el("span", "t-fill");
+      fill.style.setProperty("--w", String(h.mae[m] / top));
+      bar.appendChild(fill);
+      bar.setAttribute("aria-hidden", "true");
+      li.appendChild(bar);
       li.appendChild(el("span", "t-fig", f1(h.mae[m])));
       var d = h.mae[m] - h.mae.ratio;
       li.appendChild(el("span", "t-cmp", m === "ratio" ? "this project's estimate" :
@@ -320,7 +383,7 @@
     opts.scales.x.ticks.maxTicksLimit = 6;
     var top = Math.max.apply(null, tot.filter(function (t) { return t !== null; }).map(function (t) { return t + above; }).concat(L.guidance_pace || 0));
     opts.scales.y.suggestedMax = Math.ceil(top * 1.15);
-    charts.push(new Chart($("c-path"), { data: { labels: labels, datasets: sets }, options: opts }));
+    charts.push(new Chart($("c-path"), { data: { labels: labels, datasets: sets }, options: opts, plugins: [cross] }));
     var lastTot = rows[rows.length - 1].nowcast_total;
     $("c-path").setAttribute("aria-label", "Chart of the " + L.quarter + " estimate by registry snapshot date: latest " + f1(lastTot) +
       " deliveries with a band of past misses from " + f1(lastTot - below) + " to " + f1(lastTot + above) +
@@ -356,7 +419,7 @@
     opts.plugins.tooltip.callbacks = { label: function (ctx) { return ctx.parsed.x + " aircraft"; } };
     charts.push(new Chart($("c-pipe"), {
       type: "bar",
-      data: { labels: names, datasets: [{ label: "Aircraft", data: names.map(function (n) { return p[n]; }), backgroundColor: css("--s-ratio"), borderRadius: 2, barPercentage: 0.7 }] },
+      data: { labels: names, datasets: [{ label: "Aircraft", data: names.map(function (n) { return p[n]; }), backgroundColor: css("--s-ratio"), borderRadius: 6, barPercentage: 0.7 }] },
       options: opts
     }));
     var total = all;
@@ -479,6 +542,41 @@
     e.appendChild(document.createTextNode(". (" + err + ")"));
     text($("lead"), "The figures could not load.");
   }
+
+  /* ---------- page chrome: theme switch, current section in the bar, panels rising into view ---------- */
+  function chrome() {
+    var root = document.documentElement, btn = $("theme"), lab = $("theme-label");
+    function cur() { return root.getAttribute("data-theme") || "auto"; }
+    function show() { var c = cur(); text(lab, c === "auto" ? "Auto" : c === "dark" ? "Dark" : "Light"); }
+    show();
+    btn.addEventListener("click", function () {
+      var order = ["auto", "light", "dark"], n = order[(order.indexOf(cur()) + 1) % order.length];
+      if (n === "auto") root.removeAttribute("data-theme"); else root.setAttribute("data-theme", n);
+      try { if (n === "auto") localStorage.removeItem("gdn-theme"); else localStorage.setItem("gdn-theme", n); } catch (e) { /* storage blocked: the choice lasts for this visit */ }
+      show();
+      if (data) draw();
+    });
+    if (!("IntersectionObserver" in window)) return;
+    var links = {};
+    Array.prototype.forEach.call(document.querySelectorAll("#navlinks a"), function (a) { links[a.getAttribute("href").slice(1)] = a; });
+    var current = null;
+    var spy = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        if (!e.isIntersecting || !links[e.target.id]) return;
+        if (current) current.removeAttribute("aria-current");
+        current = links[e.target.id];
+        current.setAttribute("aria-current", "true");
+      });
+    }, { rootMargin: "-25% 0px -65% 0px" });
+    Array.prototype.forEach.call(document.querySelectorAll("main .panel"), function (p) { spy.observe(p); });
+    if (reduced.matches) return;
+    root.classList.add("reveal-on");
+    var rise = new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("in"); rise.unobserve(e.target); } });
+    }, { rootMargin: "0px 0px -8% 0px" });
+    Array.prototype.forEach.call(document.querySelectorAll("main .panel"), function (p) { rise.observe(p); });
+  }
+  chrome();
 
   fetch("data.json", { cache: "no-cache" })
     .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status); return r.json(); })

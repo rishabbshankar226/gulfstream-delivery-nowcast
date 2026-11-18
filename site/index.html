@@ -12,55 +12,91 @@
 <meta property="og:image" content="https://rishabbshankar226.github.io/gulfstream-delivery-nowcast/preview.png">
 <meta property="og:image:alt" content="GD's reported Gulfstream deliveries by quarter against five backtest estimates, and each locked live estimate with its band">
 <meta name="color-scheme" content="light dark">
-<meta name="theme-color" content="#f5f4f1" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#161412" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#0b1830">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preload" href="fonts/ibm-plex-sans-wght.woff2" as="font" type="font/woff2" crossorigin>
+<script>try { var t = localStorage.getItem("gdn-theme"); if (t === "light" || t === "dark") document.documentElement.setAttribute("data-theme", t); } catch (e) {}</script>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <a class="skip" href="#main">Skip to the content</a>
 <noscript><p class="noscript">This page draws its figures with JavaScript, which is turned off. The results are written out in the <a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast#results">README</a>.</p></noscript>
 
-<header class="hero">
-  <div class="wrap">
-    <p class="eyebrow">Student research · not affiliated with General Dynamics or Gulfstream</p>
-    <h1>How closely do FAA registrations track Gulfstream deliveries?</h1>
-    <p class="lead" id="lead" aria-live="polite">Loading the results.</p>
-    <p class="framing" id="framing"></p>
-    <nav class="links" aria-label="Related links">
-      <a href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast">Code and data on GitHub</a>
-      <a href="GD_research_note.pdf">Research note (PDF)</a>
-      <a href="https://rishabbshankar226.github.io/Defense-Backlog-forecast/">Defense backlog dashboard</a>
-      <a href="https://rshankar.dev">rshankar.dev</a>
+<header class="topbar" id="top">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#top">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 15.5 21 4l-5.5 17-3.5-6.5z"/><path d="m12 14.5 3.5-5"/></svg>
+      Gulfstream tracker
+    </a>
+    <nav aria-label="Sections">
+      <ul class="navlinks" id="navlinks">
+        <li><a href="#s-live">Latest quarter</a></li>
+        <li><a href="#s-path">Estimate path</a></li>
+        <li><a href="#s-track">Track record</a></li>
+        <li><a href="#s-tested">Tests</a></li>
+        <li><a href="#s-pipe">Own registration</a></li>
+        <li><a href="#s-gd">GD revenue</a></li>
+        <li><a href="#s-method">Method</a></li>
+      </ul>
     </nav>
+    <button class="theme" id="theme" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18" /><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+      <span>Theme: <span id="theme-label">Auto</span></span>
+    </button>
   </div>
 </header>
+
+<div class="hero">
+  <svg class="trail" viewBox="0 0 960 420" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
+    <path class="arc soft" d="M-20 400 C 220 380 420 330 560 210 S 820 40 980 30"/>
+    <path class="arc" d="M-20 340 C 200 330 400 290 540 170 S 800 10 980 0"/>
+    <path class="arc soft" d="M-20 440 C 260 430 460 380 600 250 S 860 80 980 70"/>
+    <circle class="ring" cx="800" cy="66" r="10"/>
+    <circle class="dot" cx="800" cy="66" r="4"/>
+    <circle class="dot" cx="540" cy="170" r="2.5" opacity=".6"/>
+    <circle class="dot" cx="300" cy="316" r="2.5" opacity=".45"/>
+  </svg>
+  <div class="wrap">
+    <div class="hero-in">
+      <p class="eyebrow">Student research · not affiliated with General Dynamics or Gulfstream</p>
+      <h1>How closely do FAA registrations track Gulfstream deliveries?</h1>
+      <p class="lead" id="lead" aria-live="polite">Loading the results.</p>
+      <p class="framing" id="framing"></p>
+      <nav class="links" aria-label="Related links">
+        <a class="primary" href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast">Code and data on GitHub<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
+        <a class="ghost" href="GD_research_note.pdf">Research note (PDF)</a>
+        <a class="quiet" href="https://rishabbshankar226.github.io/Defense-Backlog-forecast/">Defense backlog dashboard</a>
+        <a class="quiet" href="https://rshankar.dev">rshankar.dev</a>
+      </nav>
+    </div>
+  </div>
+</div>
 
 <main id="main" class="wrap">
   <p class="error" id="error" role="alert" hidden></p>
 
-  <section class="panel" aria-labelledby="h-live">
+  <section class="panel live-panel" id="s-live" aria-labelledby="h-live">
     <h2 id="h-live">The latest locked quarter</h2>
     <div class="live">
       <div class="live-main">
         <p class="status" id="live-status"></p>
         <p class="big"><span id="live-figure" class="fig"></span> <span class="unit" id="live-unit">deliveries, estimated</span></p>
         <p class="band" id="live-band"></p>
+        <div class="gauge" id="gauge" aria-hidden="true" hidden></div>
       </div>
       <dl class="facts" id="live-facts"></dl>
     </div>
     <p class="note" id="live-note"></p>
   </section>
 
-  <section class="panel" aria-labelledby="h-path">
+  <section class="panel" id="s-path" aria-labelledby="h-path">
     <h2 id="h-path">The estimate's path</h2>
     <p class="sub" id="path-sub">The estimate as each day's registry snapshot posts, with the band of past misses around it.</p>
     <div class="chart"><canvas id="c-path" role="img" aria-label="Chart of the estimate by snapshot date"></canvas></div>
     <details class="figures"><summary>The figures as a table</summary><div class="scroll" tabindex="0" role="region" aria-label="Table of the estimate by snapshot date"><table id="t-path"></table></div></details>
   </section>
 
-  <section class="panel" aria-labelledby="h-track">
+  <section class="panel" id="s-track" aria-labelledby="h-track">
     <h2 id="h-track">Track record</h2>
     <p class="sub">GD's reported deliveries each quarter against five estimates. The shaded quarters set the rule; the quarters after them test it. The raw registry count is the count before scaling. Select a name in the key to show or hide its line.</p>
     <div class="chart tall"><canvas id="c-track" role="img" aria-label="Chart of reported deliveries against five estimates by quarter"></canvas></div>
@@ -69,7 +105,7 @@
     <details class="figures"><summary>The figures as a table</summary><div class="scroll" tabindex="0" role="region" aria-label="Table of deliveries and estimates by quarter"><table id="t-track"></table></div></details>
   </section>
 
-  <section class="panel" aria-labelledby="h-tested">
+  <section class="panel" id="s-tested" aria-labelledby="h-tested">
     <h2 id="h-tested">How it was tested</h2>
     <ul class="plain" id="tests"></ul>
     <h3>When the registry has not finished posting</h3>
@@ -77,14 +113,14 @@
     <div class="scroll" tabindex="0" role="region" aria-label="Table of the average miss with registrations cut early"><table id="t-trunc"></table></div>
   </section>
 
-  <section class="panel" aria-labelledby="h-pipe">
+  <section class="panel" id="s-pipe" aria-labelledby="h-pipe">
     <h2 id="h-pipe">On Gulfstream's own registration</h2>
     <p class="sub" id="pipe-sub">Jets registered to Gulfstream itself with no delivery event yet, by model: aircraft in flight test, completion or resale, and registrations held for jets not yet airworthy.</p>
     <div class="chart" id="pipe-box"><canvas id="c-pipe" role="img" aria-label="Bar chart of jets on Gulfstream's own registration by model"></canvas></div>
     <details class="figures"><summary>The figures as a table</summary><div class="scroll" tabindex="0" role="region" aria-label="Table of jets on Gulfstream's own registration"><table id="t-pipe"></table></div></details>
   </section>
 
-  <section class="panel" aria-labelledby="h-gd">
+  <section class="panel" id="s-gd" aria-labelledby="h-gd">
     <h2 id="h-gd">What it means for GD</h2>
     <p class="sub">Aerospace from the delivery estimate is the delivery estimate × trailing Aerospace revenue per delivery, services included: a mechanical estimate. The defense segments use the same quarter last year scaled by trailing growth, a rule from my study of other contractors; applying it to GD is an assumption.</p>
     <div class="two">
@@ -94,7 +130,7 @@
     <p class="note" id="est-why"></p>
   </section>
 
-  <section class="panel" aria-labelledby="h-method">
+  <section class="panel" id="s-method" aria-labelledby="h-method">
     <h2 id="h-method">Method</h2>
     <ol class="method">
       <li>Each Gulfstream jet in the FAA registry that my scope rule keeps gets a delivery date: a customer's registration, or an export off Gulfstream's own registration, whichever comes first. One type code of a newer large-cabin jet falls outside the rule; the README's Limitations name it and give its size.</li>
@@ -110,6 +146,7 @@
 <footer class="foot">
   <div class="wrap">
     <p>Built by Rishabb Shankar from GD's SEC filings and the FAA aircraft registry. Student research project. Not investment advice. Not affiliated with General Dynamics, Gulfstream or the FAA.</p>
+    <a href="#top">Back to top</a>
   </div>
 </footer>
 
