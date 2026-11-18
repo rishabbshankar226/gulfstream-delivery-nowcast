@@ -47,16 +47,7 @@
 </header>
 
 <div class="hero">
-  <svg class="trail" viewBox="0 0 960 420" preserveAspectRatio="xMaxYMid slice" aria-hidden="true" focusable="false">
-    <path class="arc soft" d="M-20 400 C 220 380 420 330 560 210 S 820 40 980 30"/>
-    <path class="arc" d="M-20 340 C 200 330 400 290 540 170 S 800 10 980 0"/>
-    <path class="arc soft" d="M-20 440 C 260 430 460 380 600 250 S 860 80 980 70"/>
-    <circle class="ring" cx="800" cy="66" r="10"/>
-    <circle class="dot" cx="800" cy="66" r="4"/>
-    <circle class="dot" cx="540" cy="170" r="2.5" opacity=".6"/>
-    <circle class="dot" cx="300" cy="316" r="2.5" opacity=".45"/>
-  </svg>
-  <div class="wrap">
+  <div class="wrap hero-grid">
     <div class="hero-in">
       <p class="eyebrow">Student research · not affiliated with General Dynamics or Gulfstream</p>
       <h1>How closely do FAA registrations track Gulfstream deliveries?</h1>
@@ -65,10 +56,31 @@
       <nav class="links" aria-label="Related links">
         <a class="primary" href="https://github.com/rishabbshankar226/gulfstream-delivery-nowcast">Code and data on GitHub<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7M8 7h9v9"/></svg></a>
         <a class="ghost" href="GD_research_note.pdf">Research note (PDF)</a>
-        <a class="quiet" href="https://rishabbshankar226.github.io/Defense-Backlog-forecast/">Defense backlog dashboard</a>
-        <a class="quiet" href="https://rshankar.dev">rshankar.dev</a>
+        <span class="more">
+          <a class="quiet" href="https://rishabbshankar226.github.io/Defense-Backlog-forecast/">Defense backlog dashboard</a>
+          <a class="quiet" href="https://rshankar.dev">rshankar.dev</a>
+        </span>
       </nav>
     </div>
+    <aside class="score" id="score" aria-labelledby="h-score" hidden>
+      <header class="score-head"><h2 id="h-score">Scorecard</h2><span class="score-asof" id="score-asof"></span></header>
+      <div class="score-row">
+        <p class="score-k">Average miss, held-out quarters</p>
+        <p class="score-v"><span id="sc-mae"></span><span class="score-u">jets a quarter</span></p>
+        <p class="score-s" id="sc-mae-s"></p>
+      </div>
+      <div class="score-row">
+        <p class="score-k">Band coverage, held-out quarters</p>
+        <p class="score-v"><span id="sc-cov"></span><span class="score-u" id="sc-cov-u"></span></p>
+        <div class="hits" id="sc-hits" role="img"></div>
+        <p class="score-s" id="sc-cov-s"></p>
+      </div>
+      <div class="score-row">
+        <p class="score-k">Locked live quarters</p>
+        <p class="score-v"><span id="sc-live"></span><span class="score-u" id="sc-live-u"></span></p>
+        <p class="score-s" id="sc-live-s"></p>
+      </div>
+    </aside>
   </div>
 </div>
 
@@ -107,6 +119,7 @@
 
   <section class="panel" id="s-tested" aria-labelledby="h-tested">
     <h2 id="h-tested">How it was tested</h2>
+    <div class="scroll wide" tabindex="0" role="region" aria-label="Table of sign tests against three baselines"><table id="t-tests"></table></div>
     <ul class="plain" id="tests"></ul>
     <h3>When the registry has not finished posting</h3>
     <p class="sub">Each test quarter's own registrations are cut a set number of days before the quarter ends, while the four quarters before it stay whole, so the count falls and nothing rescales it. It shows how fast the miss grows when a quarter's registrations post late. It is not a model of a live lock, which is made weeks after the quarter ends.</p>

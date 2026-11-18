@@ -104,6 +104,51 @@
     text($("framing"), f);
   }
 
+  /* ---------- the scorecard beside the headline: the same figures the sections below carry ---------- */
+  function scorecard() {
+    var box = $("score");
+    if (!box) return;
+    var h = data.metrics.holdout, b = h.band;
+    text($("score-asof"), "Registry copy " + data.snapshot);
+    text($("sc-mae"), f1(h.mae.ratio));
+    var base = ["guidance", "seasonal", "last"].reduce(function (a, x) { return h.mae[x] < h.mae[a] ? x : a; }, "guidance");
+    text($("sc-mae-s"), "Across " + h.n + " quarters. Lowest of the simple rules: " + BASE[base] + ", " + f1(h.mae[base]) + ".");
+    text($("sc-cov"), b.hits + " of " + b.n);
+    text($("sc-cov-u"), "inside the band");
+    text($("sc-cov-s"), pct(b.coverage_pct) + " against a nominal 80%. Filled squares are quarters the band held, oldest first.");
+    var hits = $("sc-hits");
+    hits.textContent = "";
+    var missed = [];
+    b.by_quarter.forEach(function (q) {
+      var s = el("span", q.hit ? "hit" : "miss");
+      s.title = q.quarter + (q.hit ? ": inside the band" : ": outside the band");
+      hits.appendChild(s);
+      if (!q.hit) missed.push(q.quarter);
+    });
+    hits.setAttribute("aria-label", "The band held GD's count in " + b.hits + " of " + b.n + " held-out quarters, oldest first. Outside the band: " + missed.join(", ") + ".");
+    var locked = data.live.filter(function (L) { return L.lock; });
+    var scored = locked.filter(function (L) { return L.score && L.score.locked; });
+    var live = $("sc-live"), liveU = $("sc-live-u"), liveS = $("sc-live-s");
+    if (!locked.length) {
+      text(live, "None yet");
+      text(liveU, "");
+      text(liveS, "The first estimate locks on GitHub the day before GD reports.");
+    } else {
+      var inside = scored.filter(function (L) { return L.score.inside_band; }).length;
+      text(live, String(scored.length));
+      text(liveU, scored.length === 1 ? "scored" : "scored, " + inside + " inside the band");
+      var L = scored.length ? scored[scored.length - 1] : locked[locked.length - 1];
+      var P = L.locked || L.latest || L.build;
+      if (L.score && L.score.locked) {
+        text(liveS, L.quarter + ": locked " + f1(P.nowcast.total) + ", GD reported " + L.score.reported.total +
+          ", missed by " + f1(L.score.ae_total) + ", " + (L.score.inside_band ? "inside" : "outside") + " the band.");
+      } else {
+        text(liveS, L.quarter + ": locked " + f1(P.nowcast.total) + ", awaiting GD's report.");
+      }
+    }
+    box.hidden = false;
+  }
+
   /* ---------- the live quarter ---------- */
   // The newest quarter with a lock or a score, so a scored quarter stays up until the next one locks; else the newest.
   function current() {
@@ -432,16 +477,17 @@
   function tests() {
     var h = data.metrics.holdout, ul = $("tests");
     ul.textContent = "";
-    ["guidance", "seasonal", "last"].forEach(function (b) {
-      var t = h.tests[b], ac = h.autocorr_lag1[b];
-      var s = "Against " + BASE[b] + ", the registry estimate was closer in " + t.wins + " of " + h.n +
-        " quarters and further off in " + t.losses + (t.ties ? " (" + t.ties + " ties)" : "") +
-        ". Its average miss was " + f1(h.mae.ratio) + " against " + f1(h.mae[b]) + ". A one-sided sign test gives p = " +
-        t.p_one_sided.toFixed(3) + "; after Holm's correction for three comparisons it " +
-        (t.holm_reject ? "is significant." : "is not significant.");
-      if (ac !== null && ac > 0) s += " The quarter-to-quarter differences are positively correlated (" + ac.toFixed(2) + "), which makes the sign test less reliable.";
-      ul.appendChild(el("li", null, s));
-    });
+    var BS = ["guidance", "seasonal", "last"], corr = [];
+    table("t-tests", "Is the registry estimate closer than each baseline? One-sided sign test over " + h.n + " held-out quarters, Holm-corrected for three comparisons",
+      ["Baseline", "Registry estimate closer", "Further off", "Average miss, registry vs baseline", "p, one-sided", "After Holm"],
+      BS.map(function (b) {
+        var t = h.tests[b], ac = h.autocorr_lag1[b];
+        if (ac !== null && ac > 0) corr.push(BASE[b] + " (" + ac.toFixed(2) + ")");
+        return { cells: [NAME[b], String(t.wins) + (t.ties ? " (+" + t.ties + " ties)" : ""), String(t.losses),
+          f1(h.mae.ratio) + " vs " + f1(h.mae[b]), t.p_one_sided.toFixed(3), t.holm_reject ? "Significant" : "Not significant"] };
+      }));
+    if (corr.length) ul.appendChild(el("li", null, "The quarter-to-quarter differences against " + corr.join(" and ") +
+      " are positively correlated, which makes the sign test less reliable."));
     var g = h.guidance;
     ul.appendChild(el("li", null, "GD stated a numeric delivery outlook covering " + g.sourced + " of the " + h.n +
       " test quarters; the other " + g.fallback_quarters.length + " (" + g.fallback_quarters.join(", ") +
@@ -522,6 +568,7 @@
 
   function render() {
     lead();
+    scorecard();
     liveCard();
     tiles();
     trackTable();
