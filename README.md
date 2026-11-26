@@ -89,7 +89,7 @@ The truncation test cuts each held-out quarter's own registry events a set numbe
 | 60 | 22.9 |
 | 90 | 31.7 |
 
-That table is not a model of a live lock. The 2026Q3 lock read a snapshot taken 25 days after the quarter ended, when the quarter's count stood at 42, and it stands at 44 in the 2026-11-25 snapshot. The four quarters before gave 0.76 deliveries per registry event, and the quarter itself came in at 0.95.
+That table is not a model of a live lock. The 2026Q3 lock read a snapshot taken 25 days after the quarter ended, when the quarter's count stood at 42, and it stands at 44 in the 2026-11-26 snapshot. The four quarters before gave 0.76 deliveries per registry event, and the quarter itself came in at 0.95.
 
 Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021Q1. No filing or call states why the registry count differed from GD's count in any of them. The full write-up is in [results/error_analysis.md](results/error_analysis.md).
 
@@ -104,7 +104,7 @@ Five quarters drive much of the average: 2022Q1, 2020Q2, 2025Q4, 2021Q2 and 2021
 ## Live record
 
 - **2026Q3**: locked at 32.0 (band 21.2 to 37.2) from the 2026-10-29 snapshot, as a timestamped GitHub release, made while the repository was private ([`lock-2026Q3`](https://github.com/rishabbshankar226/gulfstream-delivery-nowcast/releases/tag/lock-2026Q3)) at 01:51 ET on 2026-10-29, sha256 `3c4cdbd01b8a5c6928b83b4d8cbcf32964c680a46af1a4bd8b5207296b406f23`. GD reported 40 on 2026-10-30: the lock missed by 8.0 (20%), outside the band. Other misses for the quarter: GD's guidance pace (33.8) by 6.2, the raw registry count (42) by 2, the same quarter last year (39) by 1, last quarter (41) by 1. Of the 42 events in the raw count, 5 were airframes at least three years old by the registry's year of manufacture, so the raw count is not a count of new jets. My pace split the 81 jets GD's outlook left for the rest of the year by the last three years' pattern and said 33.8; an even split would have said 40.5.
-- **2026Q4**: not locked yet. Its window runs to 2026-12-31, so the 2026-11-25 snapshot counts only part of it and no estimate is shown yet. The working file `results/live/2026Q4_latest.json` holds that part count and is not an estimate of the quarter. No release date is set in `config/calendar.json` yet, so no lock is scheduled.
+- **2026Q4**: not locked yet. Its window runs to 2026-12-31, so the 2026-11-26 snapshot counts only part of it and no estimate is shown yet. The working file `results/live/2026Q4_latest.json` holds that part count and is not an estimate of the quarter. No release date is set in `config/calendar.json` yet, so no lock is scheduled.
 
 ## Method
 
